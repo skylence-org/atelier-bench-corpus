@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\ForwardsToSchedule;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Technician extends Model
 {
     use ForwardsToSchedule;
+    use HasFactory;
 
     protected $guarded = [];
 

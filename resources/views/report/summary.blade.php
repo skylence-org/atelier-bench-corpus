@@ -21,5 +21,11 @@
 </ul>
 
 <p>Total: {{ $moneyLine }}</p>
+
+{{-- Livewire 4 single-file component embed (tag resolution → ⚡order-tracker) --}}
+<livewire:order-tracker :order="$order" />
+<x-status-badge :status="$order->status" />
+
+@livewireScripts
 </body>
 </html>

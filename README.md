@@ -39,7 +39,16 @@ Install from the **committed** `composer.lock` only. Do not freestyle `composer 
 | Filament resource / relation-manager / widget / custom page | `app/Filament/Resources/*`, relation managers under RepairOrders, `app/Filament/Widgets/RepairStats`, `app/Filament/Pages/InventoryReport` |
 | Livewire `#[Computed]` | `app/Filament/Pages/InventoryReport` (`lowStockParts`) |
 | Blade nav / report view | `resources/views/report/summary.blade.php` |
-| Broken-syntax fixtures | `fixtures/broken-syntax` — **DO NOT FIX** (intentionally invalid for parser/indexer negative cases) |
+| Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (intentionally invalid for parser/indexer negative cases) |
+| Livewire class components | `app/Livewire/{StatusBoard,PartsPicker,NoteComposer}`: `#[Url]`, `#[Locked]`, `#[On]` listeners + `dispatch()`, `#[Validate]`, DI in `mount()`, `WithPagination`, lifecycle hooks; full-page route `/board` |
+| Livewire 4 single-file component | `resources/views/components/⚡order-tracker.blade.php` (anonymous class + `#[Computed]` inside a blade file); embedded via `<livewire:order-tracker>` in the report view |
+| Livewire Form object | `app/Livewire/Forms/NoteForm` (`form.body` binding resolves through Form magic) |
+| REST API + JsonResources + FormRequest | `routes/api.php`, `app/Http/Controllers/Api/OrderController`, `app/Http/Resources/{RepairOrderResource,PartResource}` (whenLoaded / whenPivotLoaded), `app/Http/Requests/StoreNoteRequest` |
+| Localization | `lang/en/atelier.php` + `__('atelier.note_created')` in the API controller |
+| Class-based Blade component | `app/View/Components/StatusBadge` + `<x-status-badge>` in the report view |
+| Model factories + states | `database/factories/*Factory.php`, deterministic sequences; `RepairOrderFactory::rush()` / `::completed()` |
+| Observer via attribute | `app/Observers/DeviceObserver` registered with `#[ObservedBy]` on Device |
+| Feature tests (incl. Livewire::test) | `tests/Feature/*`: 13 tests / 39 assertions covering HTTP, lifecycle/events, all three Livewire components, observer registration |
 
 ### Migrations note
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\Money;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Part extends Model
 {
+    use HasFactory;
+
     protected $guarded = [];
 
     protected function casts(): array

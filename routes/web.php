@@ -12,3 +12,6 @@ Route::get('/', function () {
 Route::get('/report/{repairOrder:reference}', [ReportController::class, 'show'])
     ->middleware(App\Http\Middleware\RecordReportVisit::class)
     ->name('report.show');
+
+// Full-page Livewire component route (class-component routing coverage).
+Route::get('/board', App\Livewire\StatusBoard::class)->name('board');

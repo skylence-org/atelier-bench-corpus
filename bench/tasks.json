@@ -180,6 +180,67 @@
             "note": "Behavioral task, no needle target: tools asked about fixtures/broken-syntax/* must degrade loudly (structured error naming the parse failure), never crash and never return silent-empty.",
             "from": { "file": "fixtures/broken-syntax/Broken.php", "needle": "return 'this class never closes" },
             "expect": { "behavior": "loud_degradation" }
+        },
+        {
+            "id": "lw-sfc-computed",
+            "surface": "definition",
+            "note": "Livewire 4 single-file component: anonymous class + #[Computed] inside a .blade.php file. Parser must index PHP living in a blade extension.",
+            "from": { "file": "resources/views/components/⚡order-tracker.blade.php", "needle": "Progress: {{ $this->progressPercent }}%" },
+            "expect": { "file": "resources/views/components/⚡order-tracker.blade.php", "needle": "public function progressPercent(): int" }
+        },
+        {
+            "id": "lw-wireclick-method",
+            "surface": "definition",
+            "note": "wire:click in blade resolves to a public method on the component class.",
+            "from": { "file": "resources/views/livewire/status-board.blade.php", "needle": "wire:click=\"completeOrder({{ $order->id }})\"" },
+            "expect": { "file": "app/Livewire/StatusBoard.php", "needle": "public function completeOrder(int $orderId): void" }
+        },
+        {
+            "id": "lw-form-object-magic",
+            "surface": "definition",
+            "note": "wire:model=form.body resolves through the NoteForm Form-object property, Livewire magic in between.",
+            "from": { "file": "resources/views/livewire/note-composer.blade.php", "needle": "wire:model.blur=\"form.body\"" },
+            "expect": { "file": "app/Livewire/Forms/NoteForm.php", "needle": "public string $body = '';" }
+        },
+        {
+            "id": "lw-url-attribute",
+            "surface": "hover",
+            "note": "#[Url] attribute prop: hover should surface the attribute + docblock, and the query-string alias.",
+            "from": { "file": "app/Livewire/StatusBoard.php", "needle": "public string $statusFilter = '';" },
+            "expect": { "contains": "Url" }
+        },
+        {
+            "id": "lw-on-listener-edge",
+            "surface": "references",
+            "note": "Event edge: dispatch('part-added') in the child must connect to the #[On('part-added')] listener on the parent.",
+            "from": { "file": "app/Livewire/StatusBoard.php", "needle": "#[On('part-added')]" },
+            "expect": {
+                "min_references": 1,
+                "known_sites": [
+                    { "file": "app/Livewire/PartsPicker.php", "needle": "$this->dispatch('part-added', orderId: $this->order->id);" }
+                ]
+            }
+        },
+        {
+            "id": "lw-di-in-mount",
+            "surface": "definition",
+            "note": "Container DI in Livewire mount(): the InvoiceCalculator param resolves to the interface, binding lands on StandardInvoiceCalculator.",
+            "from": { "file": "app/Livewire/PartsPicker.php", "needle": "public function mount(RepairOrder $order, InvoiceCalculator $calculator): void" },
+            "expect": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "interface InvoiceCalculator" }
+        },
+        {
+            "id": "lw-fullpage-route",
+            "surface": "definition",
+            "note": "Full-page component routing: the route action is a Livewire class, its 'handler' is render().",
+            "from": { "file": "routes/web.php", "needle": "Route::get('/board', App\\Livewire\\StatusBoard::class)->name('board');" },
+            "expect": { "file": "app/Livewire/StatusBoard.php", "needle": "public function render()" }
+        },
+        {
+            "id": "lw-embed-tag",
+            "surface": "definition",
+            "note": "livewire: tag resolution from a plain blade to the SFC component file.",
+            "from": { "file": "resources/views/report/summary.blade.php", "needle": "<livewire:order-tracker :order=\"$order\" />" },
+            "expect": { "file": "resources/views/components/⚡order-tracker.blade.php", "needle": "new class extends Component" }
         }
     ]
 }
