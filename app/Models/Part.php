@@ -6,13 +6,15 @@ use App\Casts\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Laravel\Scout\Searchable;
+use Spatie\Tags\HasTags;
 
 /**
  * @property string $unit_price money as decimal string via the Money cast
  */
 class Part extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTags, Searchable;
 
     protected $guarded = [];
 
@@ -20,6 +22,19 @@ class Part extends Model
     {
         return [
             'unit_price_cents' => Money::class,
+        ];
+    }
+
+    /**
+     * Scout (database driver): searchable surface is sku + name.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'sku' => $this->sku,
+            'name' => $this->name,
         ];
     }
 
