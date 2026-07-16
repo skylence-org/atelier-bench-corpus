@@ -7,4 +7,4 @@ use Illuminate\Support\Facades\Route;
 // FormRequest validation, JsonResource shaping.
 Route::get('/orders', [OrderController::class, 'index']);
 Route::get('/orders/{repairOrder:reference}', [OrderController::class, 'show']);
-Route::post('/orders/{repairOrder:reference}/notes', [OrderController::class, 'storeNote']);
+Route::post('/orders/{repairOrder:reference}/notes', [OrderController::class, 'storeNote'])->middleware('auth:sanctum');

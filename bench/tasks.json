@@ -241,6 +241,85 @@
             "note": "livewire: tag resolution from a plain blade to the SFC component file.",
             "from": { "file": "resources/views/report/summary.blade.php", "needle": "<livewire:order-tracker :order=\"$order\" />" },
             "expect": { "file": "resources/views/components/⚡order-tracker.blade.php", "needle": "new class extends Component" }
+        },
+        {
+            "id": "rel-hasonethrough",
+            "surface": "definition",
+            "note": "HasOneThrough: Device reaches its invoice through RepairOrder.",
+            "from": { "file": "app/Models/Device.php", "needle": "return $this->hasOneThrough(Invoice::class, RepairOrder::class);" },
+            "expect": { "file": "app/Models/Invoice.php", "needle": "class Invoice extends Model" }
+        },
+        {
+            "id": "rel-hasmanythrough",
+            "surface": "definition",
+            "from": { "file": "app/Models/Customer.php", "needle": "public function statusLogs(): HasManyThrough" },
+            "expect": { "file": "app/Models/StatusLog.php", "needle": "class StatusLog extends Model" }
+        },
+        {
+            "id": "rel-ofmany-builder",
+            "surface": "hover",
+            "note": "HasOne-of-many builder chain: hover on the chained call should surface a HasOne relationship type.",
+            "from": { "file": "app/Models/Customer.php", "needle": "return $this->hasMany(RepairOrder::class)->one()->latestOfMany('opened_at');" },
+            "expect": { "contains": "HasOne" }
+        },
+        {
+            "id": "rel-morphedbymany",
+            "surface": "references",
+            "note": "First-party polymorphic pivot: Label's MorphedByMany answers who carries the label.",
+            "from": { "file": "app/Models/Label.php", "needle": "public function repairOrders(): MorphToMany" },
+            "expect": {
+                "min_references": 1,
+                "known_sites": [
+                    { "file": "tests/Feature/RelationshipsTest.php", "needle": "$this->assertInstanceOf(MorphToMany::class, $label->repairOrders());" }
+                ]
+            }
+        },
+        {
+            "id": "vendor-scout-trait",
+            "surface": "definition",
+            "note": "VENDOR resolution: the Searchable trait lives in laravel/scout (dep-index / stub-pack class). Needle resolves only after composer install.",
+            "from": { "file": "app/Models/Part.php", "needle": "use HasFactory, HasTags, Searchable;" },
+            "expect": { "file": "vendor/laravel/scout/src/Searchable.php", "needle": "trait Searchable" }
+        },
+        {
+            "id": "vendor-shouldbroadcast-contract",
+            "surface": "implementation",
+            "note": "VENDOR contract: RepairCompleted implements a framework interface.",
+            "from": { "file": "app/Events/RepairCompleted.php", "needle": "class RepairCompleted implements ShouldBroadcast" },
+            "expect": { "file": "vendor/laravel/framework/src/Illuminate/Contracts/Broadcasting/ShouldBroadcast.php", "needle": "interface ShouldBroadcast" }
+        },
+        {
+            "id": "int-pennant-flag",
+            "surface": "references",
+            "note": "Pennant facade edge: the flag consumed in RushInvoiceCalculator is defined in AppServiceProvider.",
+            "from": { "file": "app/Providers/AppServiceProvider.php", "needle": "Feature::define('rush-surcharge'" },
+            "expect": {
+                "min_references": 1,
+                "known_sites": [
+                    { "file": "app/Services/RushInvoiceCalculator.php", "needle": "if (! Feature::active('rush-surcharge')) {" }
+                ]
+            }
+        },
+        {
+            "id": "int-folio-filename-binding",
+            "surface": "definition",
+            "note": "Folio: route-model binding encoded in the FILENAME [RepairOrder-reference]; $repairOrder is injected, no route entry exists.",
+            "from": { "file": "resources/views/pages/orders/[RepairOrder-reference].blade.php", "needle": "<h1>{{ $repairOrder->reference }}</h1>" },
+            "expect": { "file": "app/Models/RepairOrder.php", "needle": "class RepairOrder extends Model" }
+        },
+        {
+            "id": "int-volt-functional-prop",
+            "surface": "definition",
+            "note": "Volt functional API: $this->rushCount in the template resolves to a computed() assignment, no class involved.",
+            "from": { "file": "resources/views/livewire/rush-counter.blade.php", "needle": "{{ $label }}: {{ $this->rushCount }}" },
+            "expect": { "file": "resources/views/livewire/rush-counter.blade.php", "needle": "$rushCount = computed(fn (): int" }
+        },
+        {
+            "id": "vendor-sanctum-trait",
+            "surface": "definition",
+            "note": "VENDOR resolution: HasApiTokens from laravel/sanctum on the User model.",
+            "from": { "file": "app/Models/User.php", "needle": "use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;" },
+            "expect": { "file": "vendor/laravel/sanctum/src/HasApiTokens.php", "needle": "trait HasApiTokens" }
         }
     ]
 }

@@ -6,6 +6,7 @@ use App\Enums\Priority;
 use App\Enums\RepairStatus;
 use App\Models\Customer;
 use App\Models\Device;
+use App\Models\Label;
 use App\Models\Part;
 use App\Models\RepairOrder;
 use App\Models\Technician;
@@ -86,5 +87,22 @@ class DatabaseSeeder extends Seeder
         $order->transitionTo(RepairStatus::Diagnosing, 'seeder');
         $order->transitionTo(RepairStatus::Repairing, 'seeder');
         $order->complete('seeder');
+
+        // Relationship-matrix rows: invoice (HasOne / HasOneThrough target),
+        // signature (MorphOne), fragile label on both order and device.
+        $order->invoice()->create([
+            'number' => 'INV-2026-0001',
+            'issued_at' => now(),
+            'total_cents' => $order->getRawOriginal('subtotal_cents'),
+        ]);
+
+        $order->signature()->create([
+            'signed_by' => 'ada',
+            'signed_at' => now(),
+        ]);
+
+        $fragile = Label::query()->create(['name' => 'fragile']);
+        $order->labels()->attach($fragile->id);
+        $device->labels()->attach($fragile->id);
     }
 }

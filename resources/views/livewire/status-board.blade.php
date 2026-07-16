@@ -7,7 +7,7 @@
             <tr wire:key="order-{{ $order->id }}">
                 <td>{{ $order->reference }}</td>
                 <td>{{ $order->customer->display_name }}</td>
-                <td>{{ $order->status->label() }}</td>
+                <td><flux:badge size="sm">{{ $order->status->label() }}</flux:badge></td>
                 <td>
                     {{-- wire:click resolves to StatusBoard::completeOrder --}}
                     <button wire:click="completeOrder({{ $order->id }})">Complete</button>

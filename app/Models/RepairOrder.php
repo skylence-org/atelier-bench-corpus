@@ -13,7 +13,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
  * The hub model: most benchmark tasks route through here.
@@ -80,6 +83,38 @@ class RepairOrder extends Model
     public function statusLogs(): HasMany
     {
         return $this->hasMany(StatusLog::class);
+    }
+
+    /**
+     * HasOne: the invoice issued for this order.
+     */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    /**
+     * MorphOne: the customer sign-off on this order.
+     */
+    public function signature(): MorphOne
+    {
+        return $this->morphOne(Signature::class, 'signable');
+    }
+
+    /**
+     * MorphOne (ofMany): the most recent note on this order.
+     */
+    public function latestNote(): MorphOne
+    {
+        return $this->morphOne(Note::class, 'notable')->latestOfMany();
+    }
+
+    /**
+     * MorphToMany: labels attached to this order.
+     */
+    public function labels(): MorphToMany
+    {
+        return $this->morphToMany(Label::class, 'labelable');
     }
 
     /**

@@ -49,7 +49,9 @@ Install from the **committed** `composer.lock` only. Do not freestyle `composer 
 | Class-based Blade component | `app/View/Components/StatusBadge` + `<x-status-badge>` in the report view |
 | Model factories + states | `database/factories/*Factory.php`, deterministic sequences; `RepairOrderFactory::rush()` / `::completed()` |
 | Observer via attribute | `app/Observers/DeviceObserver` registered with `#[ObservedBy]` on Device |
-| Feature tests (incl. Livewire::test) | `tests/Feature/*`: 13 tests / 39 assertions covering HTTP, lifecycle/events, all three Livewire components, observer registration |
+| Feature tests (incl. Livewire::test) | `tests/Feature/*`: 31 tests / 80 assertions covering HTTP, lifecycle/events, all Livewire components, observer registration, the full relationship matrix, and every package integration |
+| COMPLETE Eloquent relationship matrix | BelongsTo, HasOne, HasMany, BelongsToMany+pivot, HasOneThrough (Device→invoice), HasManyThrough (Customer→statusLogs), HasOne/MorphOne `ofMany`, MorphTo, MorphOne (Signature), MorphMany (Note), MorphToMany/MorphedByMany first-party (Label/labelables) AND vendor (spatie tags on Part). Proven in `tests/Feature/RelationshipsTest.php` |
+| First-party packages USED as intended | sanctum guard on the API mutation + HasApiTokens · passport guard `api` · cashier Billable on User · scout Searchable on Part (database driver) · pennant `rush-surcharge` flag in RushInvoiceCalculator · reverb-ready ShouldBroadcast event + private channel · socialite login pair · fortify actions + TwoFactorAuthenticatable · folio pages (incl. filename binding) · volt functional component at /rush-counter · flux badge + layout · horizon/octane/telescope/pulse configured (recorders env-gated) · slack notification (guarded) · spatie media/tags/settings via Filament plugins. Proven in `tests/Feature/IntegrationsTest.php` |
 
 ### Migrations note
 
