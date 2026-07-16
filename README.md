@@ -20,6 +20,7 @@ This corpus **replaces** two prior fixtures:
 | Filament | **5.6** (`filament/filament` ^5.6) |
 | Database | SQLite (`database/database.sqlite`) |
 | Seeder | Deterministic fixed rows in `DatabaseSeeder` — **no faker randomness** in the corpus seed path |
+| First-party vendor breadth | 43 laravel/livewire/filament packages in the lock (operator order 2026-07-16): horizon, telescope*, sanctum, passport, cashier, scout, socialite, fortify, pennant, pulse*, reverb, octane, folio, slack-notification-channel, volt, flux, the three Filament spatie plugins, plus dev: dusk, breeze, envoy, sail. *Telescope/Pulse ship disabled via env (no migrations run); packages are present for vendor-resolution benchmarking, not wired into app behavior. |
 
 Install from the **committed** `composer.lock` only. Do not freestyle `composer update` on a bench machine if you need bit-stable ground truth.
 
