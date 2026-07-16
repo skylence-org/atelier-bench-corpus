@@ -1,0 +1,185 @@
+{
+    "version": 1,
+    "corpus": "filament-bench-corpus",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
+    "tasks": [
+        {
+            "id": "def-enum-method",
+            "surface": "definition",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "$this->status->transitionsTo()" },
+            "expect": { "file": "app/Enums/RepairStatus.php", "needle": "public function transitionsTo(): array" }
+        },
+        {
+            "id": "def-enum-case",
+            "surface": "definition",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "'priority' => Priority::Rush" },
+            "expect": { "file": "app/Enums/Priority.php", "needle": "case Rush = 'rush';" }
+        },
+        {
+            "id": "def-global-function",
+            "surface": "definition",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "$model->reference = atelier_format_reference(" },
+            "expect": { "file": "app/Support/helpers.php", "needle": "function atelier_format_reference(string $prefix, int $number): string" }
+        },
+        {
+            "id": "def-global-const",
+            "surface": "definition",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "ATELIER_REF_PREFIX)," },
+            "expect": { "file": "app/Support/helpers.php", "needle": "const ATELIER_REF_PREFIX = 'AT';" }
+        },
+        {
+            "id": "def-class-const",
+            "surface": "definition",
+            "from": { "file": "app/Support/helpers.php", "needle": "Reference::PREFIX_SEPARATOR, now()->year" },
+            "expect": { "file": "app/Support/Reference.php", "needle": "public const PREFIX_SEPARATOR = '-';" }
+        },
+        {
+            "id": "def-shadow-alias-billing",
+            "surface": "definition",
+            "note": "Same-name pair: alias must resolve to App\\Billing, never App\\Reporting.",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "$this->money->money($order->subtotal_cents)" },
+            "expect": { "file": "app/Billing/Formatter.php", "needle": "public function money(string $decimal, string $currency = 'EUR'): string" }
+        },
+        {
+            "id": "def-shadow-alias-reporting",
+            "surface": "definition",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "$this->status->statusLine(" },
+            "expect": { "file": "app/Reporting/Formatter.php", "needle": "public function statusLine(RepairStatus $status, ?string $since): string" }
+        },
+        {
+            "id": "def-interface-through-binding",
+            "surface": "definition",
+            "note": "Contract def is the interface; the container binds StandardInvoiceCalculator (see impl-interface task).",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "app(\\App\\Contracts\\InvoiceCalculator::class)->calculate($this)" },
+            "expect": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "public function calculate(RepairOrder $order): int;" }
+        },
+        {
+            "id": "def-trait-method-scope",
+            "surface": "definition",
+            "from": { "file": "app/Filament/Resources/RepairOrders/Tables/RepairOrdersTable.php", "needle": "$query->open()" },
+            "expect": { "file": "app/Models/RepairOrder.php", "needle": "public function scopeOpen(Builder $query): Builder" }
+        },
+        {
+            "id": "def-blade-model-method",
+            "surface": "definition",
+            "from": { "file": "resources/views/report/summary.blade.php", "needle": "$order->device->label()" },
+            "expect": { "file": "app/Models/Device.php", "needle": "public function label(): string" }
+        },
+        {
+            "id": "def-livewire-computed",
+            "surface": "definition",
+            "note": "Livewire #[Computed]: blade property access resolves to a method.",
+            "from": { "file": "resources/views/filament/pages/inventory-report.blade.php", "needle": "$this->lowStockParts as $part" },
+            "expect": { "file": "app/Filament/Pages/InventoryReport.php", "needle": "public function lowStockParts(): Collection" }
+        },
+        {
+            "id": "impl-interface",
+            "surface": "implementation",
+            "from": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "interface InvoiceCalculator" },
+            "expect": {
+                "implementations": [
+                    { "file": "app/Services/StandardInvoiceCalculator.php", "needle": "class StandardInvoiceCalculator implements InvoiceCalculator" },
+                    { "file": "app/Services/RushInvoiceCalculator.php", "needle": "class RushInvoiceCalculator implements InvoiceCalculator" }
+                ]
+            }
+        },
+        {
+            "id": "refs-transition-to",
+            "surface": "references",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "public function transitionTo(RepairStatus $next, string $changedBy): bool" },
+            "expect": {
+                "min_references": 3,
+                "known_sites": [
+                    { "file": "app/Models/RepairOrder.php", "needle": "if (! $this->transitionTo(RepairStatus::Completed, $changedBy))" },
+                    { "file": "database/seeders/DatabaseSeeder.php", "needle": "$order->transitionTo(RepairStatus::Diagnosing, 'seeder');" },
+                    { "file": "database/seeders/DatabaseSeeder.php", "needle": "$order->transitionTo(RepairStatus::Repairing, 'seeder');" }
+                ]
+            }
+        },
+        {
+            "id": "refs-consumed-quantity",
+            "surface": "references",
+            "from": { "file": "app/Models/Part.php", "needle": "public function consumedQuantity(): int" },
+            "expect": {
+                "min_references": 2,
+                "known_sites": [
+                    { "file": "app/Jobs/RecalculateInventory.php", "needle": "$consumed = $part->consumedQuantity();" },
+                    { "file": "app/Filament/Widgets/RepairStats.php", "needle": "->sum(fn (Part $part): int => $part->consumedQuantity());" }
+                ]
+            }
+        },
+        {
+            "id": "refs-trait-usage",
+            "surface": "references",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "trait HasReference" },
+            "expect": {
+                "min_references": 2,
+                "known_sites": [
+                    { "file": "app/Models/Customer.php", "needle": "use HasReference;" },
+                    { "file": "app/Models/RepairOrder.php", "needle": "use HasReference;" }
+                ]
+            }
+        },
+        {
+            "id": "hover-global-function",
+            "surface": "hover",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "$model->reference = atelier_format_reference(" },
+            "expect": { "contains": "zero-padded width" }
+        },
+        {
+            "id": "hover-schedule-method",
+            "surface": "hover",
+            "from": { "file": "app/Support/Schedule.php", "needle": "public function nextSlot(CarbonImmutable $after): CarbonImmutable" },
+            "expect": { "contains": "Earliest free slot" }
+        },
+        {
+            "id": "docsym-repair-order",
+            "surface": "document_symbol",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "class RepairOrder extends Model" },
+            "expect": {
+                "min_symbols": 10,
+                "must_include": ["complete", "transitionTo", "scopeOpen", "scopeRush", "parts", "casts"]
+            }
+        },
+        {
+            "id": "card-complete-hub",
+            "surface": "symbol_card",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "public function complete(string $changedBy): bool" },
+            "expect": {
+                "kind": "method",
+                "min_confirmed_callers": 2,
+                "known_callers": [
+                    { "file": "app/Filament/Resources/RepairOrders/Tables/RepairOrdersTable.php", "needle": "->action(fn (RepairOrder $record) => $record->complete(auth()->user()->name ?? 'panel'))" },
+                    { "file": "database/seeders/DatabaseSeeder.php", "needle": "$order->complete('seeder');" }
+                ]
+            }
+        },
+        {
+            "id": "card-magic-forward",
+            "surface": "symbol_card",
+            "note": "The name_only case: Technician has no nextSlot method; resolution goes through ForwardsToSchedule::__call to Schedule::nextSlot. Expected: tagged name_only (or explicitly via-__call), NEVER a silent empty answer.",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "$slot = $technician->nextSlot(now()->toImmutable());" },
+            "expect": {
+                "resolution": "name_only_or_magic",
+                "candidate": { "file": "app/Support/Schedule.php", "needle": "public function nextSlot(CarbonImmutable $after): CarbonImmutable" }
+            }
+        },
+        {
+            "id": "hierarchy-complete-chain",
+            "surface": "call_hierarchy",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "public function complete(string $changedBy): bool" },
+            "expect": {
+                "outgoing_includes": [
+                    { "file": "app/Models/RepairOrder.php", "needle": "public function transitionTo(RepairStatus $next, string $changedBy): bool" }
+                ]
+            }
+        },
+        {
+            "id": "broken-syntax-degradation",
+            "surface": "diagnostics",
+            "note": "Behavioral task, no needle target: tools asked about fixtures/broken-syntax/* must degrade loudly (structured error naming the parse failure), never crash and never return silent-empty.",
+            "from": { "file": "fixtures/broken-syntax/Broken.php", "needle": "return 'this class never closes" },
+            "expect": { "behavior": "loud_degradation" }
+        }
+    ]
+}

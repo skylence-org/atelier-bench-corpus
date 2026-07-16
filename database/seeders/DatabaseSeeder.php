@@ -50,6 +50,12 @@ class DatabaseSeeder extends Seeder
             'hourly_rate_cents' => 9500,
         ]);
 
+        // Magic-forwarding call sites (ForwardsToSchedule::__call → Schedule):
+        // neither method exists on Technician; a semantic tool should resolve
+        // these as name_only / via __call, never silently empty.
+        $slot = $technician->nextSlot(now()->toImmutable());
+        $technician->bookSlot($slot);
+
         $screen = Part::query()->create([
             'sku' => 'SCR-13',
             'name' => 'Replacement screen',

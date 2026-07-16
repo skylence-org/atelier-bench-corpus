@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# bench corpus: never commit local db state
+/database/*.sqlite
+/database/*.sqlite-journal

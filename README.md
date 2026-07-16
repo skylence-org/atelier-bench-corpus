@@ -1,58 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# filament-bench-corpus
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Purpose-built **accuracy-bench corpus** for agent/tool evaluation over a real Laravel + Filament app graph.
 
-## About Laravel
+This corpus **replaces** two prior fixtures:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Former fixture | Why it left |
+| --- | --- |
+| `filament-erp` (R2 tarball) | Remote artifact + unpack path; not a first-class git pin |
+| `laravel-event-ticketing` (private git) | Private clone / SSH / secrets in the runner path |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Operator order 2026-07-16.** Clean-room rewrite: **zero code copied** from either predecessor. Domain is a small repair-atelier (customers, devices, repair orders, parts, technicians) with deliberate language and framework edges for definition/reference tasks.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Stack
 
-## Learning Laravel
+| Piece | Pin / constraint |
+| --- | --- |
+| PHP | `^8.3` |
+| Laravel | **13.20** (`laravel/framework` ^13.8; runtime verified 13.20.x) |
+| Filament | **5.6** (`filament/filament` ^5.6) |
+| Database | SQLite (`database/database.sqlite`) |
+| Seeder | Deterministic fixed rows in `DatabaseSeeder` — **no faker randomness** in the corpus seed path |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Install from the **committed** `composer.lock` only. Do not freestyle `composer update` on a bench machine if you need bit-stable ground truth.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Coverage map
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+| Surface | Where |
+| --- | --- |
+| Enums with methods | `app/Enums` (`Priority`, `RepairStatus`) |
+| Trait reuse | `app/Concerns/HasReference` used by Customer + RepairOrder models |
+| Magic `__call` → `name_only` | `app/Concerns/ForwardsToSchedule` → `app/Support/Schedule`; live call sites in `DatabaseSeeder` (`nextSlot` / `bookSlot` on Technician) |
+| Interface + 2 impls + container binding | `app/Contracts/InvoiceCalculator`, `app/Services/StandardInvoiceCalculator` + `RushInvoiceCalculator`, bind in `app/Providers/AppServiceProvider` |
+| Same-name shadow pair (aliases) | `app/Billing/Formatter` vs `app/Reporting/Formatter` via aliases in `app/Http/Controllers/ReportController` |
+| Custom cast | `app/Casts/Money` |
+| Global fn + global const + class const | `app/Support/helpers.php` (`atelier_format_reference`, `ATELIER_REF_PREFIX`), `app/Support/Reference::PREFIX_SEPARATOR` |
+| Events / listener / policy / job / command / middleware | `app/Events/RepairCompleted`, `app/Listeners/SendCompletionNotice`, `app/Policies/RepairOrderPolicy`, `app/Jobs/RecalculateInventory`, `app/Console/Commands/*`, `app/Http/Middleware/RecordReportVisit` |
+| Laravel helper inventory (live HTTP path) | `app/Support/HelperInventory` via `ReportController` + `cache()->remember` |
+| Filament resource / relation-manager / widget / custom page | `app/Filament/Resources/*`, relation managers under RepairOrders, `app/Filament/Widgets/RepairStats`, `app/Filament/Pages/InventoryReport` |
+| Livewire `#[Computed]` | `app/Filament/Pages/InventoryReport` (`lowStockParts`) |
+| Blade nav / report view | `resources/views/report/summary.blade.php` |
+| Broken-syntax fixtures | `fixtures/broken-syntax` — **DO NOT FIX** (intentionally invalid for parser/indexer negative cases) |
 
-## Agentic Development
+### Migrations note
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+The five migrations `2026_07_16_08000*` (benchmark_tests / test_datasets / test_results / benchmark_metrics / measurements) are **pending provenance ruling**. Treat them as frozen/disputed until the board says otherwise; do not "clean them up" as part of corpus work.
 
-```bash
-composer require laravel/boost --dev
+## Consumption (runner)
 
-php artisan boost:install
+Corpora consumers pin this tree via `corpora.lock.json`:
+
+```json
+{ "type": "git", "sha": "<commit>" }
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Runner contract:
 
-## Contributing
+1. Check out the pinned SHA.
+2. `composer install` from the **committed** `composer.lock` (no unlock, no update).
+3. No R2 downloads, no SSH private remotes, no vault/secrets required for install or seed.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Local bootstrap (dev only):
 
-## Code of Conduct
+```bash
+composer install
+cp .env.example .env   # if needed
+php artisan key:generate
+php artisan migrate --force
+php artisan db:seed    # DatabaseSeeder — deterministic
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:reference}` (see `ReportController`).
 
-## Security Vulnerabilities
+## Ground truth
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Artifact | Role |
+| --- | --- |
+| `bench/tasks.json` | Needle-based accuracy tasks (from → expect file/needle pairs) |
+| `bench/verify_tasks.php` | Self-check that every task needle still resolves in the tree |
+
+**Regenerate discipline:** any edit under `app/`, `routes/`, `resources/views/`, seeders, or other task-target paths must leave:
+
+```bash
+php bench/verify_tasks.php
+```
+
+at **exit 0**. If needles move, update `bench/tasks.json` in the same change (bench lane owns `bench/`; app lanes keep needles green).
+
+Broken fixtures under `fixtures/broken-syntax/` are out of scope for "fix until green" — they are negative cases on purpose.
+
+## Layout (short)
+
+```
+app/                 # domain + Filament + deliberate coverage surfaces
+bench/               # tasks.json (+ verify_tasks.php self-check)
+database/seeders/    # deterministic DatabaseSeeder
+fixtures/            # broken-syntax (do not fix)
+routes/              # web + api
+resources/views/     # report + filament pages
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT (Laravel skeleton lineage). Corpus content is clean-room for bench use.
