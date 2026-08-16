@@ -873,6 +873,144 @@
                 "kind": "syntax_error",
                 "must_include": "generics"
             }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 implementors: 24 nominal classes (`implements RuleContract`) and 24 structural object literals (no `implements` keyword anywhere; 16 typed `: RuleContract`, 8 checked via `satisfies RuleContract`). A tool that only counts `implements` clauses returns 24, not 48.",
+            "from": {
+                "file": "packages/bench/src/contracts/ruleContract.ts",
+                "needle": "export interface RuleContract {"
+            },
+            "expect": {
+                "exact_count": 48,
+                "nominal_count": 24,
+                "structural_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/rules/minimumStockRule.ts",
+                        "needle": "export class MinimumStockRule implements RuleContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/duplicateReferenceRule.ts",
+                        "needle": "export const duplicateReferenceRule: RuleContract = {"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/invoiceCountRule.ts",
+                        "needle": "export const invoiceCountRule = {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "24 classes extend AbstractReport (see impl-report-contract for the full fan-out); this task pins the exact count.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportContract {"
+            },
+            "expect": {
+                "exact_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/reports/cashFlowReport.ts",
+                        "needle": "export class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churnRiskReport.ts",
+                        "needle": "export class ChurnRiskReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerLifetimeReport.ts",
+                        "needle": "export class CustomerLifetimeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerRetentionReport.ts",
+                        "needle": "export class CustomerRetentionReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/dailyRevenueReport.ts",
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/grossProfitReport.ts",
+                        "needle": "export class GrossProfitReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventoryTurnoverReport.ts",
+                        "needle": "export class InventoryTurnoverReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthlyRevenueReport.ts",
+                        "needle": "export class MonthlyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/netMarginReport.ts",
+                        "needle": "export class NetMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderBacklogReport.ts",
+                        "needle": "export class OrderBacklogReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderThroughputReport.ts",
+                        "needle": "export class OrderThroughputReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderVolumeReport.ts",
+                        "needle": "export class OrderVolumeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partShortageReport.ts",
+                        "needle": "export class PartShortageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partUsageReport.ts",
+                        "needle": "export class PartUsageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentDefaultReport.ts",
+                        "needle": "export class PaymentDefaultReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentLatencyReport.ts",
+                        "needle": "export class PaymentLatencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profitMarginReport.ts",
+                        "needle": "export class ProfitMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianEfficiencyReport.ts",
+                        "needle": "export class TechnicianEfficiencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianLoadReport.ts",
+                        "needle": "export class TechnicianLoadReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianPayrollReport.ts",
+                        "needle": "export class TechnicianPayrollReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyClaimReport.ts",
+                        "needle": "export class WarrantyClaimReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyCostReport.ts",
+                        "needle": "export class WarrantyCostReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyTrendReport.ts",
+                        "needle": "export class WarrantyTrendReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
+                        "needle": "export class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
         }
     ]
 }
