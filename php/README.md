@@ -68,7 +68,7 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Direction (edge orientation) | `dir-contract-parent`/`dir-implementor-child` on `ReportContract` → `CashFlowReport` → `AbstractPeriodicReport`; `dir-self-reference` on `app/Support/TreeNode` (USES, never inheritance) |
 | Import-precision (one-of-many, const vs function) | `app/Support/Units.php` (global const + function) consumed one-at-a-time by `app/Support/Formatting/{UnitLabel,UnitFormatter}`; sibling pair `app/Support/Pair/{Left,Right}` with a Left-only consumer |
 | Collision (lane-local resolution) | Names colliding with `rust/`/`typescript/` lanes — `Money`, `Customer`, `DatabaseSeeder` (the lane's `Dataset`), `ATELIER_REF_PREFIX`, `InvoiceCalculator::calculate`, `Formatter` — each resolved to this lane's declaration |
-| Multi-parent declarations | `app/Bench/Contracts/CompositeContract` (three parent interfaces); `app/Bench/Reports/CompositeSummaryReport` (one `extends` + two `implements`) |
+| Multi-parent declarations | `app/Bench/Contracts/CompositeContract` (three parent interfaces); `app/Bench/Reports/CashFlowReport` (one `extends` + two `implements`; the composite implementor is an existing report so `ReportContract` stays at 24) |
 | Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
 
 ### Migrations note

@@ -3,7 +3,7 @@
 namespace App\Bench\Reports;
 
 use App\Bench\Support\AbstractPeriodicReport;
-use App\Bench\Contracts\CacheableContract;
+use App\Bench\Contracts\CompositeContract;
 use App\Bench\Contracts\AuditableContract;
 use App\Bench\Concerns\HasTimestamps;
 use App\Bench\Concerns\HasCache;
@@ -11,7 +11,7 @@ use App\Bench\Concerns\HasAudit;
 use App\Bench\Services\ProfitMarginService;
 use App\Bench\Services\BacklogService;
 
-class CashFlowReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract
+class CashFlowReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract
 {
     use HasTimestamps;
     use HasCache;
