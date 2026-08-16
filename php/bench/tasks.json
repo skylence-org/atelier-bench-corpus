@@ -462,6 +462,34 @@
                 "candidate": { "file": "app/Billing/Formatter.php", "needle": "class Formatter" },
                 "must_not_include": ["rust/", "typescript/", "javascript/"]
             }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "from": { "file": "app/Bench/Contracts/CompositeContract.php", "needle": "interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract" },
+            "expect": {
+                "exact_count": 3,
+                "min_references": 3,
+                "implementations": [
+                    { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
+                    { "file": "app/Bench/Contracts/CacheableContract.php", "needle": "interface CacheableContract" },
+                    { "file": "app/Bench/Contracts/ScheduleContract.php", "needle": "interface ScheduleContract" }
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "from": { "file": "app/Bench/Reports/CompositeSummaryReport.php", "needle": "class CompositeSummaryReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    { "file": "app/Bench/Support/AbstractPeriodicReport.php", "needle": "abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract" },
+                    { "file": "app/Bench/Contracts/CompositeContract.php", "needle": "interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract" },
+                    { "file": "app/Bench/Contracts/AuditableContract.php", "needle": "interface AuditableContract" }
+                ]
+            }
         }
     ]
 }
