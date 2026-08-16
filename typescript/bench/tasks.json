@@ -1,0 +1,878 @@
+{
+    "version": 1,
+    "corpus": "atelier-bench-corpus",
+    "lane": "typescript",
+    "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
+    "tasks": [
+        {
+            "id": "def-enum-method",
+            "surface": "definition",
+            "note": "Enum/namespace merge: RepairStatus.label lives in the namespace half, not the enum half.",
+            "from": {
+                "file": "packages/core/src/reporting/formatter.ts",
+                "needle": "const label = RepairStatus.label(status);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/status.ts",
+                "needle": "export function label(status: RepairStatus): string {"
+            }
+        },
+        {
+            "id": "def-enum-variant",
+            "surface": "definition",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "orders[1]!.priority = Priority.Rush;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/priority.ts",
+                "needle": "    Rush = \"rush\","
+            }
+        },
+        {
+            "id": "def-namespace-merge-value",
+            "surface": "definition",
+            "note": "Class/namespace merge: Money.ZERO is the namespace const, never the class declaration line.",
+            "from": {
+                "file": "packages/core/src/models/invoice.ts",
+                "needle": "return this.paid ? Money.ZERO : this.total;"
+            },
+            "expect": {
+                "file": "packages/core/src/money.ts",
+                "needle": "export const ZERO = new Money(0);"
+            }
+        },
+        {
+            "id": "def-free-function",
+            "surface": "definition",
+            "note": "Two-argument call: the matching overload signature is the definition; see def-overload for the implementation.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "return atelierFormatReference(prefix, this.referenceNumber);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/helpers.ts",
+                "needle": "export function atelierFormatReference(prefix: string, num: number): string;"
+            }
+        },
+        {
+            "id": "def-crate-const",
+            "surface": "definition",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "export const DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/helpers.ts",
+                "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+            }
+        },
+        {
+            "id": "def-assoc-const",
+            "surface": "definition",
+            "from": {
+                "file": "packages/core/src/support/helpers.ts",
+                "needle": "const sep = Reference.PREFIX_SEPARATOR;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/reference.ts",
+                "needle": "static readonly PREFIX_SEPARATOR = \"-\";"
+            }
+        },
+        {
+            "id": "def-shadow-alias-billing",
+            "surface": "definition",
+            "note": "Same-name pair: state.money is the billing Formatter (aliased MoneyFormatter in state.ts), never the reporting one.",
+            "from": {
+                "file": "packages/app/src/http/report.ts",
+                "needle": "total: state.money.money(order.total(state.container), \"EUR\"),"
+            },
+            "expect": {
+                "file": "packages/core/src/billing/formatter.ts",
+                "needle": "money(amount: Money, currency = \"\"): string {"
+            }
+        },
+        {
+            "id": "def-shadow-alias-reporting",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/http/report.ts",
+                "needle": "status: state.status.statusLine(order.status as RepairStatus, \"intake\"),"
+            },
+            "expect": {
+                "file": "packages/core/src/reporting/formatter.ts",
+                "needle": "statusLine(status: RepairStatus, since?: string): string {"
+            }
+        },
+        {
+            "id": "def-trait-method-through-binding",
+            "surface": "definition",
+            "note": "Contract def is the interface member; the container binds StandardInvoiceCalculator (see impl-invoice-calculator).",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "return container.invoiceCalculator().calculate(this);"
+            },
+            "expect": {
+                "file": "packages/core/src/contracts/invoiceCalculator.ts",
+                "needle": "calculate(order: RepairOrder): Money;"
+            }
+        },
+        {
+            "id": "def-mixin-method",
+            "surface": "definition",
+            "note": "RepairOrder declares no reference(); it comes from the withReference mixin class.",
+            "from": {
+                "file": "packages/core/tests/lifecycle.test.ts",
+                "needle": "expect(seededOrder().reference()).toBe(\"AT-2026-000001\");"
+            },
+            "expect": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "reference(): string {"
+            }
+        },
+        {
+            "id": "def-proxy-forwarded-method",
+            "surface": "definition",
+            "note": "Technician declares no nextSlot; the call resolves through the Proxy in concerns/forwardsToSchedule.ts into Schedule.",
+            "from": {
+                "file": "packages/bench/src/repositories/technicianRepository.ts",
+                "needle": "technician.nextSlot() !== undefined"
+            },
+            "expect": {
+                "file": "packages/core/src/support/schedule.ts",
+                "needle": "nextSlot(): SlotIndex | undefined {"
+            }
+        },
+        {
+            "id": "def-through-barrel",
+            "surface": "definition",
+            "note": "Import goes through the barrel index.ts, which declares nothing; the definition is the declaring module.",
+            "from": {
+                "file": "packages/bench/src/repositories/customerRepository.ts",
+                "needle": "import type { Customer } from \"@atelier/core\";"
+            },
+            "expect": {
+                "file": "packages/core/src/models/customer.ts",
+                "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {",
+                "must_not_include": [
+                    "packages/core/src/index.ts"
+                ]
+            }
+        },
+        {
+            "id": "def-subpath-export",
+            "surface": "definition",
+            "note": "Package.json subpath export ./billing maps to src/billing/formatter.ts.",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "import { Formatter as MoneyFormatter } from \"@atelier/core/billing\";"
+            },
+            "expect": {
+                "file": "packages/core/src/billing/formatter.ts",
+                "needle": "export class Formatter {"
+            }
+        },
+        {
+            "id": "def-module-augmentation",
+            "surface": "definition",
+            "note": "debugLabel is declared by a `declare module` augmentation in @atelier/bench; the class in @atelier/core never mentions it. The runtime body is the prototype assignment four lines below the declaration, in the same file.",
+            "from": {
+                "file": "packages/bench/tests/augmentation.test.ts",
+                "needle": "expect(new Formatter(\"EUR\").debugLabel()).toBe(\"billing-formatter(money)\");"
+            },
+            "expect": {
+                "file": "packages/bench/src/augmentations.ts",
+                "needle": "debugLabel(): string;",
+                "must_not_include": [
+                    "packages/core/"
+                ]
+            }
+        },
+        {
+            "id": "def-inferred-type",
+            "surface": "definition",
+            "note": "The type is inferred from a value; the definition of the shape is the const schema.",
+            "from": {
+                "file": "packages/app/src/http/api.ts",
+                "needle": "export type StoreNote = z.infer<typeof storeNoteSchema>;"
+            },
+            "expect": {
+                "file": "packages/app/src/http/api.ts",
+                "needle": "export const storeNoteSchema = z.object({"
+            }
+        },
+        {
+            "id": "def-overload",
+            "surface": "definition",
+            "note": "Two overload signatures (exact_count) plus one implementation signature (candidate = its parameter line). A tool that lists only one overload, or the implementation only, is incomplete.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "return atelierFormatReference(prefix, this.referenceNumber);"
+            },
+            "expect": {
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/helpers.ts",
+                        "needle": "export function atelierFormatReference(prefix: string, num: number): string;"
+                    },
+                    {
+                        "file": "packages/core/src/support/helpers.ts",
+                        "needle": "export function atelierFormatReference(prefix: string, num: number, year: number): string;"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/helpers.ts",
+                    "needle": "year: number = Reference.DEFAULT_YEAR,"
+                }
+            }
+        },
+        {
+            "id": "def-route-to-handler",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/index.ts",
+                "needle": "app.get(\"/report/:reference\", showReport(state));"
+            },
+            "expect": {
+                "file": "packages/app/src/http/report.ts",
+                "needle": "export function showReport(state: AppState) {"
+            }
+        },
+        {
+            "id": "def-error-subclass",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/http/report.ts",
+                "needle": "throw new NotFoundError(\"repair order\", reference);"
+            },
+            "expect": {
+                "file": "packages/core/src/errors.ts",
+                "needle": "export class NotFoundError extends AtelierError {"
+            }
+        },
+        {
+            "id": "def-static-factory",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "container: Container.bindDefault(),"
+            },
+            "expect": {
+                "file": "packages/core/src/container.ts",
+                "needle": "static bindDefault(): Container {"
+            }
+        },
+        {
+            "id": "def-import-alias",
+            "surface": "definition",
+            "note": "Imported as `report as findReport`; the definition is the un-aliased export.",
+            "from": {
+                "file": "packages/app/src/http/api.ts",
+                "needle": "const entry = findReport(slug);"
+            },
+            "expect": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export function report(slug: string): ReportContract | undefined {"
+            }
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "from": {
+                "file": "packages/core/src/container.ts",
+                "needle": "return new Container(new StandardInvoiceCalculator());"
+            },
+            "expect": {
+                "file": "packages/core/src/services/standardInvoiceCalculator.ts",
+                "needle": "export class StandardInvoiceCalculator implements InvoiceCalculator {"
+            }
+        },
+        {
+            "id": "def-type-alias-intersection",
+            "surface": "definition",
+            "note": "Technician is a type alias over an intersection, not a class; the barrel re-exports it with `export type`.",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "type Technician,"
+            },
+            "expect": {
+                "file": "packages/core/src/models/technician.ts",
+                "needle": "export type Technician = TechnicianBase & ScheduleForwarded;"
+            }
+        },
+        {
+            "id": "def-generic-pinned-method",
+            "surface": "definition",
+            "note": "repo is an OrderRepository; the definition is the class method that pins Repository<number, RepairOrder>, not the generic interface member.",
+            "from": {
+                "file": "packages/bench/tests/breadth.test.ts",
+                "needle": "expect(repo.find(1)).toBeDefined();"
+            },
+            "expect": {
+                "file": "packages/bench/src/repositories/orderRepository.ts",
+                "needle": "find(id: number): RepairOrder | undefined {"
+            }
+        },
+        {
+            "id": "impl-invoice-calculator",
+            "surface": "implementation",
+            "from": {
+                "file": "packages/core/src/contracts/invoiceCalculator.ts",
+                "needle": "export interface InvoiceCalculator {"
+            },
+            "expect": {
+                "min_implementations": 2,
+                "implementations": [
+                    {
+                        "file": "packages/core/src/services/standardInvoiceCalculator.ts",
+                        "needle": "export class StandardInvoiceCalculator implements InvoiceCalculator {"
+                    },
+                    {
+                        "file": "packages/core/src/services/rushInvoiceCalculator.ts",
+                        "needle": "export class RushInvoiceCalculator implements InvoiceCalculator {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-report-contract",
+            "surface": "implementation",
+            "note": "Widest fan-out in the lane. Only AbstractReport carries a textual `implements ReportContract`; the 24 concrete reports implement it by extending AbstractReport (21 directly, 3 through AbstractPeriodicReport). All 24 must be reported.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportContract {"
+            },
+            "expect": {
+                "min_implementations": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/reports/cashFlowReport.ts",
+                        "needle": "export class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churnRiskReport.ts",
+                        "needle": "export class ChurnRiskReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerLifetimeReport.ts",
+                        "needle": "export class CustomerLifetimeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerRetentionReport.ts",
+                        "needle": "export class CustomerRetentionReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/dailyRevenueReport.ts",
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/grossProfitReport.ts",
+                        "needle": "export class GrossProfitReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventoryTurnoverReport.ts",
+                        "needle": "export class InventoryTurnoverReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthlyRevenueReport.ts",
+                        "needle": "export class MonthlyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/netMarginReport.ts",
+                        "needle": "export class NetMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderBacklogReport.ts",
+                        "needle": "export class OrderBacklogReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderThroughputReport.ts",
+                        "needle": "export class OrderThroughputReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderVolumeReport.ts",
+                        "needle": "export class OrderVolumeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partShortageReport.ts",
+                        "needle": "export class PartShortageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partUsageReport.ts",
+                        "needle": "export class PartUsageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentDefaultReport.ts",
+                        "needle": "export class PaymentDefaultReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentLatencyReport.ts",
+                        "needle": "export class PaymentLatencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profitMarginReport.ts",
+                        "needle": "export class ProfitMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianEfficiencyReport.ts",
+                        "needle": "export class TechnicianEfficiencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianLoadReport.ts",
+                        "needle": "export class TechnicianLoadReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianPayrollReport.ts",
+                        "needle": "export class TechnicianPayrollReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyClaimReport.ts",
+                        "needle": "export class WarrantyClaimReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyCostReport.ts",
+                        "needle": "export class WarrantyCostReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyTrendReport.ts",
+                        "needle": "export class WarrantyTrendReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
+                        "needle": "export class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-abstract-report",
+            "surface": "implementation",
+            "note": "Subclass fan-out of an abstract class: 21 direct concrete subclasses, one abstract intermediate (AbstractPeriodicReport) and 3 concrete subclasses of that. min counts the 24 concrete ones.",
+            "from": {
+                "file": "packages/bench/src/support/abstractReport.ts",
+                "needle": "export abstract class AbstractReport"
+            },
+            "expect": {
+                "min_implementations": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/support/abstractPeriodicReport.ts",
+                        "needle": "export abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/cashFlowReport.ts",
+                        "needle": "export class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/dailyRevenueReport.ts",
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
+                        "needle": "export class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-generic",
+            "surface": "implementation",
+            "note": "Interface declared in @atelier/core; every implementor lives in @atelier/bench and pins both type parameters.",
+            "from": {
+                "file": "packages/core/src/contracts/repository.ts",
+                "needle": "export interface Repository<Id, Rec> {"
+            },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/repositories/customerRepository.ts",
+                        "needle": "export class CustomerRepository implements Repository<number, Customer> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/inventoryRepository.ts",
+                        "needle": "export class InventoryRepository implements Repository<number, StockMovement> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/invoiceRepository.ts",
+                        "needle": "export class InvoiceRepository implements Repository<number, Invoice> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/orderRepository.ts",
+                        "needle": "export class OrderRepository implements Repository<number, RepairOrder> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/partRepository.ts",
+                        "needle": "export class PartRepository implements Repository<number, Part> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/paymentRepository.ts",
+                        "needle": "export class PaymentRepository implements Repository<number, Payment> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/technicianRepository.ts",
+                        "needle": "export class TechnicianRepository implements Repository<number, Technician> {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/warrantyRepository.ts",
+                        "needle": "export class WarrantyRepository implements Repository<number, WarrantyClaim> {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-notifier-contract",
+            "surface": "implementation",
+            "note": "AbstractNotifier is the only textual `implements NotifierContract`; the 8 transports implement it by extending AbstractNotifier.",
+            "from": {
+                "file": "packages/bench/src/contracts/notifierContract.ts",
+                "needle": "export interface NotifierContract {"
+            },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/notifiers/discordNotifier.ts",
+                        "needle": "export class DiscordNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/emailNotifier.ts",
+                        "needle": "export class EmailNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/pagerNotifier.ts",
+                        "needle": "export class PagerNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/pushNotifier.ts",
+                        "needle": "export class PushNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/slackNotifier.ts",
+                        "needle": "export class SlackNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/smsNotifier.ts",
+                        "needle": "export class SmsNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/teamsNotifier.ts",
+                        "needle": "export class TeamsNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/webhookNotifier.ts",
+                        "needle": "export class WebhookNotifier extends AbstractNotifier {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-transition-to",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "transitionTo(next: RepairStatus, changedBy: string): boolean {"
+            },
+            "expect": {
+                "min_references": 11,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.ts",
+                        "needle": "if (!this.transitionTo(RepairStatus.Completed, changedBy)) {"
+                    },
+                    {
+                        "file": "packages/bench/src/dataset.ts",
+                        "needle": "orders[1]!.transitionTo(RepairStatus.AwaitingParts, \"seeder\");"
+                    },
+                    {
+                        "file": "packages/core/tests/lifecycle.test.ts",
+                        "needle": "expect(order.transitionTo(RepairStatus.Collected, \"seeder\")).toBe(false);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-consumed-quantity",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/models/part.ts",
+                "needle": "consumedQuantity(): number {"
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/inventoryTurnoverReport.ts",
+                        "needle": "part.consumedQuantity()"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partUsageReport.ts",
+                        "needle": "part.consumedQuantity()"
+                    },
+                    {
+                        "file": "packages/bench/src/services/partUsageService.ts",
+                        "needle": "part.consumedQuantity()"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-dataset-seeded",
+            "surface": "references",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "static seeded(): Dataset {"
+            },
+            "expect": {
+                "min_references": 7,
+                "known_sites": [
+                    {
+                        "file": "packages/app/src/state.ts",
+                        "needle": "data: Dataset.seeded(),"
+                    },
+                    {
+                        "file": "packages/bench/tests/breadth.test.ts",
+                        "needle": "const repo = new OrderRepository(Dataset.seeded().orders);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-money-class",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/money.ts",
+                "needle": "export class Money {"
+            },
+            "expect": {
+                "min_references": 20,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/part.ts",
+                        "needle": "readonly unitPrice: Money,"
+                    },
+                    {
+                        "file": "packages/core/src/models/invoice.ts",
+                        "needle": "readonly total: Money,"
+                    },
+                    {
+                        "file": "packages/core/src/contracts/invoiceCalculator.ts",
+                        "needle": "calculate(order: RepairOrder): Money;"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-row-from-cents",
+            "surface": "references",
+            "note": "11 call lines across 9 report files at the pinned base; import lines do not count.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export function rowFromCents(label: string, cents: number): ReportRow {"
+            },
+            "expect": {
+                "min_references": 10,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/cashFlowReport.ts",
+                        "needle": "return [rowFromCents(\"paid\", paid), rowFromCents(\"outstanding\", outstanding)];"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
+                        "needle": "return [rowFromCents(\"week to date\", data.revenueCents())];"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-registry",
+            "surface": "references",
+            "note": "The registry itself has 4 read sites; its 24 `new XReport()` entries are construction sites of ReportContract implementors, not references to REPORTS.",
+            "from": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export const REPORTS: readonly ReportContract[] = ["
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/index.ts",
+                        "needle": "return REPORTS.find((candidate) => candidate.slug === slug);"
+                    },
+                    {
+                        "file": "packages/bench/tests/breadth.test.ts",
+                        "needle": "expect(REPORTS).toHaveLength(24);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hover-free-function",
+            "surface": "hover",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "return atelierFormatReference(prefix, this.referenceNumber);"
+            },
+            "expect": {
+                "contains": "zero-padded width"
+            }
+        },
+        {
+            "id": "hover-frozen-seed",
+            "surface": "hover",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "static seeded(): Dataset {"
+            },
+            "expect": {
+                "contains": "Changing these rows changes bench ground truth"
+            }
+        },
+        {
+            "id": "hover-proxy-forwarding",
+            "surface": "hover",
+            "from": {
+                "file": "packages/core/src/models/technician.ts",
+                "needle": "export function makeTechnician(id: number, name: string, schedule = new Schedule()): Technician {"
+            },
+            "expect": {
+                "contains": "forward to its Schedule"
+            }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "note": "Two `export class Formatter` declarations exist; this alias must land on the billing one.",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "readonly money: MoneyFormatter;"
+            },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "@atelier/core/billing#Formatter",
+                "candidate": {
+                    "file": "packages/core/src/billing/formatter.ts",
+                    "needle": "export class Formatter {"
+                }
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "readonly status: StatusFormatter;"
+            },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "@atelier/core/reporting#Formatter",
+                "candidate": {
+                    "file": "packages/core/src/reporting/formatter.ts",
+                    "needle": "export class Formatter {"
+                }
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "No `implements HasFormatting` exists anywhere; the value satisfies the interface structurally. A tool that only follows implements/extends clauses finds no implementor.",
+            "from": {
+                "file": "packages/bench/src/concerns/hasFormatting.ts",
+                "needle": "export const formatting: HasFormatting = {"
+            },
+            "expect": {
+                "kind": "structural",
+                "candidate": {
+                    "file": "packages/bench/src/concerns/hasFormatting.ts",
+                    "needle": "export interface HasFormatting {"
+                }
+            }
+        },
+        {
+            "id": "resolution-type-only-import",
+            "surface": "resolution",
+            "note": "`import type` is erased at runtime: the edge is type-level only and must not be reported as a value/runtime dependency.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "import type { Container } from \"../container\";"
+            },
+            "expect": {
+                "kind": "type_only",
+                "candidate": {
+                    "file": "packages/core/src/container.ts",
+                    "needle": "export class Container {"
+                }
+            }
+        },
+        {
+            "id": "resolution-discriminated-union",
+            "surface": "resolution",
+            "note": "Inside the branch `event` is exactly one union member; the candidate is that member's line, not the whole alias.",
+            "from": {
+                "file": "packages/core/src/events.ts",
+                "needle": "if (event.kind === \"repair_completed\") {"
+            },
+            "expect": {
+                "resolution": "DomainEvent narrowed to the repair_completed member",
+                "candidate": {
+                    "file": "packages/core/src/events.ts",
+                    "needle": "| { readonly kind: \"repair_completed\"; readonly orderId: number; readonly reference: string }"
+                }
+            }
+        },
+        {
+            "id": "resolution-namespace-vs-enum",
+            "surface": "resolution",
+            "note": "RepairStatus resolves to two declarations (enum + namespace, exact_count); the member transitionsTo lives in the namespace half (candidate).",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "if (!RepairStatus.transitionsTo(this.status).includes(next)) {"
+            },
+            "expect": {
+                "kind": "declaration_merge",
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export enum RepairStatus {"
+                    },
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export namespace RepairStatus {"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/status.ts",
+                    "needle": "export function transitionsTo(status: RepairStatus): readonly RepairStatus[] {"
+                }
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-class",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture. A parser must report an error here, never a partial tree. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/unclosed_class.ts",
+                "needle": "label(): string {"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "unclosed"
+            }
+        },
+        {
+            "id": "parse-negative-bad-generics",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture: unbalanced generics plus a truncated extends constraint. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/bad_generics.ts",
+                "needle": "export class Holder<T, U {"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "generics"
+            }
+        }
+    ]
+}
