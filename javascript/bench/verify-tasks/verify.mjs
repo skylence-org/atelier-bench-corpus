@@ -2,7 +2,8 @@
 // Self-check for bench/tasks.json needle uniqueness.
 //
 //   node bench/verify-tasks/verify.mjs                 # resolve every file+needle pair
-//   node bench/verify-tasks/verify.mjs --lint          # node --check over the lane + broken-fixture guard
+//   node bench/verify-tasks/verify.mjs --lint          # node --check + broken-fixture guard + checkJs allowlist gate
+//   node bench/verify-tasks/verify.mjs --lint --write-allowlist   # regenerate bench/checkjs-allowlist.txt
 //   node bench/verify-tasks/verify.mjs --root <dir>    # verify another lane-shaped directory
 //
 // Node built-ins only. Exit 0 only when every check passes. Mirrors
@@ -10,7 +11,7 @@
 // typescript/bench/verify-tasks/verify.mjs line for line so every lane is
 // scored the same way.
 
-import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { dirname, resolve, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -190,9 +191,9 @@ function summarize(needle) {
 }
 
 /**
- * --lint: every source file must parse, and every broken fixture must still
- * refuse to parse. `npx tsc -p jsconfig.json` runs on top when a local
- * typescript is installed; it is an optional gate, never a hard dependency.
+ * --lint: every source file must parse, every broken fixture must still refuse
+ * to parse, and `tsc -p jsconfig.json` must produce exactly the diagnostics in
+ * bench/checkjs-allowlist.txt (see runTypecheckGate).
  */
 function runLint(root) {
     const packages = join(root, "packages");
@@ -241,7 +242,7 @@ function runLint(root) {
     }
     process.stdout.write(`lint: OK (${refused} broken fixture(s) still refuse to parse)\n`);
 
-    return runOptionalTypecheck(root);
+    return runTypecheckGate(root);
 }
 
 /** Every .js/.mjs/.cjs under `dir`, depth first, node_modules skipped. */
@@ -265,34 +266,83 @@ function collectSources(dir) {
 }
 
 /**
- * JSDoc typecheck over jsconfig.json, only when a local typescript is present.
- *
- * ADVISORY, never fatal. The lane ships no typescript and no @types packages
- * (express + supertest are its only dependencies), and its whole point is
- * behaviour tsc cannot model: Object.assign mixins, Proxy forwarding, prototype
- * assignment. Diagnostics here describe the JSDoc surface, they are not a
- * defect in the lane, so they are reported and the exit code stays 0.
+ * checkJs gate over jsconfig.json (HARD). typescript, @types/node and @types/express
+ * are exact-pinned devDependencies, so `npm ci` always provides tsc. The lane
+ * deliberately contains behaviour tsc cannot model (Object.assign mixins, Proxy
+ * forwarding, prototype assignment), so a fixed set of diagnostics is EXPECTED:
+ * bench/checkjs-allowlist.txt lists every one of them, normalised to
+ * `<file>: error TS<code>: <message>` (line/column stripped). The gate fails on
+ * any diagnostic not in the allowlist AND on any allowlisted diagnostic that no
+ * longer occurs, so the file is regenerated with `--write-allowlist` and
+ * reviewed like code.
  */
-function runOptionalTypecheck(root) {
+function runTypecheckGate(root) {
     const tsc = join(root, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc");
     if (!existsSync(tsc)) {
-        process.stdout.write("lint: SKIP (no local typescript; jsconfig.json checkJs pass not run)\n");
-        return 0;
+        process.stdout.write("lint: FAIL (node_modules/.bin/tsc missing; run npm ci)\n");
+        return 1;
     }
 
     const check = spawnSync(tsc, ["-p", "jsconfig.json"], { cwd: root, encoding: "utf8" });
     if (check.error) {
-        process.stdout.write(`lint: ADVISORY (tsc not runnable: ${check.error.message})\n`);
-        return 0;
+        process.stdout.write(`lint: FAIL (tsc not runnable: ${check.error.message})\n`);
+        return 1;
     }
-    if (check.status !== 0) {
-        const count = `${check.stdout}`.split("\n").filter((line) => line.includes(": error TS")).length;
-        process.stdout.write(
-            `lint: ADVISORY (tsc -p jsconfig.json reported ${count} diagnostic(s); see javascript/README.md)\n`,
-        );
+
+    const actual = normaliseDiagnostics(`${check.stdout}`);
+    const allowlistPath = join(root, "bench", "checkjs-allowlist.txt");
+
+    if (args.includes("--write-allowlist")) {
+        writeFileSync(allowlistPath, actual.length === 0 ? "" : `${actual.join("\n")}\n`);
+        process.stdout.write(`lint: WROTE ${allowlistPath} (${actual.length} diagnostic(s))\n`);
         return 0;
     }
 
-    process.stdout.write("lint: OK (tsc -p jsconfig.json)\n");
+    const expected = existsSync(allowlistPath)
+        ? readFileSync(allowlistPath, "utf8").split("\n").filter((line) => line.length > 0)
+        : [];
+    const extra = multisetDifference(actual, expected);
+    const stale = multisetDifference(expected, actual);
+
+    if (extra.length > 0 || stale.length > 0) {
+        for (const line of extra) {
+            process.stdout.write(`lint: NEW  ${line}\n`);
+        }
+        for (const line of stale) {
+            process.stdout.write(`lint: GONE ${line}\n`);
+        }
+        process.stdout.write(
+            `lint: FAIL (tsc -p jsconfig.json: ${extra.length} diagnostic(s) not in bench/checkjs-allowlist.txt, ${stale.length} allowlisted diagnostic(s) no longer occur)\n`,
+        );
+        return 1;
+    }
+
+    process.stdout.write(`lint: OK (tsc -p jsconfig.json: ${actual.length} diagnostic(s), all allowlisted)\n`);
     return 0;
+}
+
+/** `path(l,c): error TSn: msg` -> `path: error TSn: msg`, sorted. */
+function normaliseDiagnostics(stdout) {
+    return stdout
+        .split(/\r?\n/)
+        .filter((line) => line.includes(": error TS"))
+        .map((line) => line.replace(/\(\d+,\d+\)(?=: error TS)/, ""))
+        .sort();
+}
+
+/** Lines of `a` not matched one-for-one by a line of `b`. */
+function multisetDifference(a, b) {
+    const remaining = new Map();
+    for (const line of b) {
+        remaining.set(line, (remaining.get(line) ?? 0) + 1);
+    }
+
+    return a.filter((line) => {
+        const count = remaining.get(line) ?? 0;
+        if (count === 0) {
+            return true;
+        }
+        remaining.set(line, count - 1);
+        return false;
+    });
 }
