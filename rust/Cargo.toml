@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/atelier-core",
+    "crates/atelier-bench",
 ]
 
 [workspace.package]
