@@ -1,0 +1,23 @@
+{
+    "name": "@atelier/app",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Application surface: express routes, console commands, background jobs.",
+    "license": "MIT",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*.ts"
+    },
+    "dependencies": {
+        "@atelier/bench": "*",
+        "@atelier/core": "*",
+        "express": "^5.0.1",
+        "zod": "^3.24.1"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/supertest": "^6.0.2",
+        "supertest": "^7.0.0"
+    }
+}

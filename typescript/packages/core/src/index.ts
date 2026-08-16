@@ -36,6 +36,13 @@ export { Note, NotableKind } from "./models/note";
 export { Label } from "./models/label";
 export { Signature } from "./models/signature";
 
+export { Dispatcher, SendCompletionNotice, channelFor } from "./events";
+export type { DomainEvent, Listener } from "./events";
+export { AuditingDeviceObserver } from "./observers";
+export type { DeviceObserver } from "./observers";
+export { RepairOrderPolicy } from "./policy";
+export type { Actor } from "./policy";
+
 // Deliberately NOT re-exported: both halves of the same-name pair. Consumers
 // import them through the "./billing" and "./reporting" subpath exports and
 // alias them at the import site.
