@@ -1,0 +1,25 @@
+{
+    "name": "atelier-ts",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "TypeScript lane of filament-bench-corpus: repair-atelier domain graph for accuracy benchmarking.",
+    "license": "MIT",
+    "workspaces": [
+        "packages/*"
+    ],
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit -p tsconfig.json",
+        "test": "vitest run",
+        "verify": "node bench/verify-tasks/verify.mjs",
+        "verify:lint": "node bench/verify-tasks/verify.mjs --lint"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.2",
+        "typescript": "^5.7.2",
+        "vitest": "^2.1.8"
+    }
+}

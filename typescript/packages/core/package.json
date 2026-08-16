@@ -1,0 +1,13 @@
+{
+    "name": "@atelier/core",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Repair-atelier domain core: models, enums, contracts, container bindings.",
+    "license": "MIT",
+    "exports": {
+        ".": "./src/index.ts",
+        "./billing": "./src/billing/formatter.ts",
+        "./reporting": "./src/reporting/formatter.ts"
+    }
+}
