@@ -30,7 +30,7 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | `database/` | Migrations, factories, deterministic `DatabaseSeeder` | 40 |
 | `routes/` | `web.php`, `api.php`, `console.php` | 3 |
 | `resources/views/` | Report view, Blade components, Livewire SFC, Filament pages | 12 |
-| `tests/` | Feature suite (31 tests / 80 assertions), Dusk scaffold | 15 |
+| `tests/` | Feature suite (34 tests / 86 assertions), Dusk scaffold | 16 |
 | `bench/` | `tasks.json` + `verify_tasks.php` self-check; **zero composer dependencies** | 1 |
 | `fixtures/broken-syntax/` | Intentionally invalid PHP + Blade, **DO NOT FIX** | 2 |
 
@@ -59,7 +59,7 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Class-based Blade component | `app/View/Components/StatusBadge` + `<x-status-badge>` in the report view |
 | Model factories + states | `database/factories/*Factory.php`, deterministic sequences; `RepairOrderFactory::rush()` / `::completed()` |
 | Observer via attribute | `app/Observers/DeviceObserver` registered with `#[ObservedBy]` on Device |
-| Feature tests (incl. Livewire::test) | `tests/Feature/*`: 31 tests / 80 assertions covering HTTP, lifecycle/events, all Livewire components, observer registration, the full relationship matrix, and every package integration |
+| Feature tests (incl. Livewire::test) | `tests/Feature/*`: 34 tests / 86 assertions covering HTTP, lifecycle/events, all Livewire components, observer registration, the full relationship matrix, and every package integration |
 | COMPLETE Eloquent relationship matrix | BelongsTo, HasOne, HasMany, BelongsToMany+pivot, HasOneThrough (Device→invoice), HasManyThrough (Customer→statusLogs), HasOne/MorphOne `ofMany`, MorphTo, MorphOne (Signature), MorphMany (Note), MorphToMany/MorphedByMany first-party (Label/labelables) AND vendor (spatie tags on Part). Proven in `tests/Feature/RelationshipsTest.php` |
 | First-party packages USED as intended (auth, billing, search, flags, broadcast) | sanctum guard on the API mutation + HasApiTokens · passport guard `api` · cashier Billable on User · scout Searchable on Part (database driver) · pennant `rush-surcharge` flag in RushInvoiceCalculator · reverb-ready ShouldBroadcast event + private channel · socialite login pair · fortify actions + TwoFactorAuthenticatable |
 | First-party packages USED as intended (pages, UI, ops, plugins) | folio pages (incl. filename binding) · volt functional component at /rush-counter · flux badge + layout · horizon/octane/telescope/pulse configured (recorders env-gated) · slack notification (guarded) · spatie media/tags/settings via Filament plugins. Proven in `tests/Feature/IntegrationsTest.php` |
@@ -69,11 +69,9 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Import-precision (one-of-many, const vs function) | `app/Support/Units.php` (global const + function) consumed one-at-a-time by `app/Support/Formatting/{UnitLabel,UnitFormatter}`; sibling pair `app/Support/Pair/{Left,Right}` with a Left-only consumer |
 | Collision (lane-local resolution) | Names colliding with `rust/`/`typescript/` lanes — `Money`, `Customer`, `DatabaseSeeder` (the lane's `Dataset`), `ATELIER_REF_PREFIX`, `InvoiceCalculator::calculate`, `Formatter` — each resolved to this lane's declaration |
 | Multi-parent declarations | `app/Bench/Contracts/CompositeContract` (three parent interfaces); `app/Bench/Reports/CashFlowReport` (one `extends` + two `implements`; the composite implementor is an existing report so `ReportContract` stays at 24) |
+| Framework magic 1/2 (string-keyed edges) | facade static call (`Log::info` -> `Illuminate\Log\LogManager::info`), gate ability (`allows('update')` -> `RepairOrderPolicy::update`), query scope (`->open()` -> `scopeOpen`), `Attribute::get` accessor (`display_name` -> `displayName()`), container string key (`app('atelier.clock')` -> the `singleton` line) |
+| Framework magic 2/2 (string-keyed edges) | middleware alias (`record.visit` -> `RecordReportVisit`), route -> controller method + `{repairOrder:reference}` binding, `config('atelier.labor_rate_cents')` -> `config/atelier.php`, `__('atelier.note_created')` -> `lang/en/atelier.php`; probes in `app/Support/Edge/StringKeyProbe.php` |
 | Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
-
-### Migrations note
-
-The five migrations `2026_07_16_08000*` (benchmark_tests / test_datasets / test_results / benchmark_metrics / measurements) are **pending provenance ruling**. Treat them as frozen/disputed until the board says otherwise; do not "clean them up" as part of corpus work.
 
 ## Consumption (runner)
 
@@ -89,7 +87,7 @@ cp .env.example .env   # if needed
 php artisan key:generate
 php artisan migrate --force
 php artisan db:seed    # DatabaseSeeder — deterministic
-php artisan test       # 31 tests, sqlite :memory:
+php artisan test       # 34 tests, sqlite :memory:
 ```
 
 Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:reference}` (see `ReportController`).
@@ -98,7 +96,7 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 69 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) |
+| `bench/tasks.json` | 79 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges |
 | `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
