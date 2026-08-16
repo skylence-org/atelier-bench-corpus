@@ -1,0 +1,5 @@
+atelier_app/http/api.py: error: "RepairOrder" has no attribute "reference"  [attr-defined]
+atelier_app/http/report.py: error: "RepairOrder" has no attribute "reference"  [attr-defined]
+atelier_bench/rules/structural.py: error: "RepairOrder" has no attribute "reference"  [attr-defined]
+atelier_bench/rules/structural.py: error: "RepairOrder" has no attribute "reference"  [attr-defined]
+atelier_core/models/repair_order.py: error: "RepairOrder" has no attribute "reference_number"  [attr-defined]
