@@ -1,0 +1,23 @@
+{
+    "name": "atelier-js",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "JavaScript lane of atelier-bench-corpus: repair-atelier domain graph with no declared types, mixed CJS/ESM and prototype edges.",
+    "license": "MIT",
+    "workspaces": [
+        "packages/*"
+    ],
+    "engines": {
+        "node": ">=22.12"
+    },
+    "scripts": {
+        "test": "node --test",
+        "verify": "node bench/verify-tasks/verify.mjs",
+        "verify:lint": "node bench/verify-tasks/verify.mjs --lint",
+        "typecheck": "npx --yes -p typescript@5 tsc -p jsconfig.json"
+    },
+    "devDependencies": {
+        "supertest": "^7.0.0"
+    }
+}

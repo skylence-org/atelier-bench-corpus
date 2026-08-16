@@ -1,0 +1,16 @@
+{
+    "name": "@atelier/bench",
+    "version": "0.1.0",
+    "private": true,
+    "type": "commonjs",
+    "description": "Breadth subsystem: reports, metrics, exporters, notifiers, repositories, services, rules. CommonJS only.",
+    "license": "MIT",
+    "main": "./src/index.cjs",
+    "exports": {
+        ".": "./src/index.cjs",
+        "./*": "./src/*"
+    },
+    "dependencies": {
+        "@atelier/core": "*"
+    }
+}
