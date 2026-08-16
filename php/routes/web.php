@@ -10,9 +10,9 @@ Route::get('/', function () {
 });
 
 // Route-model binding by the custom `reference` key (binding-resolution edge)
-// + route-level middleware (session/request helper context).
+// + route-level middleware applied through its string ALIAS (see bootstrap/app.php).
 Route::get('/report/{repairOrder:reference}', [ReportController::class, 'show'])
-    ->middleware(App\Http\Middleware\RecordReportVisit::class)
+    ->middleware('record.visit')
     ->name('report.show');
 
 // Full-page Livewire component route (class-component routing coverage).

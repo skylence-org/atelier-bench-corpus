@@ -66,6 +66,12 @@
         "javascript"
       ]
     },
+    "def-accessor-attribute": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
     "def-ambient-global-namespace": {
       "surface": "definition",
       "lanes": [
@@ -182,6 +188,12 @@
         "typescript"
       ]
     },
+    "def-config-key": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
     "def-const-enum": {
       "surface": "definition",
       "lanes": [
@@ -200,6 +212,12 @@
         "rust",
         "typescript",
         "javascript"
+      ]
+    },
+    "def-container-string-key": {
+      "surface": "definition",
+      "lanes": [
+        "php"
       ]
     },
     "def-crate-const": {
@@ -295,6 +313,12 @@
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-facade-static-call": {
+      "surface": "definition",
+      "lanes": [
+        "php"
       ]
     },
     "def-first-class-callable": {
@@ -432,6 +456,12 @@
         "typescript"
       ]
     },
+    "def-lang-key": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
     "def-lifetime-struct": {
       "surface": "definition",
       "lanes": [
@@ -472,6 +502,12 @@
       "surface": "definition",
       "lanes": [
         "typescript"
+      ]
+    },
+    "def-middleware-alias": {
+      "surface": "definition",
+      "lanes": [
+        "php"
       ]
     },
     "def-mixin-method": {
@@ -552,6 +588,12 @@
         "typescript"
       ]
     },
+    "def-policy-ability": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
     "def-prototype-method": {
       "surface": "definition",
       "lanes": [
@@ -563,6 +605,12 @@
       "lanes": [
         "typescript",
         "javascript"
+      ]
+    },
+    "def-query-scope": {
+      "surface": "definition",
+      "lanes": [
+        "php"
       ]
     },
     "def-readonly-promoted": {
@@ -586,6 +634,7 @@
     "def-route-to-handler": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript"
@@ -1251,6 +1300,12 @@
       "surface": "resolution",
       "lanes": [
         "typescript"
+      ]
+    },
+    "resolution-route-model-binding": {
+      "surface": "resolution",
+      "lanes": [
+        "php"
       ]
     },
     "resolution-satisfies": {
