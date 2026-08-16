@@ -84,6 +84,10 @@ class Dataset:
         """Iterating a dataset iterates its orders."""
         yield from self.orders
 
+    def __len__(self) -> int:
+        """Return the number of orders in the dataset."""
+        return len(self.orders)
+
     def orders_of(self, customer_id: int) -> Generator[RepairOrder, None, None]:
         """Lazily walk the orders of one customer."""
         for order in self:
