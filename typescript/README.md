@@ -57,7 +57,11 @@ on a bench machine if you need bit-stable ground truth.
 | HTTP surface (express 5) | `packages/app/src/index.ts` router; handlers in `http/{report,api}.ts` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `packages/bench/src/dataset.ts` `Dataset.seeded()` — revenue `58325`c, part cost `46300`c, gross profit `12025`c |
-| Tests (incl. request-level) | 39 vitest tests: lifecycle, money, shadow pair, Proxy forwarding, breadth registry, augmentation, express routes, console commands |
+| Tests (incl. request-level) | 48 vitest tests: lifecycle, money, shadow pair, Proxy forwarding, breadth registry, augmentation, express routes, console commands, TSX views, async loaders, issue-#9 surfaces |
+| TSX + JSX factory | `packages/app/src/views/{h.ts,reportCard.tsx,reportPage.tsx}`: `jsxFactory: "h"` (no framework), component + intrinsic elements + fragment |
+| Ambient declarations | `packages/app/src/types/jsx.d.ts` (global `JSX` namespace), `packages/app/src/types/legacy-formatting.d.ts` (`declare module "atelier-legacy-formatting"`, type-only consumer in `http/legacy.ts`) |
+| `paths` alias | `tsconfig.base.json` maps `@app/*` → `packages/app/src/*`; type-only import in `http/reportLoader.ts` |
+| async / generators | `http/reportLoader.ts`: `async function`, `function*`, `async function*`, `for await` |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; excluded by `tsconfig.json`, so `tsc` never sees them) |
 | Cardinality (nominal/structural split) | `packages/bench/src/contracts/ruleContract.ts` + `rules/` — 48 implementors: 24 nominal classes (`implements`), 24 structural object literals (16 typed `: RuleContract`, 8 via `satisfies RuleContract`) |
 | Direction (parent/child/self/merge) | `dir-contract-parent`, `dir-implementor-child` over `ReportContract`/`AbstractReport`/`CashFlowReport`; `dir-self-reference` — new `packages/core/src/support/treeNode.ts`; `dir-declaration-merge-not-inheritance` — the existing `RepairStatus` enum/namespace merge, framed as a non-inheritance edge |
@@ -76,7 +80,7 @@ Local use:
 
 ```bash
 npm run typecheck               # tsc --noEmit -p tsconfig.json
-npm test                        # 39 tests
+npm test                        # 48 tests
 ```
 
 The console entrypoint is `packages/app/src/main.ts` (`serve [port]`, `seed`, `report [slug]`,
@@ -90,7 +94,7 @@ HTTP surface: `GET /report/:reference` (e.g. `AT-2026-000001`), `GET /api/orders
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 78 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/tasks.json` | 87 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 34 failure-mode surfaces (issue #9) + 9 TSX/ambient/paths/async edges |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
