@@ -116,6 +116,12 @@
         "rust"
       ]
     },
+    "def-async-style": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "def-async-trait-method": {
       "surface": "implementation",
       "lanes": [
@@ -144,6 +150,12 @@
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-callback-style": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-cfg-gated": {
@@ -227,6 +239,12 @@
         "typescript"
       ]
     },
+    "def-create-require": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "def-cross-crate-trait": {
       "surface": "definition",
       "lanes": [
@@ -249,6 +267,12 @@
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-dynamic-import": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-dynamic-require": {
@@ -294,6 +318,12 @@
       "surface": "definition",
       "lanes": [
         "typescript",
+        "javascript"
+      ]
+    },
+    "def-event-emitter-subclass": {
+      "surface": "definition",
+      "lanes": [
         "javascript"
       ]
     },
@@ -430,6 +460,12 @@
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-jsdoc-template": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-jsdoc-typedef": {
@@ -592,6 +628,12 @@
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-promise-style": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-prototype-method": {
@@ -1272,6 +1314,12 @@
         "rust"
       ]
     },
+    "resolution-calculate-through-binding": {
+      "surface": "resolution",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "resolution-class-interface-merge": {
       "surface": "resolution",
       "lanes": [
@@ -1306,6 +1354,12 @@
       "surface": "resolution",
       "lanes": [
         "php"
+      ]
+    },
+    "resolution-same-name-command-vs-job": {
+      "surface": "resolution",
+      "lanes": [
+        "javascript"
       ]
     },
     "resolution-satisfies": {

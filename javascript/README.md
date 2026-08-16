@@ -16,7 +16,7 @@ surface.
 | --- | --- |
 | Node | `>= 22.12` (`require(esm)` must be available: the CommonJS bench package requires the ESM core) |
 | Layout | npm workspaces, 3 packages + 1 dependency-free verifier |
-| Dependencies | `express@5` (runtime) and `supertest` (dev). Nothing else, on purpose |
+| Dependencies | `express@5` (runtime); dev: `supertest`, plus exact-pinned `typescript`, `@types/node`, `@types/express` for the checkJs gate only (no TypeScript sources, no `.d.ts`) |
 | Test runner | `node --test` (`node:test` + `node:assert/strict`), zero test-runner dependencies |
 | Build step | none: everything runs from source with `node` |
 | Dataset | `Dataset.seeded()` — fixed rows, **no randomness** in the corpus seed path |
@@ -54,7 +54,8 @@ on a bench machine if you need bit-stable ground truth.
 | `EventEmitter` with string event names | `packages/core/src/events.js`: `dispatcher.on('repair.completed', ...)` — a name-only edge |
 | One operation in three styles | `packages/app/src/jobs.js`: `recalculateInventory(cb)`, `recalculateInventoryPromise()`, `recalculateInventoryAsync()` |
 | Dynamic registry | `packages/bench/src/index.cjs`: `require(\`./reports/${slug}.cjs\`)`, with the static `REPORTS` array kept alongside |
-| JSDoc as the only type surface | everywhere: `@typedef`, `@template`, `@param`, `@returns`, `@type {import('./x.js').Y}`; `jsconfig.json` sets `checkJs` |
+| JSDoc as the only type surface | everywhere: `@typedef`, `@template` (`core/src/support/pick.js`), `@param`, `@returns`, `@type {import('./x.js').Y}`; `jsconfig.json` sets `checkJs` and `--lint` enforces the allowlist |
+| createRequire + dynamic import() | `app/src/reportsIndex.js`: synchronous `require` of the CJS bench package from ESM, and `await import("@atelier/core/reporting")` with a static specifier |
 | `this` rebinding | `packages/bench/src/support/abstractNotifier.cjs`: arrow vs function declaration inside one method, `.call`, and `.bind` in `boundSender()` |
 | Same-name shadow pair | `packages/core/src/billing/formatter.js` vs `packages/core/src/reporting/formatter.js`; aliased in ESM (`Formatter as MoneyFormatter`, `packages/app/src/state.js`) and in CJS (`const { Formatter: StatusFormatter } = require(...)`, `packages/bench/tests/interop.test.cjs`) |
 | Barrel that declares nothing + subpath exports | `packages/core/src/index.js` and the `exports` map in `packages/core/package.json` |
@@ -64,7 +65,7 @@ on a bench machine if you need bit-stable ground truth.
 | One contract, 48 implementors | `packages/bench/src/rules/`: 24 classes + 24 object literals in `structural.cjs`, registered in `RuleRegistry.RULES` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `packages/bench/src/dataset.cjs`: revenue `58325`c, part cost `46300`c, gross profit `12025`c |
-| Tests (incl. request-level) | 65 tests: domain lifecycle, prototypes, Proxy forwarding, shadow pair, breadth registry, rules, CJS/ESM interop, express routes, console commands, the three job styles |
+| Tests (incl. request-level) | 70 tests: domain lifecycle, prototypes, Proxy forwarding, shadow pair, breadth registry, rules, CJS/ESM interop, express routes, console commands, the three job styles |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; nothing imports them) |
 
 ## Consumption (runner)
@@ -77,8 +78,8 @@ Local use:
 
 ```bash
 npm ci
-npm test                             # node --test, 65 tests
-npm run verify                       # 53 ground-truth tasks
+npm test                             # node --test, 70 tests
+npm run verify                       # 62 ground-truth tasks
 npm run verify:lint                  # node --check over packages/ + broken-fixture guard
 node packages/app/src/main.js serve 8080
 node packages/app/src/main.js seed
@@ -89,37 +90,32 @@ node packages/app/src/main.js recalculate
 HTTP surface: `GET /report/:reference` (e.g. `AT-2026-000001`), `GET /api/orders`,
 `GET /api/reports/:slug`, `POST /api/orders/:id/notes`, `GET /health`.
 
-## The JSDoc typecheck is advisory
+## The JSDoc typecheck is a hard gate with an allowlist
 
-`jsconfig.json` sets `checkJs: true`, and `verify.mjs --lint` runs `tsc -p jsconfig.json` when a
-local typescript is installed. That pass **reports, it never fails the lint**, for two reasons:
+`jsconfig.json` sets `checkJs: true`; `verify.mjs --lint` runs `node_modules/.bin/tsc -p jsconfig.json`
+(typescript, `@types/node` and `@types/express` are exact-pinned devDependencies, so `npm ci` always
+provides it) and compares the diagnostics, normalised to `<file>: error TS<code>: <message>` (line and
+column stripped), against `bench/checkjs-allowlist.txt`. The gate fails on any diagnostic that is not
+allowlisted AND on any allowlisted diagnostic that no longer occurs; regenerate the file with
+`node bench/verify-tasks/verify.mjs --lint --write-allowlist` and review the diff like code.
 
-- the lane vendors no `typescript` and no `@types/*` packages, so `node:` builtins and `express`
-  have no type declarations here;
-- the edges this lane exists for — `Object.assign` mixins, `Proxy` forwarding, prototype
-  assignment — are precisely what `checkJs` cannot model. `order.reference()` is reported as
-  missing on `RepairOrder`; that diagnostic is the lane working as designed, not a defect.
-
-Measured with `typescript@5 + @types/node + @types/express` installed: **24 diagnostics**, 21 of
-them `TS2339` on mixin-injected members (`reference`, `referenceNumber`, mixin `this`) and 3 on
-`Proxy`/generic variance. Advisory does not mean unread: an earlier head shipped 32, and the extra
-8 were `TS2307` from a real gap — `@atelier/core/contracts/repository.js` was missing from the
-core `exports` map, so a specifier used only inside JSDoc `import(...)` types was unresolvable
-while every test, `node --check` and the needle verifier stayed green. `packages/bench/tests/interop.test.cjs`
-now resolves every `@atelier/*` specifier in the lane so that class of defect fails a test instead.
-
-To look at the JSDoc surface anyway:
-
-```bash
-npm i --no-save typescript @types/node @types/express
-npm run typecheck
-```
+A fixed set of diagnostics is expected, because the edges this lane exists for — `Object.assign`
+mixins, `Proxy` forwarding, prototype assignment, CJS `require` of ESM-typed files — are precisely
+what `checkJs` cannot model: `order.reference()` reported as missing on `RepairOrder` is the lane
+working as designed. At the pinned versions the allowlist holds **60 diagnostics** (TS1542/TS1479
+CJS-imports-ESM-types, TS2339 on mixin-injected members, TS2769/TS2345/TS2322 on Proxy/generic
+variance). What the gate catches is anything NEW: an earlier head shipped 8 extra `TS2307` from a real
+gap — `@atelier/core/contracts/repository.js` was missing from the core `exports` map, so a specifier
+used only inside JSDoc `import(...)` types was unresolvable while every test, `node --check` and the
+needle verifier stayed green. `packages/bench/tests/interop.test.cjs` also resolves every `@atelier/*`
+specifier in the lane, so that class of defect fails a test as well as the gate.
 
 ## Ground truth
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 53 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/tasks.json` | 62 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 53 original + 9 (EventEmitter subclass, callback/promise/async trio, same-name command vs job, createRequire, @template, dynamic import(), aligned def-container-binding) |
+| `bench/checkjs-allowlist.txt` | The exact `tsc -p jsconfig.json` diagnostics the gate accepts (60 at the pinned versions); regenerate with `--lint --write-allowlist` |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

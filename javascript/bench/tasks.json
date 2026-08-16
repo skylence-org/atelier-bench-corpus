@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "javascript",
-    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. IDs shared with the php, rust and typescript lanes ask the same question in each language.",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). IDs shared with the php, rust and typescript lanes ask the same question in each language.",
     "tasks": [
         {
             "id": "def-through-require",
@@ -330,13 +330,14 @@
         {
             "id": "def-error-subclass",
             "surface": "definition",
+            "note": "Same question as the typescript lane: the thrown subclass, not its base.",
             "from": {
-                "file": "packages/app/src/http/errors.js",
-                "needle": "if (error instanceof AtelierError) {"
+                "file": "packages/app/src/http/report.js",
+                "needle": "throw new NotFoundError(\"repair order\", reference);"
             },
             "expect": {
                 "file": "packages/core/src/errors.js",
-                "needle": "export class AtelierError extends Error {"
+                "needle": "export class NotFoundError extends AtelierError {"
             }
         },
         {
@@ -352,8 +353,8 @@
             }
         },
         {
-            "id": "def-container-binding",
-            "surface": "definition",
+            "id": "resolution-calculate-through-binding",
+            "surface": "resolution",
             "note": "The call site sees only the container; two implementations answer calculate, and the binding decides which one runs.",
             "from": {
                 "file": "packages/core/src/models/repairOrder.js",
@@ -894,7 +895,8 @@
                     "needle": "export class Container {"
                 },
                 "must_not_include": [
-                    "packages/core/src/index.js"
+                    "packages/core/src/index.js",
+                    "packages/core/src/models/device.js"
                 ]
             }
         },
@@ -1124,6 +1126,157 @@
             "expect": {
                 "kind": "syntax_error",
                 "must_include": "destructure"
+            }
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "note": "Same question as the typescript lane: the default binding constructs StandardInvoiceCalculator; the definition is that class.",
+            "from": {
+                "file": "packages/core/src/container.js",
+                "needle": "return new Container(new StandardInvoiceCalculator());"
+            },
+            "expect": {
+                "file": "packages/core/src/services/standardInvoiceCalculator.js",
+                "needle": "export class StandardInvoiceCalculator {"
+            }
+        },
+        {
+            "id": "def-event-emitter-subclass",
+            "surface": "definition",
+            "note": "Dispatcher extends the node:events EventEmitter: dispatcher.on/emit have no declaration in the lane; the class line is the only in-tree definition and the parent is a built-in module.",
+            "from": {
+                "file": "packages/app/src/commands/recalculateInventory.js",
+                "needle": "const dispatcher = new Dispatcher();"
+            },
+            "expect": {
+                "kind": "builtin_parent",
+                "file": "packages/core/src/events.js",
+                "needle": "export class Dispatcher extends EventEmitter {",
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/events.js",
+                        "needle": "import { EventEmitter } from \"node:events\";"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-callback-style",
+            "surface": "definition",
+            "note": "One job, three styles (1/3): node-style callback (error, count). The command module exports a DIFFERENT function with the same name; must_not_include keeps them apart.",
+            "from": {
+                "file": "packages/app/tests/jobs.test.js",
+                "needle": "recalculateInventory(Dataset.seeded(), new Dispatcher(), (error, count) => {"
+            },
+            "expect": {
+                "file": "packages/app/src/jobs.js",
+                "needle": "export function recalculateInventory(data, dispatcher, callback) {",
+                "must_not_include": [
+                    "commands/recalculateInventory.js"
+                ]
+            }
+        },
+        {
+            "id": "def-promise-style",
+            "surface": "definition",
+            "note": "One job, three styles (2/3): a hand-built Promise wrapping the callback form; no async keyword.",
+            "from": {
+                "file": "packages/app/src/jobs.js",
+                "needle": "const count = await recalculateInventoryPromise(data, dispatcher);"
+            },
+            "expect": {
+                "file": "packages/app/src/jobs.js",
+                "needle": "export function recalculateInventoryPromise(data, dispatcher) {"
+            }
+        },
+        {
+            "id": "def-async-style",
+            "surface": "definition",
+            "note": "One job, three styles (3/3): async/await over the promise form.",
+            "from": {
+                "file": "packages/app/src/commands/recalculateInventory.js",
+                "needle": "return recalculateInventoryAsync(state.data, dispatcher);"
+            },
+            "expect": {
+                "file": "packages/app/src/jobs.js",
+                "needle": "export async function recalculateInventoryAsync(data, dispatcher) {"
+            }
+        },
+        {
+            "id": "resolution-same-name-command-vs-job",
+            "surface": "resolution",
+            "note": "Two exported functions named recalculateInventory in two modules (the console command and the callback job); the import in main.js picks the command by module path, not by name.",
+            "from": {
+                "file": "packages/app/src/main.js",
+                "needle": "console.log(await recalculateInventory(state));"
+            },
+            "expect": {
+                "kind": "same_name",
+                "candidate": {
+                    "file": "packages/app/src/commands/recalculateInventory.js",
+                    "needle": "export async function recalculateInventory(state) {"
+                },
+                "must_not_include": [
+                    "packages/app/src/jobs.js"
+                ]
+            }
+        },
+        {
+            "id": "def-create-require",
+            "surface": "definition",
+            "note": "createRequire from an ESM file: a synchronous require of the CommonJS bench package; the destructured REPORTS is the CJS registry array.",
+            "from": {
+                "file": "packages/app/src/reportsIndex.js",
+                "needle": "const { REPORTS } = require(\"@atelier/bench\");"
+            },
+            "expect": {
+                "kind": "imports",
+                "file": "packages/bench/src/index.cjs",
+                "needle": "const REPORTS = [",
+                "known_sites": [
+                    {
+                        "file": "packages/app/src/reportsIndex.js",
+                        "needle": "const require = createRequire(import.meta.url);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-jsdoc-template",
+            "surface": "definition",
+            "note": "JSDoc @template is the only place the type parameter exists; the call resolves to the generic helper and its result type is ReportContract | undefined.",
+            "from": {
+                "file": "packages/app/src/reportsIndex.js",
+                "needle": "return firstWhere(REPORTS, (report) => report.slug === slug);"
+            },
+            "expect": {
+                "kind": "jsdoc_generic",
+                "file": "packages/core/src/support/pick.js",
+                "needle": "export function firstWhere(items, predicate) {",
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/pick.js",
+                        "needle": " * @template T"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-dynamic-import",
+            "surface": "definition",
+            "note": "Dynamic import() with a STATIC specifier: resolvable without running anything (contrast def-dynamic-require, whose specifier is a template literal); the target is the reporting Formatter through the @atelier/core exports map.",
+            "from": {
+                "file": "packages/app/src/reportsIndex.js",
+                "needle": "const reporting = await import(\"@atelier/core/reporting\");"
+            },
+            "expect": {
+                "kind": "dynamic_import",
+                "file": "packages/core/src/reporting/formatter.js",
+                "needle": "export class Formatter {",
+                "must_not_include": [
+                    "packages/core/src/billing/formatter.js"
+                ]
             }
         }
     ]
