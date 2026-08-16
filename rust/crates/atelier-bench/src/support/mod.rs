@@ -5,3 +5,8 @@ pub mod abstract_notifier;
 pub mod abstract_periodic_report;
 pub mod abstract_report;
 pub mod abstract_service;
+pub mod closure_predicate;
+pub mod grid;
+pub mod pair_map;
+pub mod report_glob;
+pub mod rule_summary;
