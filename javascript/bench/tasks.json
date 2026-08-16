@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "javascript",
-    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. IDs shared with the php, rust and typescript lanes ask the same question in each language.",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. IDs shared with the php, rust and typescript lanes ask the same question in each language.",
     "tasks": [
         {
             "id": "def-through-require",
@@ -76,7 +76,7 @@
             }
         },
         {
-            "id": "def-object-create-parent",
+            "id": "dir-object-create-parent",
             "surface": "direction",
             "note": "Inheritance is wired by hand: Object.create(Device.prototype) is the only parent edge Laptop has.",
             "from": {
@@ -594,7 +594,7 @@
                 "needle": "const { Formatter: StatusFormatter } = require(\"@atelier/core/reporting\");"
             },
             "expect": {
-                "kind": "lane_local",
+                "kind": "shadow_alias",
                 "candidate": {
                     "file": "packages/core/src/reporting/formatter.js",
                     "needle": "export class Formatter {"
@@ -613,7 +613,7 @@
                 "needle": "import { Formatter as StatusFormatter } from \"@atelier/core/reporting\";"
             },
             "expect": {
-                "kind": "lane_local",
+                "kind": "shadow_alias",
                 "candidate": {
                     "file": "packages/core/src/reporting/formatter.js",
                     "needle": "export class Formatter {"
