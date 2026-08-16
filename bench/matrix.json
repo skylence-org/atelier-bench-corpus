@@ -462,12 +462,6 @@
         "javascript"
       ]
     },
-    "def-object-create-parent": {
-      "surface": "direction",
-      "lanes": [
-        "javascript"
-      ]
-    },
     "def-operator-overload": {
       "surface": "definition",
       "lanes": [
@@ -649,6 +643,12 @@
       "surface": "direction",
       "lanes": [
         "rust"
+      ]
+    },
+    "dir-object-create-parent": {
+      "surface": "direction",
+      "lanes": [
+        "javascript"
       ]
     },
     "dir-self-reference": {
