@@ -27,6 +27,12 @@
         "node",
         "bench/verify-tasks/verify.mjs"
       ]
+    },
+    "python": {
+      "verify": [
+        "python3",
+        "bench/verify_tasks.py"
+      ]
     }
   },
   "canonical": {
@@ -54,7 +60,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "card-rule-contract": {
@@ -63,7 +70,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-accessor-attribute": {
@@ -89,7 +97,8 @@
       "lanes": [
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-associated-type": {
@@ -101,7 +110,8 @@
     "def-async-function": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-async-generator": {
@@ -155,7 +165,8 @@
     "def-callback-style": {
       "surface": "definition",
       "lanes": [
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-cfg-gated": {
@@ -223,13 +234,20 @@
       "lanes": [
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-container-string-key": {
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-context-manager": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-crate-const": {
@@ -251,16 +269,29 @@
         "rust"
       ]
     },
+    "def-dataclass-field": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-decorator": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-deref-forwarded-method": {
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-descriptor": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-docblock-generic": {
@@ -273,6 +304,12 @@
       "surface": "definition",
       "lanes": [
         "javascript"
+      ]
+    },
+    "def-dynamic-import-module": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-dynamic-require": {
@@ -298,14 +335,16 @@
       "lanes": [
         "php",
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-enum-variant": {
       "surface": "definition",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-error-conversion": {
@@ -318,7 +357,8 @@
       "surface": "definition",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-event-emitter-subclass": {
@@ -362,7 +402,14 @@
       "lanes": [
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
+      ]
+    },
+    "def-future-style": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-gat-assoc-type": {
@@ -374,7 +421,8 @@
     "def-generator-function": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-generator-iterator": {
@@ -387,6 +435,12 @@
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-generic-pep695": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-generic-pinned-method": {
@@ -435,13 +489,20 @@
       "surface": "definition",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-inferred-type": {
       "surface": "definition",
       "lanes": [
         "typescript"
+      ]
+    },
+    "def-init-subclass-registry": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-interface-const-via-impl": {
@@ -534,6 +595,12 @@
         "typescript"
       ]
     },
+    "def-match-class-pattern": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-method-overload": {
       "surface": "definition",
       "lanes": [
@@ -549,7 +616,8 @@
     "def-mixin-method": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-module-augmentation": {
@@ -561,7 +629,8 @@
     "def-module-const": {
       "surface": "definition",
       "lanes": [
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-module-exports-object": {
@@ -570,10 +639,28 @@
         "javascript"
       ]
     },
+    "def-module-getattr": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
+    "def-name-mangling": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-named-args": {
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-namedtuple-field": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-namespace-merge-value": {
@@ -609,7 +696,8 @@
     "def-overload": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-path-attribute-module": {
@@ -636,6 +724,12 @@
         "javascript"
       ]
     },
+    "def-property": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-prototype-method": {
       "surface": "definition",
       "lanes": [
@@ -646,7 +740,8 @@
       "surface": "definition",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-query-scope": {
@@ -679,7 +774,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "def-serde-tagged-enum": {
@@ -688,12 +784,19 @@
         "rust"
       ]
     },
+    "def-setattr-mixin": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-shadow-alias-billing": {
       "surface": "definition",
       "lanes": [
         "php",
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-shadow-alias-reporting": {
@@ -701,7 +804,14 @@
       "lanes": [
         "php",
         "rust",
-        "typescript"
+        "typescript",
+        "python"
+      ]
+    },
+    "def-singledispatch": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-static-block-init": {
@@ -720,13 +830,32 @@
       "surface": "definition",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
+      ]
+    },
+    "def-string-key-dispatch": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
+    "def-string-key-exporter": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-subpath-export": {
       "surface": "definition",
       "lanes": [
         "typescript"
+      ]
+    },
+    "def-super-cooperative": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-template-literal-type": {
@@ -738,7 +867,8 @@
     "def-through-barrel": {
       "surface": "definition",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-through-reexport": {
@@ -763,7 +893,8 @@
       "surface": "definition",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "def-type-alias-intersection": {
@@ -778,6 +909,12 @@
         "typescript"
       ]
     },
+    "def-typed-dict-key": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-unique-symbol": {
       "surface": "definition",
       "lanes": [
@@ -790,7 +927,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "dir-declaration-merge-not-inheritance": {
@@ -805,13 +943,20 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "dir-inherent-not-trait": {
       "surface": "direction",
       "lanes": [
         "rust"
+      ]
+    },
+    "dir-mro-linearization": {
+      "surface": "direction",
+      "lanes": [
+        "python"
       ]
     },
     "dir-object-create-parent": {
@@ -826,7 +971,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "docsym-repair-order": {
@@ -845,7 +991,8 @@
       "surface": "hover",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "hover-frozen-seed": {
@@ -853,7 +1000,8 @@
       "lanes": [
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "hover-global-function": {
@@ -872,7 +1020,8 @@
       "surface": "hover",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "hover-schedule-method": {
@@ -885,7 +1034,8 @@
       "surface": "import-precision",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "imp-const-not-function": {
@@ -909,13 +1059,15 @@
     "imp-glob-import": {
       "surface": "import-precision",
       "lanes": [
-        "rust"
+        "rust",
+        "python"
       ]
     },
     "imp-namespace-one-member": {
       "surface": "import-precision",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "imp-one-of-two-siblings": {
@@ -924,14 +1076,22 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
+      ]
+    },
+    "imp-relative-import": {
+      "surface": "import-precision",
+      "lanes": [
+        "python"
       ]
     },
     "imp-type-only-no-value-edge": {
       "surface": "import-precision",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "impl-abstract-report": {
@@ -956,21 +1116,24 @@
       "surface": "implementation",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "impl-notifier-contract": {
       "surface": "implementation",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "impl-report-contract": {
       "surface": "implementation",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "impl-repository-cross-crate": {
@@ -982,7 +1145,8 @@
     "impl-repository-generic": {
       "surface": "implementation",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "impl-trait-abstract": {
@@ -1015,7 +1179,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lane-local-customer": {
@@ -1024,7 +1189,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lane-local-dataset": {
@@ -1033,7 +1199,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lane-local-formatter-billing": {
@@ -1042,7 +1209,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lane-local-money": {
@@ -1051,7 +1219,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lane-local-ref-prefix": {
@@ -1060,7 +1229,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "lw-di-in-mount": {
@@ -1116,7 +1286,8 @@
       "lanes": [
         "php",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "parents-contract-three": {
@@ -1125,7 +1296,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "parents-supertrait-send-sync": {
@@ -1147,10 +1319,17 @@
         "typescript"
       ]
     },
+    "parse-negative-bad-indent": {
+      "surface": "parse-negative",
+      "lanes": [
+        "python"
+      ]
+    },
     "parse-negative-unclosed-class": {
       "surface": "parse-negative",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "parse-negative-unclosed-function": {
@@ -1183,7 +1362,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-dataset-seeded": {
@@ -1191,13 +1371,15 @@
       "lanes": [
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-decorator-usage": {
       "surface": "references",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "refs-jsx-component-usage": {
@@ -1210,7 +1392,8 @@
       "surface": "references",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-money-newtype": {
@@ -1229,7 +1412,8 @@
       "surface": "references",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-report-row-from-cents": {
@@ -1242,7 +1426,8 @@
       "surface": "references",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-rule-registry": {
@@ -1254,7 +1439,8 @@
     "refs-string-event-name": {
       "surface": "references",
       "lanes": [
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "refs-trait-usage": {
@@ -1269,7 +1455,8 @@
         "php",
         "rust",
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "rel-hasmanythrough": {
@@ -1326,6 +1513,12 @@
         "typescript"
       ]
     },
+    "resolution-diamond-mro": {
+      "surface": "resolution",
+      "lanes": [
+        "python"
+      ]
+    },
     "resolution-discriminated-union": {
       "surface": "resolution",
       "lanes": [
@@ -1359,7 +1552,8 @@
     "resolution-same-name-command-vs-job": {
       "surface": "resolution",
       "lanes": [
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "resolution-satisfies": {
@@ -1384,21 +1578,24 @@
       "surface": "resolution",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "resolution-shadow-type-reporting": {
       "surface": "resolution",
       "lanes": [
         "rust",
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "resolution-structural-concern": {
       "surface": "resolution",
       "lanes": [
         "typescript",
-        "javascript"
+        "javascript",
+        "python"
       ]
     },
     "resolution-this-rebinding": {
@@ -1416,7 +1613,8 @@
     "resolution-type-only-import": {
       "surface": "resolution",
       "lanes": [
-        "typescript"
+        "typescript",
+        "python"
       ]
     },
     "vendor-sanctum-trait": {

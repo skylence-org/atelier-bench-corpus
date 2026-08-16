@@ -37,6 +37,7 @@ const LANE_DEFS = [
     { name: "rust", verify: ["cargo", "run", "-q", "-p", "bench-verify"] },
     { name: "typescript", verify: ["node", "bench/verify-tasks/verify.mjs"] },
     { name: "javascript", verify: ["node", "bench/verify-tasks/verify.mjs"] },
+    { name: "python", verify: ["python3", "bench/verify_tasks.py"] },
 ];
 
 const write = process.argv.slice(2).includes("--write");

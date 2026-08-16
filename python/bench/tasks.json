@@ -668,6 +668,332 @@
             "expect": {
                 "contains": "forward to its Schedule"
             }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "from": {"file": "atelier_app/state.py", "needle": "money: MoneyFormatter"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "atelier_core.billing.formatter#Formatter",
+                "candidate": {"file": "atelier_core/billing/formatter.py", "needle": "class Formatter:"}
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "from": {"file": "atelier_app/state.py", "needle": "status: StatusFormatter"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "atelier_core.reporting.formatter#Formatter",
+                "candidate": {"file": "atelier_core/reporting/formatter.py", "needle": "class Formatter:"}
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "`formatting` is a SimpleNamespace that satisfies the HasFormatting Protocol by shape; nothing names the Protocol on it.",
+            "from": {"file": "atelier_bench/concerns/has_formatting.py", "needle": "formatting = SimpleNamespace("},
+            "expect": {
+                "kind": "structural",
+                "candidate": {"file": "atelier_bench/concerns/has_formatting.py", "needle": "class HasFormatting(Protocol):"}
+            }
+        },
+        {
+            "id": "resolution-type-only-import",
+            "surface": "resolution",
+            "note": "Import under `if TYPE_CHECKING:` never executes: a type edge, not a runtime import edge.",
+            "from": {"file": "atelier_core/contracts/invoice_calculator.py", "needle": "    from ..models.repair_order import RepairOrder"},
+            "expect": {
+                "kind": "type_only",
+                "candidate": {"file": "atelier_core/models/repair_order.py", "needle": "class RepairOrder:"},
+                "known_sites": [
+                    {"file": "atelier_core/contracts/invoice_calculator.py", "needle": "if TYPE_CHECKING:  # type-only import: no runtime edge to repair_order"}
+                ]
+            }
+        },
+        {
+            "id": "resolution-diamond-mro",
+            "surface": "resolution",
+            "note": "CashFlowReport(AbstractReport, CompositeContract) reaches ReportContract by two paths; C3 linearisation keeps it once.",
+            "from": {"file": "atelier_bench/reports/cash_flow.py", "needle": "class CashFlowReport(AbstractReport, CompositeContract):"},
+            "expect": {
+                "kind": "mro",
+                "candidate": {"file": "atelier_bench/contracts/report_contract.py", "needle": "class ReportContract(ABC):"},
+                "must_include": ["AbstractReport", "CompositeContract"]
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-class",
+            "surface": "parse-negative",
+            "from": {"file": "fixtures/broken-syntax/unclosed_class.py", "needle": "def book_slot(self, slot)"},
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "unclosed_class"
+            }
+        },
+        {
+            "id": "parse-negative-bad-indent",
+            "surface": "parse-negative",
+            "from": {"file": "fixtures/broken-syntax/bad_indent.py", "needle": "      return total"},
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "bad_indent"
+            }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 rules: 24 NOMINAL classes subclass RuleContract; 24 STRUCTURAL AdHocRule values (one dataclass, 24 instances) satisfy the RuleLike Protocol by shape. structural_count counts the values, as in the typescript/javascript lanes. Excluded by the counting rule: AdHocRule itself is not a rule.",
+            "from": {"file": "atelier_bench/contracts/rule_contract.py", "needle": "class RuleContract(ABC):"},
+            "expect": {
+                "exact_count": 48,
+                "nominal_count": 24,
+                "structural_count": 24,
+                "implementations": [
+                    {"file": "atelier_bench/rules/minimum_stock.py", "needle": "class MinimumStockRule(RuleContract):"},
+                    {"file": "atelier_bench/rules/structural.py", "needle": "AdHocRule(\"duplicate-reference\""},
+                    {"file": "atelier_bench/rules/__init__.py", "needle": "RULES.extend(STRUCTURAL_RULES)"}
+                ],
+                "must_not_include": ["class AdHocRule(RuleContract"]
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "exact_count is exact: 24 concrete reports; AbstractReport, AbstractPeriodicReport, AbstractCompositeReport and CompositeContract are abstract and excluded.",
+            "from": {"file": "atelier_bench/contracts/report_contract.py", "needle": "class ReportContract(ABC):"},
+            "expect": {
+                "exact_count": 24,
+                "implementations": [
+                    {"file": "atelier_bench/reports/cash_flow.py", "needle": "class CashFlowReport(AbstractReport, CompositeContract):"},
+                    {"file": "atelier_bench/reports/churn_risk.py", "needle": "class ChurnRiskReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/customer_lifetime.py", "needle": "class CustomerLifetimeReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/customer_retention.py", "needle": "class CustomerRetentionReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/daily_revenue.py", "needle": "class DailyRevenueReport(AbstractPeriodicReport):"},
+                    {"file": "atelier_bench/reports/gross_profit.py", "needle": "class GrossProfitReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/inventory_turnover.py", "needle": "class InventoryTurnoverReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/monthly_revenue.py", "needle": "class MonthlyRevenueReport(AbstractCompositeReport):"},
+                    {"file": "atelier_bench/reports/net_margin.py", "needle": "class NetMarginReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/order_backlog.py", "needle": "class OrderBacklogReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/order_throughput.py", "needle": "class OrderThroughputReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/order_volume.py", "needle": "class OrderVolumeReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/part_shortage.py", "needle": "class PartShortageReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/part_usage.py", "needle": "class PartUsageReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/payment_default.py", "needle": "class PaymentDefaultReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/payment_latency.py", "needle": "class PaymentLatencyReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/profit_margin.py", "needle": "class ProfitMarginReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/technician_efficiency.py", "needle": "class TechnicianEfficiencyReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/technician_load.py", "needle": "class TechnicianLoadReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/technician_payroll.py", "needle": "class TechnicianPayrollReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/warranty_claim.py", "needle": "class WarrantyClaimReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/warranty_cost.py", "needle": "class WarrantyCostReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/warranty_trend.py", "needle": "class WarrantyTrendReport(AbstractReport):"},
+                    {"file": "atelier_bench/reports/weekly_revenue.py", "needle": "class WeeklyRevenueReport(AbstractPeriodicReport):"}
+                ]
+            }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "from": {"file": "atelier_bench/contracts/report_contract.py", "needle": "class ReportContract(ABC):"},
+            "expect": {
+                "kind": "parent_of",
+                "candidate": {"file": "atelier_bench/reports/cash_flow.py", "needle": "class CashFlowReport(AbstractReport, CompositeContract):"},
+                "must_not_include": ["ReportContract(CashFlowReport"]
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "note": "child_of points at the FIRST base in the class statement.",
+            "from": {"file": "atelier_bench/reports/cash_flow.py", "needle": "class CashFlowReport(AbstractReport, CompositeContract):"},
+            "expect": {
+                "kind": "child_of",
+                "candidate": {"file": "atelier_bench/support/abstract_report.py", "needle": "class AbstractReport(ReportContract, CacheableContract, HasCache, AbstractComponent):"}
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "from": {"file": "atelier_core/support/tree_node.py", "needle": "children: list[TreeNode] = field(default_factory=list)"},
+            "expect": {
+                "kind": "uses_self",
+                "candidate": {"file": "atelier_core/support/tree_node.py", "needle": "class TreeNode:"},
+                "must_not_include": ["TreeNode(TreeNode"]
+            }
+        },
+        {
+            "id": "dir-mro-linearization",
+            "surface": "direction",
+            "note": "Four bases in one class statement; the MRO order is the declaration order (ReportContract before CacheableContract before HasCache before AbstractComponent).",
+            "from": {"file": "atelier_bench/support/abstract_report.py", "needle": "class AbstractReport(ReportContract, CacheableContract, HasCache, AbstractComponent):"},
+            "expect": {
+                "kind": "mro",
+                "exact_count": 4,
+                "known_sites": [
+                    {"file": "atelier_bench/contracts/report_contract.py", "needle": "class ReportContract(ABC):"},
+                    {"file": "atelier_bench/contracts/cacheable_contract.py", "needle": "class CacheableContract(ABC):"},
+                    {"file": "atelier_bench/concerns/has_cache.py", "needle": "class HasCache:"},
+                    {"file": "atelier_bench/support/abstract_component.py", "needle": "class AbstractComponent(HasLogging):"}
+                ]
+            }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "from": {"file": "atelier_app/http/api.py", "needle": "from atelier_core.support.pair import Left"},
+            "expect": {
+                "kind": "imports",
+                "candidate": {"file": "atelier_core/support/pair.py", "needle": "class Left:"},
+                "must_not_include": ["Right"]
+            }
+        },
+        {
+            "id": "imp-glob-import",
+            "surface": "import-precision",
+            "note": "`from ..metrics import *` imports exactly the 16 names in metrics/__init__.py __all__ (same question as the rust lane's glob).",
+            "from": {"file": "atelier_bench/support/metric_glob.py", "needle": "from ..metrics import *  # noqa: F403 - the point of this module"},
+            "expect": {
+                "kind": "glob",
+                "exact_count": 16,
+                "known_sites": [
+                    {"file": "atelier_bench/metrics/__init__.py", "needle": "from .margin import MarginMetric"},
+                    {"file": "atelier_bench/metrics/__init__.py", "needle": "from .nps import NpsMetric"}
+                ],
+                "must_include": ["__all__"]
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "from": {"file": "atelier_core/contracts/invoice_calculator.py", "needle": "    from ..models.repair_order import RepairOrder"},
+            "expect": {
+                "kind": "type_only",
+                "candidate": {"file": "atelier_core/models/repair_order.py", "needle": "class RepairOrder:"},
+                "known_sites": [
+                    {"file": "atelier_core/contracts/invoice_calculator.py", "needle": "if TYPE_CHECKING:  # type-only import: no runtime edge to repair_order"}
+                ]
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "`import atelier_bench.rules as rules` binds the module; one attribute is read.",
+            "from": {"file": "atelier_app/seed.py", "needle": "import atelier_bench.rules as rules"},
+            "expect": {
+                "kind": "namespace_import",
+                "candidate": {"file": "atelier_bench/rules/__init__.py", "needle": "class RuleRegistry:"}
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "from": {"file": "atelier_app/state.py", "needle": "from atelier_core import Container"},
+            "expect": {
+                "kind": "barrel",
+                "candidate": {"file": "atelier_core/container.py", "needle": "class Container:"},
+                "must_not_include": ["atelier_core/__init__.py", "atelier_core/models/device.py"]
+            }
+        },
+        {
+            "id": "imp-relative-import",
+            "surface": "import-precision",
+            "note": "Explicit relative import (`..concerns`) resolves against the package, not sys.path.",
+            "from": {"file": "atelier_core/models/customer.py", "needle": "from ..concerns.has_reference import HasReference"},
+            "expect": {
+                "kind": "relative_import",
+                "candidate": {"file": "atelier_core/concerns/has_reference.py", "needle": "class HasReference:"}
+            }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "from": {"file": "atelier_bench/dataset.py", "needle": "Part(1, \"SCR-13\", 'Screen 13\"', Money(19900), 4),"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_core/money.py", "needle": "class Money:"},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "from": {"file": "atelier_bench/dataset.py", "needle": "Customer.seed(2, \"Grace Hopper\", \"grace@example.test\"),"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_core/models/customer.py", "needle": "class Customer(HasReference):"},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "from": {"file": "atelier_app/state.py", "needle": "data=Dataset.seeded(),"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_bench/dataset.py", "needle": "class Dataset:"},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "from": {"file": "atelier_core/concerns/has_reference.py", "needle": "DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_core/support/helpers.py", "needle": "ATELIER_REF_PREFIX = \"AT\""},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "from": {"file": "atelier_core/models/repair_order.py", "needle": "return container.invoice_calculator().calculate(self)"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_core/contracts/invoice_calculator.py", "needle": "def calculate(self, order: \"RepairOrder\") -> Money: ..."},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "from": {"file": "atelier_app/http/report.py", "needle": "\"total\": state.money.money(order.total(state.container), \"EUR\"),"},
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {"file": "atelier_core/billing/formatter.py", "needle": "class Formatter:"},
+                "must_not_include": ["php/", "rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "note": "Real multiple inheritance: three parent ABCs in one class statement.",
+            "from": {"file": "atelier_bench/contracts/composite_contract.py", "needle": "class CompositeContract(ReportContract, CacheableContract, ScheduleContract):"},
+            "expect": {
+                "exact_count": 3,
+                "implementations": [
+                    {"file": "atelier_bench/contracts/report_contract.py", "needle": "class ReportContract(ABC):"},
+                    {"file": "atelier_bench/contracts/cacheable_contract.py", "needle": "class CacheableContract(ABC):"},
+                    {"file": "atelier_bench/contracts/schedule_contract.py", "needle": "class ScheduleContract(ABC):"}
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "note": "One base class + two mixins in the bases list (extends_count = first base, implements_count = the mixins).",
+            "from": {"file": "atelier_bench/support/abstract_composite_report.py", "needle": "class AbstractCompositeReport(AbstractPeriodicReport, HasAudit, HasMetadataAccess):"},
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    {"file": "atelier_bench/support/abstract_periodic_report.py", "needle": "class AbstractPeriodicReport(AbstractReport, ScheduleContract):"},
+                    {"file": "atelier_bench/concerns/has_audit.py", "needle": "class HasAudit:"},
+                    {"file": "atelier_bench/concerns/has_metadata.py", "needle": "class HasMetadataAccess:"}
+                ]
+            }
         }
     ]
 }
