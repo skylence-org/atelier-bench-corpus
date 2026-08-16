@@ -1092,6 +1092,86 @@
                     }
                 ]
             }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "note": "Consumer imports only Left; Right never enters its import graph.",
+            "from": {
+                "file": "packages/bench/src/support/pairConsumer.ts",
+                "needle": "import { Left } from \"@atelier/core\";"
+            },
+            "expect": {
+                "kind": "imports",
+                "must_not_include": [
+                    "Right"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/pair.ts",
+                    "needle": "export class Left {"
+                }
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "repairOrder.ts imports Container type-only (erased at runtime); state.ts imports the same Container as a value in the same module graph. The type-only site carries no runtime edge.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "import type { Container } from \"../container\";"
+            },
+            "expect": {
+                "kind": "type_only",
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.ts",
+                        "needle": "import type { Container } from \"../container\";"
+                    },
+                    {
+                        "file": "packages/app/src/state.ts",
+                        "needle": "import { Container } from \"@atelier/core\";"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/container.ts",
+                    "needle": "export class Container {"
+                }
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "Namespace import `import * as Rules from \"../rules\"`; only Rules.RULES is ever read.",
+            "from": {
+                "file": "packages/bench/src/support/ruleNamespaceUser.ts",
+                "needle": "import * as Rules from \"../rules\";"
+            },
+            "expect": {
+                "kind": "namespace_import",
+                "candidate": {
+                    "file": "packages/bench/src/rules/index.ts",
+                    "needle": "export const RULES: readonly RuleContract[] = ["
+                }
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "Customer imported through the @atelier/core barrel must resolve to models/customer.ts, not fan out to every other module the barrel re-exports.",
+            "from": {
+                "file": "packages/bench/src/repositories/customerRepository.ts",
+                "needle": "import type { Customer } from \"@atelier/core\";"
+            },
+            "expect": {
+                "kind": "barrel",
+                "must_not_include": [
+                    "models/device.ts"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/models/customer.ts",
+                    "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {"
+                }
+            }
         }
     ]
 }
