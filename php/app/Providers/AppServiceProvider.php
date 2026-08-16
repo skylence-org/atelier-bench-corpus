@@ -9,6 +9,7 @@ use App\Models\RepairOrder;
 use App\Models\User;
 use App\Policies\RepairOrderPolicy;
 use App\Services\StandardInvoiceCalculator;
+use App\Support\Edge\ClockAware;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(InvoiceCalculator::class, StandardInvoiceCalculator::class);
+
+        // String-keyed binding: resolved only through app('atelier.clock'), never by type.
+        $this->app->singleton('atelier.clock', fn (): ClockAware => new ClockAware());
     }
 
     /**
