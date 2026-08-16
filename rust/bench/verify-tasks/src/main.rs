@@ -38,8 +38,8 @@ const NESTED_KEYS: [&str; 4] = [
 ];
 
 fn main() -> ExitCode {
-    let root = lane_root();
     let flags: Vec<String> = std::env::args().skip(1).collect();
+    let root = lane_root(&flags);
 
     if flags.iter().any(|flag| flag == "--lint") {
         return run_lint(&root);
@@ -48,9 +48,15 @@ fn main() -> ExitCode {
     run_tasks(&root)
 }
 
-/// The lane root (`rust/`), resolved the same way whether this was built by
-/// cargo or by a bare `rustc src/main.rs`.
-fn lane_root() -> PathBuf {
+/// The lane root (`rust/`): `--root <dir>` when given, else resolved the same
+/// way whether this was built by cargo or by a bare `rustc src/main.rs`.
+fn lane_root(flags: &[String]) -> PathBuf {
+    if let Some(index) = flags.iter().position(|flag| flag == "--root") {
+        if let Some(dir) = flags.get(index + 1) {
+            return PathBuf::from(dir);
+        }
+    }
+
     match option_env!("CARGO_MANIFEST_DIR") {
         Some(manifest) => Path::new(manifest)
             .parent()
