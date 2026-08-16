@@ -11,16 +11,18 @@ pub mod dataset;
 pub mod exporters;
 pub mod metrics;
 pub mod notifiers;
+pub mod prelude;
 pub mod reports;
 pub mod repositories;
+pub mod rules;
 pub mod services;
 pub mod support;
 
 use crate::contracts::metric_contract::MetricContract;
 use crate::contracts::report_contract::ReportContract;
 use once_cell::sync::Lazy;
-
 pub use crate::dataset::Dataset;
+pub use crate::prelude::RuleContract;
 
 /// Every report in the lane, in registry order.
 ///
