@@ -5,6 +5,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+#[allow(async_fn_in_trait)]
 pub trait AsyncCheck {
     async fn check(&self) -> bool;
 }
@@ -26,6 +27,7 @@ pub struct BoxedStyleCheck {
 }
 
 impl AsyncCheck for BoxedStyleCheck {
+    #[allow(refining_impl_trait_reachable)]
     fn check(&self) -> Pin<Box<dyn Future<Output = bool> + '_>> {
         Box::pin(async move { self.ok })
     }
