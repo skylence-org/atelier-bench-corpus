@@ -1,0 +1,16 @@
+[package]
+name = "bench-verify"
+description = "Self-check for bench/tasks.json needle uniqueness. No third-party dependencies."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "bench-verify"
+path = "src/main.rs"
+
+# Deliberately empty: the self-check must run on a machine that has never
+# fetched the corpus dependency tree.
+[dependencies]

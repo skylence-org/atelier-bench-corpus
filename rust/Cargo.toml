@@ -4,6 +4,7 @@ members = [
     "crates/atelier-core",
     "crates/atelier-bench",
     "crates/atelier-app",
+    "bench/verify-tasks",
 ]
 
 [workspace.package]

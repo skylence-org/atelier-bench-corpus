@@ -1,0 +1,680 @@
+{
+    "version": 1,
+    "corpus": "filament-bench-corpus",
+    "lane": "rust",
+    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
+    "tasks": [
+        {
+            "id": "def-enum-method",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/models/repair_order.rs",
+                "needle": "self.status.transitions_to().contains(&next)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/status.rs",
+                "needle": "pub fn transitions_to(&self) -> &'static [RepairStatus] {"
+            }
+        },
+        {
+            "id": "def-enum-variant",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": ".with_priority(Priority::Rush)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/priority.rs",
+                "needle": "    Rush,"
+            }
+        },
+        {
+            "id": "def-free-function",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "atelier_format_reference(Self::PREFIX, self.reference_number())"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/helpers.rs",
+                "needle": "pub fn atelier_format_reference(prefix: &str, number: u32) -> String {"
+            }
+        },
+        {
+            "id": "def-crate-const",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "const PREFIX: &'static str = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/helpers.rs",
+                "needle": "pub const ATELIER_REF_PREFIX: &str"
+            }
+        },
+        {
+            "id": "def-assoc-const",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/support/helpers.rs",
+                "needle": "let sep = Reference::PREFIX_SEPARATOR;"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/reference.rs",
+                "needle": "pub const PREFIX_SEPARATOR: char"
+            }
+        },
+        {
+            "id": "def-shadow-alias-billing",
+            "surface": "definition",
+            "note": "Same-name pair: the alias must resolve to billing::Formatter, never reporting::Formatter.",
+            "from": {
+                "file": "crates/atelier-app/src/http/report.rs",
+                "needle": "state.money.money(order.total(&state.container)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/billing/formatter.rs",
+                "needle": "pub fn money(&self, amount: Money, currency: &str) -> String {"
+            }
+        },
+        {
+            "id": "def-shadow-alias-reporting",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-app/src/http/report.rs",
+                "needle": "state.status.status_line(order.status"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/reporting/formatter.rs",
+                "needle": "pub fn status_line(&self, status: RepairStatus, since: Option<&str>) -> String {"
+            }
+        },
+        {
+            "id": "def-trait-method-through-binding",
+            "surface": "definition",
+            "note": "Contract def is the trait method; the container binds StandardInvoiceCalculator (see impl-invoice-calculator).",
+            "from": {
+                "file": "crates/atelier-core/src/models/repair_order.rs",
+                "needle": "container.invoice_calculator().calculate(self)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/contracts/invoice_calculator.rs",
+                "needle": "fn calculate(&self, order: &RepairOrder) -> Money;"
+            }
+        },
+        {
+            "id": "def-deref-forwarded-method",
+            "surface": "definition",
+            "note": "Technician declares no next_slot; the call resolves through the Deref impl into Schedule.",
+            "from": {
+                "file": "crates/atelier-core/tests/schedule_forwarding.rs",
+                "needle": "technician.next_slot(), Some(0)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/schedule.rs",
+                "needle": "pub fn next_slot(&self) -> Option<SlotIndex> {"
+            }
+        },
+        {
+            "id": "def-macro-generated-method",
+            "surface": "definition",
+            "note": "peek_next_slot has no textual declaration: it is generated by forwards_to_schedule!.",
+            "from": {
+                "file": "crates/atelier-core/tests/schedule_forwarding.rs",
+                "needle": "technician.peek_next_slot()"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/macros.rs",
+                "needle": "pub fn peek_next_slot(&self)"
+            }
+        },
+        {
+            "id": "def-macro-invocation",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/models/technician.rs",
+                "needle": "forwards_to_schedule!(Technician);"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/macros.rs",
+                "needle": "macro_rules! forwards_to_schedule {"
+            }
+        },
+        {
+            "id": "def-blanket-impl-method",
+            "surface": "definition",
+            "note": "format_value comes from a blanket impl over ReportContract, not from any report's own impl block.",
+            "from": {
+                "file": "crates/atelier-bench/tests/breadth.rs",
+                "needle": "report.format_value(1.5)"
+            },
+            "expect": {
+                "file": "crates/atelier-bench/src/concerns/has_formatting.rs",
+                "needle": "fn format_value(&self, value: f64) -> String {"
+            }
+        },
+        {
+            "id": "def-through-reexport",
+            "surface": "definition",
+            "note": "Import goes through the crate-root pub use; the definition is in the declaring module.",
+            "from": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "use atelier_core::{Customer, Device, Part, Technician};"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/models/customer.rs",
+                "needle": "pub struct Customer {"
+            }
+        },
+        {
+            "id": "def-operator-overload",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/services/standard_invoice_calculator.rs",
+                "needle": "self.labour(order) + order.parts_subtotal()"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "fn add(self, rhs: Money) -> Money {"
+            }
+        },
+        {
+            "id": "def-extension-trait-on-primitive",
+            "surface": "definition",
+            "note": "cents() on an i64 resolves to the local extension trait, not to Money's inherent cents().",
+            "from": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "1_500_i64.cents()"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "fn cents(self) -> Money {"
+            }
+        },
+        {
+            "id": "def-associated-type",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-bench/src/repositories/order_repository.rs",
+                "needle": "type Record = RepairOrder;"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/contracts/repository.rs",
+                "needle": "type Record;"
+            }
+        },
+        {
+            "id": "def-cross-crate-trait",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-bench/src/repositories/part_repository.rs",
+                "needle": "impl Repository for PartRepository {"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/contracts/repository.rs",
+                "needle": "pub trait Repository {"
+            }
+        },
+        {
+            "id": "def-route-to-handler",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-app/src/lib.rs",
+                "needle": "get(http::report::show)"
+            },
+            "expect": {
+                "file": "crates/atelier-app/src/http/report.rs",
+                "needle": "pub async fn show("
+            }
+        },
+        {
+            "id": "def-async-handler",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-app/src/lib.rs",
+                "needle": "post(http::api::store_note)"
+            },
+            "expect": {
+                "file": "crates/atelier-app/src/http/api.rs",
+                "needle": "pub async fn store_note("
+            }
+        },
+        {
+            "id": "def-error-conversion",
+            "surface": "definition",
+            "note": "The ? conversion is generated by #[from]; the target type lives in another module.",
+            "from": {
+                "file": "crates/atelier-core/src/errors.rs",
+                "needle": "Money(#[from] ParseMoneyError),"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "pub enum ParseMoneyError {"
+            }
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/container.rs",
+                "needle": "Arc::new(StandardInvoiceCalculator::default())"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/services/standard_invoice_calculator.rs",
+                "needle": "pub struct StandardInvoiceCalculator {"
+            }
+        },
+        {
+            "id": "def-registry-entry",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-bench/src/lib.rs",
+                "needle": "reports::gross_profit_report::GrossProfitReport::new()"
+            },
+            "expect": {
+                "file": "crates/atelier-bench/src/reports/gross_profit_report.rs",
+                "needle": "pub struct GrossProfitReport {"
+            }
+        },
+        {
+            "id": "def-serde-tagged-enum",
+            "surface": "definition",
+            "from": {
+                "file": "crates/atelier-core/src/models/note.rs",
+                "needle": "pub notable_kind: NotableKind,"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/models/note.rs",
+                "needle": "pub enum NotableKind {"
+            }
+        },
+        {
+            "id": "impl-invoice-calculator",
+            "surface": "implementation",
+            "from": {
+                "file": "crates/atelier-core/src/contracts/invoice_calculator.rs",
+                "needle": "pub trait InvoiceCalculator: Send + Sync {"
+            },
+            "expect": {
+                "min_implementations": 2,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-core/src/services/standard_invoice_calculator.rs",
+                        "needle": "impl InvoiceCalculator for StandardInvoiceCalculator {"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/services/rush_invoice_calculator.rs",
+                        "needle": "impl InvoiceCalculator for RushInvoiceCalculator {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-report-contract",
+            "surface": "implementation",
+            "note": "Widest fan-out in the lane: 24 implementors, all registered in atelier-bench/src/lib.rs.",
+            "from": {
+                "file": "crates/atelier-bench/src/contracts/report_contract.rs",
+                "needle": "pub trait ReportContract: Send + Sync {"
+            },
+            "expect": {
+                "min_implementations": 24,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-bench/src/reports/gross_profit_report.rs",
+                        "needle": "impl ReportContract for GrossProfitReport {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/reports/part_shortage_report.rs",
+                        "needle": "impl ReportContract for PartShortageReport {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/reports/weekly_revenue_report.rs",
+                        "needle": "impl ReportContract for WeeklyRevenueReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-cross-crate",
+            "surface": "implementation",
+            "note": "Trait is declared in atelier-core; every implementor lives in atelier-bench.",
+            "from": {
+                "file": "crates/atelier-core/src/contracts/repository.rs",
+                "needle": "pub trait Repository {"
+            },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-bench/src/repositories/order_repository.rs",
+                        "needle": "impl Repository for OrderRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/invoice_repository.rs",
+                        "needle": "impl Repository for InvoiceRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/warranty_repository.rs",
+                        "needle": "impl Repository for WarrantyRepository {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-notifier-contract",
+            "surface": "implementation",
+            "from": {
+                "file": "crates/atelier-bench/src/contracts/notifier_contract.rs",
+                "needle": "pub trait NotifierContract: Send + Sync {"
+            },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-bench/src/notifiers/sms_notifier.rs",
+                        "needle": "impl NotifierContract for SmsNotifier {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/notifiers/slack_notifier.rs",
+                        "needle": "impl NotifierContract for SlackNotifier {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-transition-to",
+            "surface": "references",
+            "from": {
+                "file": "crates/atelier-core/src/models/repair_order.rs",
+                "needle": "pub fn transition_to(&mut self, next: RepairStatus, changed_by: &str) -> bool {"
+            },
+            "expect": {
+                "min_references": 8,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/models/repair_order.rs",
+                        "needle": "if !self.transition_to(RepairStatus::Completed, changed_by) {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/dataset.rs",
+                        "needle": "orders[1].transition_to(RepairStatus::AwaitingParts"
+                    },
+                    {
+                        "file": "crates/atelier-core/tests/lifecycle.rs",
+                        "needle": "order.transition_to(RepairStatus::Repairing"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-consumed-quantity",
+            "surface": "references",
+            "from": {
+                "file": "crates/atelier-core/src/models/part.rs",
+                "needle": "pub fn consumed_quantity(&self) -> u32 {"
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/src/reports/inventory_turnover_report.rs",
+                        "needle": "part.consumed_quantity()"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/reports/part_usage_report.rs",
+                        "needle": "part.consumed_quantity()"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/services/part_usage_service.rs",
+                        "needle": "part.consumed_quantity()"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-dataset-seeded",
+            "surface": "references",
+            "from": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "pub fn seeded() -> Self {"
+            },
+            "expect": {
+                "min_references": 12,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-app/src/state.rs",
+                        "needle": "Arc::new(Dataset::seeded())"
+                    },
+                    {
+                        "file": "crates/atelier-bench/tests/breadth.rs",
+                        "needle": "OrderRepository::new(Dataset::seeded().orders)"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-money-newtype",
+            "surface": "references",
+            "from": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "pub struct Money(pub i64);"
+            },
+            "expect": {
+                "min_references": 20,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/models/part.rs",
+                        "needle": "pub unit_price: Money,"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/models/invoice.rs",
+                        "needle": "pub total: Money,"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/contracts/invoice_calculator.rs",
+                        "needle": "fn calculate(&self, order: &RepairOrder) -> Money;"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-row-from-cents",
+            "surface": "references",
+            "from": {
+                "file": "crates/atelier-bench/src/contracts/report_contract.rs",
+                "needle": "pub fn from_cents(label: impl Into<String>, cents: i64) -> Self {"
+            },
+            "expect": {
+                "min_references": 10,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/src/reports/cash_flow_report.rs",
+                        "needle": "ReportRow::from_cents(\"paid\", paid)"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/reports/weekly_revenue_report.rs",
+                        "needle": "ReportRow::from_cents(\"week to date\""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-contract-registry",
+            "surface": "references",
+            "note": "Every registry entry is a construction site of a ReportContract implementor.",
+            "from": {
+                "file": "crates/atelier-bench/src/lib.rs",
+                "needle": "pub static REPORTS: Lazy<Vec<Box<dyn ReportContract>>>"
+            },
+            "expect": {
+                "min_references": 24,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/src/lib.rs",
+                        "needle": "reports::cash_flow_report::CashFlowReport::new()"
+                    },
+                    {
+                        "file": "crates/atelier-app/src/http/api.rs",
+                        "needle": "atelier_bench::report(&slug)"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hover-free-function",
+            "surface": "hover",
+            "from": {
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "atelier_format_reference(Self::PREFIX"
+            },
+            "expect": {
+                "contains": "zero-padded width"
+            }
+        },
+        {
+            "id": "hover-macro-generated",
+            "surface": "hover",
+            "from": {
+                "file": "crates/atelier-core/src/models/technician.rs",
+                "needle": "forwards_to_schedule!(Technician)"
+            },
+            "expect": {
+                "contains": "schedule-forwarding inherent methods"
+            }
+        },
+        {
+            "id": "hover-frozen-seed",
+            "surface": "hover",
+            "from": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "pub fn seeded() -> Self {"
+            },
+            "expect": {
+                "contains": "Changing these rows changes bench ground truth"
+            }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "note": "Two `pub struct Formatter` declarations exist; this alias must land on the billing one.",
+            "from": {
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "pub money: MoneyFormatter,"
+            },
+            "expect": {
+                "kind": "struct",
+                "resolution": "atelier_core::billing::formatter::Formatter",
+                "candidate": {
+                    "file": "crates/atelier-core/src/billing/formatter.rs",
+                    "needle": "pub struct Formatter {"
+                }
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "from": {
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "pub status: StatusFormatter,"
+            },
+            "expect": {
+                "kind": "struct",
+                "resolution": "atelier_core::reporting::formatter::Formatter",
+                "candidate": {
+                    "file": "crates/atelier-core/src/reporting/formatter.rs",
+                    "needle": "pub struct Formatter {"
+                }
+            }
+        },
+        {
+            "id": "resolution-blanket-impl",
+            "surface": "resolution",
+            "note": "The method has no impl block on the receiver type; only the blanket impl provides it.",
+            "from": {
+                "file": "crates/atelier-bench/tests/breadth.rs",
+                "needle": "report.format_label("
+            },
+            "expect": {
+                "kind": "blanket_impl",
+                "candidate": {
+                    "file": "crates/atelier-bench/src/concerns/has_formatting.rs",
+                    "needle": "impl<T: ReportContract> HasFormatting for T {}"
+                }
+            }
+        },
+        {
+            "id": "resolution-foreign-bound-blanket",
+            "surface": "resolution",
+            "note": "to_json() is provided by a blanket impl keyed on a foreign trait bound (serde::Serialize).",
+            "from": {
+                "file": "crates/atelier-bench/tests/breadth.rs",
+                "needle": "rows.to_json()"
+            },
+            "expect": {
+                "kind": "blanket_impl",
+                "candidate": {
+                    "file": "crates/atelier-bench/src/concerns/has_serialization.rs",
+                    "needle": "impl<T: serde::Serialize> HasSerialization for T {}"
+                }
+            }
+        },
+        {
+            "id": "resolution-assoc-const-override",
+            "surface": "resolution",
+            "note": "Customer overrides the trait's default associated const; RepairOrder does not.",
+            "from": {
+                "file": "crates/atelier-core/src/models/customer.rs",
+                "needle": "const PREFIX: &'static str = \"CU\";"
+            },
+            "expect": {
+                "kind": "associated_const",
+                "candidate": {
+                    "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                    "needle": "const PREFIX: &'static str = ATELIER_REF_PREFIX;"
+                }
+            }
+        },
+        {
+            "id": "resolution-trait-default-body",
+            "surface": "resolution",
+            "from": {
+                "file": "crates/atelier-core/tests/lifecycle.rs",
+                "needle": "order.reference()"
+            },
+            "expect": {
+                "kind": "trait_default_method",
+                "candidate": {
+                    "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                    "needle": "fn reference(&self) -> String {"
+                }
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-impl",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture. A parser must report an error here, never a partial tree. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/unclosed_impl.rs",
+                "needle": "pub fn label(&self) -> String {"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "unclosed"
+            }
+        },
+        {
+            "id": "parse-negative-bad-generics",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture: unbalanced generics plus a truncated where clause. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/bad_generics.rs",
+                "needle": "pub struct Holder<T, U {"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "generics"
+            }
+        }
+    ]
+}
