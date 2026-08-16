@@ -56,6 +56,9 @@ export * from "./contracts/metricContract";
 export * from "./contracts/exporterContract";
 export * from "./contracts/notifierContract";
 export * from "./contracts/scheduleContract";
+export * from "./contracts/ruleContract";
+export { RULES } from "./rules";
+export * as Rules from "./rules";
 
 /**
  * Every report in the lane, in registry order.

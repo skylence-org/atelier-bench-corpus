@@ -14,6 +14,7 @@ export {
 } from "./support/helpers";
 export { Schedule } from "./support/schedule";
 export { RepairStatus } from "./support/status";
+export { Left, Right } from "./support/pair";
 export { Priority } from "./support/priority";
 
 export { Money } from "./money";

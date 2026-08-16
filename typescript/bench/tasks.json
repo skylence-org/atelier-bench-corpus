@@ -873,6 +873,714 @@
                 "kind": "syntax_error",
                 "must_include": "generics"
             }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 implementors: 24 nominal classes (`implements RuleContract`) and 24 structural object literals (no `implements` keyword anywhere; 16 typed `: RuleContract`, 8 checked via `satisfies RuleContract`). A tool that only counts `implements` clauses returns 24, not 48.",
+            "from": {
+                "file": "packages/bench/src/contracts/ruleContract.ts",
+                "needle": "export interface RuleContract {"
+            },
+            "expect": {
+                "exact_count": 48,
+                "nominal_count": 24,
+                "structural_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/rules/minimumStockRule.ts",
+                        "needle": "export class MinimumStockRule implements RuleContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/duplicateReferenceRule.ts",
+                        "needle": "export const duplicateReferenceRule: RuleContract = {"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/invoiceCountRule.ts",
+                        "needle": "export const invoiceCountRule = {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "24 classes extend AbstractReport (see impl-report-contract for the full fan-out); this task pins the exact count.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportContract {"
+            },
+            "expect": {
+                "exact_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/reports/cashFlowReport.ts",
+                        "needle": "export class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churnRiskReport.ts",
+                        "needle": "export class ChurnRiskReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerLifetimeReport.ts",
+                        "needle": "export class CustomerLifetimeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customerRetentionReport.ts",
+                        "needle": "export class CustomerRetentionReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/dailyRevenueReport.ts",
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/grossProfitReport.ts",
+                        "needle": "export class GrossProfitReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventoryTurnoverReport.ts",
+                        "needle": "export class InventoryTurnoverReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthlyRevenueReport.ts",
+                        "needle": "export class MonthlyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/netMarginReport.ts",
+                        "needle": "export class NetMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderBacklogReport.ts",
+                        "needle": "export class OrderBacklogReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderThroughputReport.ts",
+                        "needle": "export class OrderThroughputReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/orderVolumeReport.ts",
+                        "needle": "export class OrderVolumeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partShortageReport.ts",
+                        "needle": "export class PartShortageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/partUsageReport.ts",
+                        "needle": "export class PartUsageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentDefaultReport.ts",
+                        "needle": "export class PaymentDefaultReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/paymentLatencyReport.ts",
+                        "needle": "export class PaymentLatencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profitMarginReport.ts",
+                        "needle": "export class ProfitMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianEfficiencyReport.ts",
+                        "needle": "export class TechnicianEfficiencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianLoadReport.ts",
+                        "needle": "export class TechnicianLoadReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technicianPayrollReport.ts",
+                        "needle": "export class TechnicianPayrollReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyClaimReport.ts",
+                        "needle": "export class WarrantyClaimReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyCostReport.ts",
+                        "needle": "export class WarrantyCostReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warrantyTrendReport.ts",
+                        "needle": "export class WarrantyTrendReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
+                        "needle": "export class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "note": "ReportContract is the parent; the CashFlow implementor's declaring line is the candidate child. must_not_include guards the reversed (interface-extends) phrasing.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportContract {"
+            },
+            "expect": {
+                "kind": "parent_of",
+                "must_not_include": [
+                    "ReportContract extends"
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/reports/cashFlowReport.ts",
+                    "needle": "export class CashFlowReport extends AbstractReport {"
+                }
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "note": "CashFlowReport is the child; its parent is the abstract base it extends, not ReportContract directly.",
+            "from": {
+                "file": "packages/bench/src/reports/cashFlowReport.ts",
+                "needle": "export class CashFlowReport extends AbstractReport {"
+            },
+            "expect": {
+                "kind": "child_of",
+                "candidate": {
+                    "file": "packages/bench/src/support/abstractReport.ts",
+                    "needle": "export abstract class AbstractReport"
+                }
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "note": "TreeNode.children and TreeNode.parent both reference TreeNode itself; this is recursion in the type, never an extends/implements edge.",
+            "from": {
+                "file": "packages/core/src/support/treeNode.ts",
+                "needle": "children: TreeNode[];"
+            },
+            "expect": {
+                "kind": "uses_self",
+                "must_not_include": [
+                    "extends TreeNode"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/treeNode.ts",
+                    "needle": "export interface TreeNode {"
+                }
+            }
+        },
+        {
+            "id": "dir-declaration-merge-not-inheritance",
+            "surface": "direction",
+            "note": "enum RepairStatus + namespace RepairStatus merge into one name; the merge is not an inheritance edge in either direction.",
+            "from": {
+                "file": "packages/core/src/support/status.ts",
+                "needle": "export enum RepairStatus {"
+            },
+            "expect": {
+                "kind": "declaration_merge",
+                "exact_count": 2,
+                "must_not_include": [
+                    "extends",
+                    "implements"
+                ],
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export enum RepairStatus {"
+                    },
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export namespace RepairStatus {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "note": "Consumer imports only Left; Right never enters its import graph.",
+            "from": {
+                "file": "packages/bench/src/support/pairConsumer.ts",
+                "needle": "import { Left } from \"@atelier/core\";"
+            },
+            "expect": {
+                "kind": "imports",
+                "must_not_include": [
+                    "Right"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/pair.ts",
+                    "needle": "export class Left {"
+                }
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "repairOrder.ts imports Container type-only (erased at runtime); state.ts imports the same Container as a value in the same module graph. The type-only site carries no runtime edge.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "import type { Container } from \"../container\";"
+            },
+            "expect": {
+                "kind": "type_only",
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.ts",
+                        "needle": "import type { Container } from \"../container\";"
+                    },
+                    {
+                        "file": "packages/app/src/state.ts",
+                        "needle": "import { Container } from \"@atelier/core\";"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/container.ts",
+                    "needle": "export class Container {"
+                }
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "Namespace import `import * as Rules from \"../rules\"`; only Rules.RULES is ever read.",
+            "from": {
+                "file": "packages/bench/src/support/ruleNamespaceUser.ts",
+                "needle": "import * as Rules from \"../rules\";"
+            },
+            "expect": {
+                "kind": "namespace_import",
+                "candidate": {
+                    "file": "packages/bench/src/rules/index.ts",
+                    "needle": "export const RULES: readonly RuleContract[] = ["
+                }
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "Customer imported through the @atelier/core barrel must resolve to models/customer.ts, not fan out to every other module the barrel re-exports.",
+            "from": {
+                "file": "packages/bench/src/repositories/customerRepository.ts",
+                "needle": "import type { Customer } from \"@atelier/core\";"
+            },
+            "expect": {
+                "kind": "barrel",
+                "must_not_include": [
+                    "models/device.ts"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/models/customer.ts",
+                    "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "note": "Money is declared once per lane, under an identical name. This guards against a resolver crossing lane boundaries.",
+            "from": {
+                "file": "packages/core/src/models/part.ts",
+                "needle": "readonly unitPrice: Money,"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/money.ts",
+                    "needle": "export class Money {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "note": "Customer is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "Customer.seed(1, \"Ada Byron\", \"ada@example.test\", \"+32 470 00 00 01\"),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/models/customer.ts",
+                    "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "note": "Dataset is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "data: Dataset.seeded(),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/dataset.ts",
+                    "needle": "export class Dataset {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "note": "ATELIER_REF_PREFIX is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "export const DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/helpers.ts",
+                    "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+                }
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "note": "InvoiceCalculator.calculate is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "return container.invoiceCalculator().calculate(this);"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/contracts/invoiceCalculator.ts",
+                    "needle": "calculate(order: RepairOrder): Money;"
+                }
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "note": "The billing Formatter is declared once per lane, under an identical name (each lane also carries a same-name reporting Formatter -- see resolution-shadow-type-billing).",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "money: new MoneyFormatter(\"EUR\"),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/billing/formatter.ts",
+                    "needle": "export class Formatter {"
+                }
+            }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "note": "CompositeContract extends three interfaces at once; all three must be reported.",
+            "from": {
+                "file": "packages/bench/src/contracts/compositeContract.ts",
+                "needle": "export interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract {}"
+            },
+            "expect": {
+                "exact_count": 3,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/contracts/reportContract.ts",
+                        "needle": "export interface ReportContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/cacheableContract.ts",
+                        "needle": "export interface CacheableContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/scheduleContract.ts",
+                        "needle": "export interface ScheduleContract {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "note": "One extends (AbstractComponent) plus two implements (CompositeContract, HasLogging). Deliberately not in the AbstractReport/ReportContract fan-out, which card-report-contract pins at exact_count 24.",
+            "from": {
+                "file": "packages/bench/src/support/compositeFixture.ts",
+                "needle": "export class CompositeFixture extends AbstractComponent implements CompositeContract, HasLogging {"
+            },
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/support/abstractComponent.ts",
+                        "needle": "export abstract class AbstractComponent implements HasLogging {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/compositeContract.ts",
+                        "needle": "export interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract {}"
+                    },
+                    {
+                        "file": "packages/bench/src/concerns/hasLogging.ts",
+                        "needle": "export interface HasLogging {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-conditional-type",
+            "surface": "definition",
+            "note": "Conditional type unwraps a Promise; a real value is typed through it, not just declared.",
+            "from": {
+                "file": "packages/bench/src/support/unwrap.ts",
+                "needle": "export type Unwrap<T> = T extends Promise<infer U> ? U : T;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/unwrap.ts",
+                "needle": "export const unwrappedOrderCount: Unwrap<Promise<number>> = 4;"
+            }
+        },
+        {
+            "id": "def-mapped-type",
+            "surface": "definition",
+            "note": "Mapped type builds one boolean flag per key of the union.",
+            "from": {
+                "file": "packages/bench/src/support/flags.ts",
+                "needle": "export type Flags<K extends string> = { [P in K]: boolean };"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/flags.ts",
+                "needle": "export const reportFlags: Flags<\"cacheable\" | \"billable\"> = {"
+            }
+        },
+        {
+            "id": "def-template-literal-type",
+            "surface": "definition",
+            "note": "Template literal type constrains every Slug to end in `-report`.",
+            "from": {
+                "file": "packages/bench/src/support/slug.ts",
+                "needle": "export type Slug = `${Lowercase<string>}-report`;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/slug.ts",
+                "needle": "export const cashFlowSlug: Slug = \"cash-flow-report\";"
+            }
+        },
+        {
+            "id": "resolution-satisfies",
+            "surface": "resolution",
+            "note": "satisfies checks rulesConfig against the shape without widening its literal type -- unlike a `: Record<...>` annotation.",
+            "from": {
+                "file": "packages/bench/src/support/rulesConfig.ts",
+                "needle": "export const rulesConfig = {"
+            },
+            "expect": {
+                "resolution": "rulesConfig keeps its literal type; satisfies only checks it against Record<string, number | string>",
+                "candidate": {
+                    "file": "packages/bench/src/support/rulesConfig.ts",
+                    "needle": "} satisfies Record<string, number | string>;"
+                }
+            }
+        },
+        {
+            "id": "def-decorator",
+            "surface": "definition",
+            "note": "Standard (TC39) decorator, TS 5 native -- no experimentalDecorators.",
+            "from": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "@logged"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "function logged<This, Args extends unknown[], Return>("
+            }
+        },
+        {
+            "id": "refs-decorator-usage",
+            "surface": "references",
+            "note": "The decorator declaration; refs-decorator-usage is the inverse of def-decorator.",
+            "from": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "function logged<This, Args extends unknown[], Return>("
+            },
+            "expect": {
+                "min_references": 1,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/support/logged.ts",
+                        "needle": "@logged"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-global-augmentation",
+            "surface": "definition",
+            "note": "declare global augments the built-in Array<T>; the call site is in the same file.",
+            "from": {
+                "file": "packages/bench/src/support/arrayAugmentation.ts",
+                "needle": "return parts.second();"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/arrayAugmentation.ts",
+                "needle": "second(): T | undefined;"
+            }
+        },
+        {
+            "id": "def-type-guard",
+            "surface": "definition",
+            "note": "isRush is a type guard (order is RushOrder); assertRush is the assertion-function analogue in the same file.",
+            "from": {
+                "file": "packages/core/src/support/orderGuards.ts",
+                "needle": "if (!isRush(order)) {"
+            },
+            "expect": {
+                "file": "packages/core/src/support/orderGuards.ts",
+                "needle": "export function isRush(order: RepairOrder): order is RushOrder {"
+            }
+        },
+        {
+            "id": "def-unique-symbol",
+            "surface": "definition",
+            "note": "unique symbol RULE_TAG used as a computed property key.",
+            "from": {
+                "file": "packages/bench/src/support/uniqueKey.ts",
+                "needle": "return { [RULE_TAG]: true, key };"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/uniqueKey.ts",
+                "needle": "const RULE_TAG: unique symbol = Symbol(\"ruleTag\");"
+            }
+        },
+        {
+            "id": "def-const-enum",
+            "surface": "definition",
+            "note": "const enum: inlined at every use site, but the declaration still exists for lookups.",
+            "from": {
+                "file": "packages/bench/src/support/severity.ts",
+                "needle": "export const defaultSeverity = Severity.Medium;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/severity.ts",
+                "needle": "export const enum Severity {"
+            }
+        },
+        {
+            "id": "def-class-expression",
+            "surface": "definition",
+            "note": "Adhoc is a class expression assigned to a const, not a class declaration.",
+            "from": {
+                "file": "packages/bench/src/support/adhoc.ts",
+                "needle": "export const namedAdhoc = new Adhoc(\"demo\");"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/adhoc.ts",
+                "needle": "export const Adhoc = class Adhoc {"
+            }
+        },
+        {
+            "id": "def-keyof-typeof",
+            "surface": "definition",
+            "note": "weightOf<K> has a default type parameter resolved through keyof typeof SEVERITY_WEIGHT.",
+            "from": {
+                "file": "packages/bench/src/support/keyedLookup.ts",
+                "needle": "export const lowWeight = weightOf();"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/keyedLookup.ts",
+                "needle": "export function weightOf<K extends SeverityKey = \"low\">(key: K = \"low\" as K): number {"
+            }
+        },
+        {
+            "id": "def-method-overload",
+            "surface": "definition",
+            "note": "Two overload signatures (exact_count) plus one implementation signature, on a class method this time -- def-overload/def-free-function already cover the free-function case.",
+            "from": {
+                "file": "packages/core/src/money.ts",
+                "needle": "return amounts.reduce((total, amount) => total.plus(amount), ZERO);"
+            },
+            "expect": {
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/money.ts",
+                        "needle": "plus(other: Money): Money;"
+                    },
+                    {
+                        "file": "packages/core/src/money.ts",
+                        "needle": "plus(cents: number): Money;"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/money.ts",
+                    "needle": "plus(other: Money | number): Money {"
+                }
+            }
+        },
+        {
+            "id": "resolution-class-interface-merge",
+            "surface": "resolution",
+            "note": "Declaration merging on a class: the interface half adds `concurrency`, a member the class body never declares.",
+            "from": {
+                "file": "packages/bench/src/support/worker.ts",
+                "needle": "export abstract class Worker {"
+            },
+            "expect": {
+                "kind": "declaration_merge",
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/support/worker.ts",
+                        "needle": "export abstract class Worker {"
+                    },
+                    {
+                        "file": "packages/bench/src/support/worker.ts",
+                        "needle": "export interface Worker {"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/support/worker.ts",
+                    "needle": "readonly concurrency: number;"
+                }
+            }
+        },
+        {
+            "id": "def-export-star-as",
+            "surface": "definition",
+            "note": "export * as Rules re-export; the definition is still the target module's declaration, not the re-export line.",
+            "from": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export * as Rules from \"./rules\";"
+            },
+            "expect": {
+                "file": "packages/bench/src/rules/index.ts",
+                "needle": "export const RULES: readonly RuleContract[] = ["
+            }
         }
     ]
 }

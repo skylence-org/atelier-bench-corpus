@@ -24,8 +24,8 @@ on a bench machine if you need bit-stable ground truth.
 
 | Package | Role | .ts files |
 | --- | --- | --- |
-| `packages/core` (`@atelier/core`) | Domain: models, enum/namespace merges, mixin + Proxy concerns, contracts, container binding, money, errors, events, policy | 29 src + 4 test |
-| `packages/bench` (`@atelier/bench`) | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 76 implementors, module augmentation, frozen dataset | 102 src + 2 test |
+| `packages/core` (`@atelier/core`) | Domain: models, enum/namespace merges, mixin + Proxy concerns, contracts, container binding, money, errors, events, policy, sibling pair, self-referential tree, type guard/assertion function | 32 src + 4 test |
+| `packages/bench` (`@atelier/bench`) | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 76 implementors, 48 RuleContract implementors (cardinality), a three-parent contract, 15 language-breadth fixtures, module augmentation, frozen dataset | 167 src + 2 test |
 | `packages/app` (`@atelier/app`) | Application surface: express router, console commands, jobs, shadow-pair aliases | 11 src + 2 test |
 | `bench/verify-tasks` | Ground-truth self-check; **zero third-party dependencies** (Node built-ins only) | 1 `.mjs` |
 
@@ -59,6 +59,12 @@ on a bench machine if you need bit-stable ground truth.
 | Deterministic seed | `packages/bench/src/dataset.ts` `Dataset.seeded()` — revenue `58325`c, part cost `46300`c, gross profit `12025`c |
 | Tests (incl. request-level) | 39 vitest tests: lifecycle, money, shadow pair, Proxy forwarding, breadth registry, augmentation, express routes, console commands |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; excluded by `tsconfig.json`, so `tsc` never sees them) |
+| Cardinality (nominal/structural split) | `packages/bench/src/contracts/ruleContract.ts` + `rules/` — 48 implementors: 24 nominal classes (`implements`), 24 structural object literals (16 typed `: RuleContract`, 8 via `satisfies RuleContract`) |
+| Direction (parent/child/self/merge) | `dir-contract-parent`, `dir-implementor-child` over `ReportContract`/`AbstractReport`/`CashFlowReport`; `dir-self-reference` — new `packages/core/src/support/treeNode.ts`; `dir-declaration-merge-not-inheritance` — the existing `RepairStatus` enum/namespace merge, framed as a non-inheritance edge |
+| Import precision | `packages/core/src/support/pair.ts` (`Left`/`Right`, one imported); type-only vs value import of `Container`; namespace import `import * as Rules from "./rules"`; barrel no-fanout on `Customer` |
+| Collision (lane-local) | 6 tasks pinning `Money`, `Customer`, `Dataset`, `ATELIER_REF_PREFIX`, `InvoiceCalculator.calculate`, the billing `Formatter` as this lane's own declarations |
+| Multi-parent | `packages/bench/src/contracts/compositeContract.ts` (`CompositeContract extends` 3 interfaces); `packages/bench/src/support/compositeFixture.ts` (1 `extends` + 2 `implements`, kept out of the `AbstractReport` fan-out on purpose) |
+| Breadth (language-feature fixtures) | `packages/bench/src/support/{unwrap,flags,slug,rulesConfig,logged,arrayAugmentation,uniqueKey,severity,adhoc,keyedLookup,worker}.ts`, `packages/core/src/support/orderGuards.ts`, an overloaded `Money.plus`, and `export * as Rules from "./rules"` — conditional/mapped/template-literal types, `satisfies`, a standard TC39 decorator, global augmentation, type guard + assertion function, `unique symbol`, `const enum`, class expression, `keyof typeof`, class method overload, class/interface declaration merging, `export * as` |
 
 ## Consumption (runner)
 
@@ -84,7 +90,7 @@ HTTP surface: `GET /report/:reference` (e.g. `AT-2026-000001`), `GET /api/orders
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 45 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/tasks.json` | 78 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
