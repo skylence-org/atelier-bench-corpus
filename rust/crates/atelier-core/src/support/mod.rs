@@ -1,5 +1,8 @@
+pub mod expr;
 pub mod helpers;
 pub mod macros;
+pub mod orientation;
+pub mod pair;
 pub mod priority;
 pub mod reference;
 pub mod schedule;
