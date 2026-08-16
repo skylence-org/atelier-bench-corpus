@@ -66,6 +66,18 @@
         "javascript"
       ]
     },
+    "def-ambient-global-namespace": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-ambient-module-declaration": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
     "def-assoc-const": {
       "surface": "definition",
       "lanes": [
@@ -78,6 +90,18 @@
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-async-function": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-async-generator": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
       ]
     },
     "def-async-handler": {
@@ -293,6 +317,12 @@
         "rust"
       ]
     },
+    "def-generator-function": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
     "def-generator-iterator": {
       "surface": "definition",
       "lanes": [
@@ -382,6 +412,18 @@
       "surface": "definition",
       "lanes": [
         "javascript"
+      ]
+    },
+    "def-jsx-component": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-jsx-factory": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
       ]
     },
     "def-keyof-typeof": {
@@ -502,6 +544,12 @@
       "surface": "definition",
       "lanes": [
         "rust"
+      ]
+    },
+    "def-paths-alias-import": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
       ]
     },
     "def-prototype-method": {
@@ -1056,6 +1104,12 @@
       ]
     },
     "refs-decorator-usage": {
+      "surface": "references",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "refs-jsx-component-usage": {
       "surface": "references",
       "lanes": [
         "typescript"
