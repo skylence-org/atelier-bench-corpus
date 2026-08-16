@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "typescript",
-        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
+        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: jsx_element, jsx_factory, ambient (global namespace in a .d.ts), ambient_module (declare module), paths_alias.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1580,6 +1580,156 @@
             "expect": {
                 "file": "packages/bench/src/rules/index.ts",
                 "needle": "export const RULES: readonly RuleContract[] = ["
+            }
+        },
+        {
+            "id": "def-jsx-component",
+            "surface": "definition",
+            "note": "TSX surface: a JSX component element resolves to the function whose name it carries; the file is .tsx and the factory is h (jsxFactory in tsconfig.base.json).",
+            "from": {
+                "file": "packages/app/src/views/reportPage.tsx",
+                "needle": "<ReportCard reference={view.reference} total={view.total} status={view.status} />"
+            },
+            "expect": {
+                "kind": "jsx_element",
+                "file": "packages/app/src/views/reportCard.tsx",
+                "needle": "export function ReportCard(props: ReportCardProps): Html {"
+            }
+        },
+        {
+            "id": "def-jsx-factory",
+            "surface": "definition",
+            "note": "TSX surface: every intrinsic JSX element is a call to the configured factory h(tag, props, ...children); Fragment handles <>...</>.",
+            "from": {
+                "file": "packages/app/src/views/reportCard.tsx",
+                "needle": "<article class=\"report-card\" data-reference={props.reference}>"
+            },
+            "expect": {
+                "kind": "jsx_factory",
+                "file": "packages/app/src/views/h.ts",
+                "needle": "export function h(tag: string | Component<never>, props: Props, ...children: Child[]): Html {",
+                "known_sites": [
+                    {
+                        "file": "tsconfig.base.json",
+                        "needle": "\"jsxFactory\": \"h\","
+                    },
+                    {
+                        "file": "packages/app/src/views/h.ts",
+                        "needle": "export function Fragment(props: { children?: Child[] }): Html {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-ambient-global-namespace",
+            "surface": "definition",
+            "note": "Ambient .d.ts surface: the JSX namespace that types every intrinsic tag lives in a declaration file nothing imports; tsconfig includes it.",
+            "from": {
+                "file": "packages/app/src/views/reportCard.tsx",
+                "needle": "<h2>{props.reference}</h2>"
+            },
+            "expect": {
+                "kind": "ambient",
+                "file": "packages/app/src/types/jsx.d.ts",
+                "needle": "interface IntrinsicElements {"
+            }
+        },
+        {
+            "id": "def-ambient-module-declaration",
+            "surface": "definition",
+            "note": "Ambient module: the specifier \"atelier-legacy-formatting\" resolves to a declare module block in a .d.ts, not to a file under node_modules (the package does not exist).",
+            "from": {
+                "file": "packages/app/src/http/legacy.ts",
+                "needle": "import type { LegacyMoney } from \"atelier-legacy-formatting\";"
+            },
+            "expect": {
+                "kind": "ambient_module",
+                "file": "packages/app/src/types/legacy-formatting.d.ts",
+                "needle": "declare module \"atelier-legacy-formatting\" {",
+                "must_not_include": [
+                    "node_modules"
+                ]
+            }
+        },
+        {
+            "id": "def-paths-alias-import",
+            "surface": "definition",
+            "note": "tsconfig paths alias: @app/* maps to packages/app/src/* (known_sites); the import is type-only so no bundler alias is needed at runtime.",
+            "from": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "import type { AppState } from \"@app/state\";"
+            },
+            "expect": {
+                "kind": "paths_alias",
+                "file": "packages/app/src/state.ts",
+                "needle": "export interface AppState {",
+                "known_sites": [
+                    {
+                        "file": "tsconfig.base.json",
+                        "needle": "\"@app/*\": [\"./packages/app/src/*\"]"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-async-function",
+            "surface": "definition",
+            "note": "Async surface: await on an async function; the definition returns a Promise.",
+            "from": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "const order = await loadOrder(state, reference);"
+            },
+            "expect": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "export async function loadOrder(state: AppState, reference: string): Promise<RepairOrder | undefined> {"
+            }
+        },
+        {
+            "id": "def-generator-function",
+            "surface": "definition",
+            "note": "Generator: for..of over a function* call.",
+            "from": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "for (const order of iterateOpenOrders(state)) {"
+            },
+            "expect": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "export function* iterateOpenOrders(state: AppState): Generator<RepairOrder, void, undefined> {"
+            }
+        },
+        {
+            "id": "def-async-generator",
+            "surface": "definition",
+            "note": "Async generator: for await..of over an async function* call.",
+            "from": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "for await (const reference of streamReferences(state)) {"
+            },
+            "expect": {
+                "file": "packages/app/src/http/reportLoader.ts",
+                "needle": "export async function* streamReferences(state: AppState): AsyncGenerator<string, void, undefined> {"
+            }
+        },
+        {
+            "id": "refs-jsx-component-usage",
+            "surface": "references",
+            "note": "References to a component include its JSX element usages, not only call expressions.",
+            "from": {
+                "file": "packages/app/src/views/reportCard.tsx",
+                "needle": "export function ReportCard(props: ReportCardProps): Html {"
+            },
+            "expect": {
+                "min_references": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/app/src/views/reportPage.tsx",
+                        "needle": "<ReportCard reference={view.reference} total={view.total} status={view.status} />"
+                    },
+                    {
+                        "file": "packages/app/tests/views.test.ts",
+                        "needle": "const html = String(ReportCard({ reference: \"AT-2026-000001\", total: \"349.00 EUR\", status: \"Completed\" }));"
+                    }
+                ]
             }
         }
     ]

@@ -11,6 +11,12 @@
         "isolatedModules": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "noEmit": true
+        "noEmit": true,
+        "jsx": "react",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
+        "paths": {
+            "@app/*": ["./packages/app/src/*"]
+        }
     }
 }
