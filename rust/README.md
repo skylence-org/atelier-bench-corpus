@@ -50,7 +50,10 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Parallel iteration (rayon) | `services/revenue_service.rs::metric_sweep` — also what forces `MetricContract: Send + Sync` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `atelier-bench/src/dataset.rs::seeded` — revenue `58_325c`, part cost `46_300c`, gross profit `12_025c` |
-| Tests (incl. request-level) | 55 tests: domain lifecycle, shadow pair, Deref/macro forwarding, breadth registry, axum routes, console commands, JSON parser |
+| Tests (incl. request-level) | 59 tests: domain lifecycle, shadow pair, Deref/macro forwarding, breadth registry, axum routes, console commands, JSON parser |
+| Build-script generated item | `crates/atelier-core/build.rs` writes `generated_units()` into `OUT_DIR`; `support/generated_units.rs` splices it in with `include!` — no textual definition under `src/` |
+| `#[path]` module | `support/mod.rs`: `#[path = "pathed/tally_sheet.rs"] pub mod ledger;` — module name and file name differ |
+| Lifetimes, HRTB, GAT | `support/borrowed.rs` (`Borrowed<'a>`, `for<'x> Fn(&'x str)`), `support/lender.rs` (`type Loan<'a> where Self: 'a`) |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; outside every crate, so cargo never sees them) |
 | Cardinality: macro-generated half of a wide contract | `contracts/rule_contract.rs` + `rules/`: 48 `RuleContract` implementors, 24 textual (one file each) + 24 from `define_rules!` in `rules/generated.rs` |
 | Direction: parent/child/self-reference/inherent | `dir-contract-parent`/`dir-implementor-child` (`ReportContract` ↔ `CashFlowReport`), `support/expr.rs` (`Expr` self-reference), `money.rs` inherent `impl Money` |
@@ -68,7 +71,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 Local use:
 
 ```bash
-cargo test --workspace          # 55 tests
+cargo test --workspace          # 59 tests
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p atelier-app -- serve 8080
 cargo run -p atelier-app -- seed
@@ -82,7 +85,7 @@ HTTP surface: `GET /report/{reference}` (e.g. `AT-2026-000001`), `GET /api/order
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 44 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/tasks.json` | 79 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges |
 | `bench/verify-tasks` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
