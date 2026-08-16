@@ -12,6 +12,7 @@ One directory per language lane; each lane is self-contained and carries its own
 | `php/` | PHP 8.3+ · Laravel 13.20 · Filament 5.6 | repair atelier | `php/bench/tasks.json` | `php bench/verify_tasks.php` |
 | `rust/` | Rust 2024 edition · cargo workspace | repair atelier (same domain) | `rust/bench/tasks.json` | `cargo run -p bench-verify` |
 | `typescript/` | Node 22 · TypeScript 5.7 · npm workspaces | repair atelier (same domain) | `typescript/bench/tasks.json` | `npm run verify` |
+| `javascript/` | Node 22 · mixed CJS/ESM · npm workspaces · JSDoc-only typing | repair atelier (same domain) | `javascript/bench/tasks.json` | `npm run verify` |
 
 All lanes model the **same** domain (customers, devices, repair orders, parts, technicians) so a
 harness can compare tool accuracy across languages on structurally equivalent questions.
@@ -29,7 +30,7 @@ Every lane ships the same three artifacts:
 Needles are strings, never line numbers, so the manifest survives edits. Any change under a lane's
 task-target paths must leave that lane's verifier at **exit 0**, in the same commit.
 
-Task `file` paths inside a lane's `tasks.json` are relative to that **lane root** (`php/`, `rust/`, `typescript/`),
+Task `file` paths inside a lane's `tasks.json` are relative to that **lane root** (`php/`, `rust/`, `typescript/`, `javascript/`),
 not to the repository root.
 
 ## Consumption (runner)
@@ -41,7 +42,7 @@ Consumers pin this tree via `corpora.lock.json`:
 ```
 
 1. Check out the pinned SHA.
-2. Install per lane from the **committed** lockfile — `composer install` in `php/`, `cargo build --locked` in `rust/`, `npm ci` in `typescript/`. No unlock, no update.
+2. Install per lane from the **committed** lockfile — `composer install` in `php/`, `cargo build --locked` in `rust/`, `npm ci` in `typescript/` and `javascript/`. No unlock, no update.
 3. No remote artifacts, no SSH private remotes, no vault/secrets required for install or seed.
 
 ## Negative cases
