@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "noEmit": true,
+        "target": "ES2023",
+        "lib": ["ES2023"],
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "strict": false,
+        "types": []
+    },
+    "include": [
+        "packages/*/src/**/*.js",
+        "packages/*/src/**/*.cjs",
+        "packages/*/src/**/*.mjs"
+    ],
+    "exclude": [
+        "node_modules",
+        "fixtures",
+        "bench"
+    ]
+}

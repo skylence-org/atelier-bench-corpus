@@ -1,0 +1,20 @@
+{
+    "name": "@atelier/app",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Application surface: express routes, console commands, background jobs. ESM importing the CommonJS bench package.",
+    "license": "MIT",
+    "exports": {
+        ".": "./src/index.js",
+        "./*": "./src/*"
+    },
+    "dependencies": {
+        "@atelier/bench": "*",
+        "@atelier/core": "*",
+        "express": "^5.0.1"
+    },
+    "devDependencies": {
+        "supertest": "^7.0.0"
+    }
+}

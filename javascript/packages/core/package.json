@@ -1,0 +1,16 @@
+{
+    "name": "@atelier/core",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Repair-atelier domain core: models, prototypes, mixins, container bindings. ESM only.",
+    "license": "MIT",
+    "exports": {
+        ".": "./src/index.js",
+        "./billing": "./src/billing/formatter.js",
+        "./reporting": "./src/reporting/formatter.js",
+        "./support/*": "./src/support/*",
+        "./concerns/*": "./src/concerns/*",
+        "./models/*": "./src/models/*"
+    }
+}
