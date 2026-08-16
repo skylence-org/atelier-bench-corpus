@@ -9,8 +9,11 @@ export class Money {
         return new Money(this.cents + Math.floor((this.cents * bp + 5000) / 10000));
     }
 
-    plus(other: Money): Money {
-        return new Money(this.cents + other.cents);
+    /** Two overload signatures (exact_count) plus one implementation. */
+    plus(other: Money): Money;
+    plus(cents: number): Money;
+    plus(other: Money | number): Money {
+        return new Money(this.cents + (other instanceof Money ? other.cents : other));
     }
 
     minus(other: Money): Money {

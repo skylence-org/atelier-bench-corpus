@@ -1351,6 +1351,236 @@
                     }
                 ]
             }
+        },
+        {
+            "id": "def-conditional-type",
+            "surface": "definition",
+            "note": "Conditional type unwraps a Promise; a real value is typed through it, not just declared.",
+            "from": {
+                "file": "packages/bench/src/support/unwrap.ts",
+                "needle": "export type Unwrap<T> = T extends Promise<infer U> ? U : T;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/unwrap.ts",
+                "needle": "export const unwrappedOrderCount: Unwrap<Promise<number>> = 4;"
+            }
+        },
+        {
+            "id": "def-mapped-type",
+            "surface": "definition",
+            "note": "Mapped type builds one boolean flag per key of the union.",
+            "from": {
+                "file": "packages/bench/src/support/flags.ts",
+                "needle": "export type Flags<K extends string> = { [P in K]: boolean };"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/flags.ts",
+                "needle": "export const reportFlags: Flags<\"cacheable\" | \"billable\"> = {"
+            }
+        },
+        {
+            "id": "def-template-literal-type",
+            "surface": "definition",
+            "note": "Template literal type constrains every Slug to end in `-report`.",
+            "from": {
+                "file": "packages/bench/src/support/slug.ts",
+                "needle": "export type Slug = `${Lowercase<string>}-report`;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/slug.ts",
+                "needle": "export const cashFlowSlug: Slug = \"cash-flow-report\";"
+            }
+        },
+        {
+            "id": "resolution-satisfies",
+            "surface": "resolution",
+            "note": "satisfies checks rulesConfig against the shape without widening its literal type -- unlike a `: Record<...>` annotation.",
+            "from": {
+                "file": "packages/bench/src/support/rulesConfig.ts",
+                "needle": "export const rulesConfig = {"
+            },
+            "expect": {
+                "resolution": "rulesConfig keeps its literal type; satisfies only checks it against Record<string, number | string>",
+                "candidate": {
+                    "file": "packages/bench/src/support/rulesConfig.ts",
+                    "needle": "} satisfies Record<string, number | string>;"
+                }
+            }
+        },
+        {
+            "id": "def-decorator",
+            "surface": "definition",
+            "note": "Standard (TC39) decorator, TS 5 native -- no experimentalDecorators.",
+            "from": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "@logged"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "function logged<This, Args extends unknown[], Return>("
+            }
+        },
+        {
+            "id": "refs-decorator-usage",
+            "surface": "references",
+            "note": "The decorator declaration; refs-decorator-usage is the inverse of def-decorator.",
+            "from": {
+                "file": "packages/bench/src/support/logged.ts",
+                "needle": "function logged<This, Args extends unknown[], Return>("
+            },
+            "expect": {
+                "min_references": 1,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/support/logged.ts",
+                        "needle": "@logged"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-global-augmentation",
+            "surface": "definition",
+            "note": "declare global augments the built-in Array<T>; the call site is in the same file.",
+            "from": {
+                "file": "packages/bench/src/support/arrayAugmentation.ts",
+                "needle": "return parts.second();"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/arrayAugmentation.ts",
+                "needle": "second(): T | undefined;"
+            }
+        },
+        {
+            "id": "def-type-guard",
+            "surface": "definition",
+            "note": "isRush is a type guard (order is RushOrder); assertRush is the assertion-function analogue in the same file.",
+            "from": {
+                "file": "packages/core/src/support/orderGuards.ts",
+                "needle": "if (!isRush(order)) {"
+            },
+            "expect": {
+                "file": "packages/core/src/support/orderGuards.ts",
+                "needle": "export function isRush(order: RepairOrder): order is RushOrder {"
+            }
+        },
+        {
+            "id": "def-unique-symbol",
+            "surface": "definition",
+            "note": "unique symbol RULE_TAG used as a computed property key.",
+            "from": {
+                "file": "packages/bench/src/support/uniqueKey.ts",
+                "needle": "return { [RULE_TAG]: true, key };"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/uniqueKey.ts",
+                "needle": "const RULE_TAG: unique symbol = Symbol(\"ruleTag\");"
+            }
+        },
+        {
+            "id": "def-const-enum",
+            "surface": "definition",
+            "note": "const enum: inlined at every use site, but the declaration still exists for lookups.",
+            "from": {
+                "file": "packages/bench/src/support/severity.ts",
+                "needle": "export const defaultSeverity = Severity.Medium;"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/severity.ts",
+                "needle": "export const enum Severity {"
+            }
+        },
+        {
+            "id": "def-class-expression",
+            "surface": "definition",
+            "note": "Adhoc is a class expression assigned to a const, not a class declaration.",
+            "from": {
+                "file": "packages/bench/src/support/adhoc.ts",
+                "needle": "export const namedAdhoc = new Adhoc(\"demo\");"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/adhoc.ts",
+                "needle": "export const Adhoc = class Adhoc {"
+            }
+        },
+        {
+            "id": "def-keyof-typeof",
+            "surface": "definition",
+            "note": "weightOf<K> has a default type parameter resolved through keyof typeof SEVERITY_WEIGHT.",
+            "from": {
+                "file": "packages/bench/src/support/keyedLookup.ts",
+                "needle": "export const lowWeight = weightOf();"
+            },
+            "expect": {
+                "file": "packages/bench/src/support/keyedLookup.ts",
+                "needle": "export function weightOf<K extends SeverityKey = \"low\">(key: K = \"low\" as K): number {"
+            }
+        },
+        {
+            "id": "def-method-overload",
+            "surface": "definition",
+            "note": "Two overload signatures (exact_count) plus one implementation signature, on a class method this time -- def-overload/def-free-function already cover the free-function case.",
+            "from": {
+                "file": "packages/core/src/money.ts",
+                "needle": "return amounts.reduce((total, amount) => total.plus(amount), ZERO);"
+            },
+            "expect": {
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/money.ts",
+                        "needle": "plus(other: Money): Money;"
+                    },
+                    {
+                        "file": "packages/core/src/money.ts",
+                        "needle": "plus(cents: number): Money;"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/core/src/money.ts",
+                    "needle": "plus(other: Money | number): Money {"
+                }
+            }
+        },
+        {
+            "id": "resolution-class-interface-merge",
+            "surface": "resolution",
+            "note": "Declaration merging on a class: the interface half adds `concurrency`, a member the class body never declares.",
+            "from": {
+                "file": "packages/bench/src/support/worker.ts",
+                "needle": "export abstract class Worker {"
+            },
+            "expect": {
+                "kind": "declaration_merge",
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/support/worker.ts",
+                        "needle": "export abstract class Worker {"
+                    },
+                    {
+                        "file": "packages/bench/src/support/worker.ts",
+                        "needle": "export interface Worker {"
+                    }
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/support/worker.ts",
+                    "needle": "readonly concurrency: number;"
+                }
+            }
+        },
+        {
+            "id": "def-export-star-as",
+            "surface": "definition",
+            "note": "export * as Rules re-export; the definition is still the target module's declaration, not the re-export line.",
+            "from": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export * as Rules from \"./rules\";"
+            },
+            "expect": {
+                "file": "packages/bench/src/rules/index.ts",
+                "needle": "export const RULES: readonly RuleContract[] = ["
+            }
         }
     ]
 }
