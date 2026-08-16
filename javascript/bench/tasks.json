@@ -1,0 +1,1100 @@
+{
+    "version": 1,
+    "corpus": "atelier-bench-corpus",
+    "lane": "javascript",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. IDs shared with the php, rust and typescript lanes ask the same question in each language.",
+    "tasks": [
+        {
+            "id": "def-through-require",
+            "surface": "definition",
+            "note": "The require destructure is the only link between the two files; the declaration is a plain class in the required module.",
+            "from": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "const { Dataset } = require(\"./dataset.cjs\");"
+            },
+            "expect": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "class Dataset {"
+            }
+        },
+        {
+            "id": "def-module-exports-object",
+            "surface": "definition",
+            "note": "rowFromCents is a property of one `module.exports = { ... }` literal; the definition is the function declaration above it, never the export line.",
+            "from": {
+                "file": "packages/bench/src/reports/gross-profit.cjs",
+                "needle": "rowFromCents(\"revenue\", revenue),"
+            },
+            "expect": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": "function rowFromCents(label, cents) {"
+            }
+        },
+        {
+            "id": "def-exports-assignment",
+            "surface": "definition",
+            "note": "suffix is added with `exports.suffix =`, so the declaration and the export are the same statement.",
+            "from": {
+                "file": "packages/bench/src/support/abstractMetric.cjs",
+                "needle": "return `${this.compute(data).toFixed(2)}${suffix(this.unit)}`;"
+            },
+            "expect": {
+                "file": "packages/bench/src/contracts/metricContract.cjs",
+                "needle": "exports.suffix = function suffix(unit) {"
+            }
+        },
+        {
+            "id": "def-cjs-reexport",
+            "surface": "definition",
+            "note": "src/reportContract.cjs is one line: `module.exports = require(...)`. A lookup must hop through it to the declaring module.",
+            "from": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "const { reportRow, rowFromCents } = require(\"./reportContract.cjs\");"
+            },
+            "expect": {
+                "file": "packages/bench/src/reportContract.cjs",
+                "needle": "module.exports = require(\"./contracts/reportContract.cjs\");"
+            }
+        },
+        {
+            "id": "def-prototype-method",
+            "surface": "definition",
+            "note": "Device is a constructor function; label lives on Device.prototype, not in a class body.",
+            "from": {
+                "file": "packages/core/src/observers.js",
+                "needle": "this.lines.push(`device.created ${device.label()}`);"
+            },
+            "expect": {
+                "file": "packages/core/src/models/device.js",
+                "needle": "Device.prototype.label = function label() {"
+            }
+        },
+        {
+            "id": "def-object-create-parent",
+            "surface": "direction",
+            "note": "Inheritance is wired by hand: Object.create(Device.prototype) is the only parent edge Laptop has.",
+            "from": {
+                "file": "packages/core/src/models/device.js",
+                "needle": "Laptop.prototype = Object.create(Device.prototype);"
+            },
+            "expect": {
+                "kind": "parent_of",
+                "file": "packages/core/src/models/device.js",
+                "needle": "export function Device(id, customerId, brand, model, serial) {"
+            }
+        },
+        {
+            "id": "def-object-assign-mixin",
+            "surface": "definition",
+            "note": "reference() has no declaration in customer.js or repairOrder.js: withReference copies it onto the prototype with Object.assign.",
+            "from": {
+                "file": "packages/app/src/http/api.js",
+                "needle": "reference: order.reference(),"
+            },
+            "expect": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "    reference() {"
+            }
+        },
+        {
+            "id": "def-proxy-forwarded-method",
+            "surface": "definition",
+            "note": "A technician declares no nextSlot; the call resolves through the Proxy in concerns/forwardsToSchedule.js into Schedule.",
+            "from": {
+                "file": "packages/bench/src/repositories/technicianRepository.cjs",
+                "needle": "technician.nextSlot() !== undefined"
+            },
+            "expect": {
+                "file": "packages/core/src/support/schedule.js",
+                "needle": "    nextSlot() {"
+            }
+        },
+        {
+            "id": "def-jsdoc-typedef",
+            "surface": "definition",
+            "note": "The only type surface is JSDoc: the @type annotation points at a @typedef in another package, with no runtime edge behind it.",
+            "from": {
+                "file": "packages/bench/src/repositories/orderRepository.cjs",
+                "needle": "@type {import(\"@atelier/core/contracts/repository.js\").Repository<number, import(\"@atelier/core\").RepairOrder>}"
+            },
+            "expect": {
+                "file": "packages/core/src/contracts/repository.js",
+                "needle": " * @typedef {object} Repository"
+            }
+        },
+        {
+            "id": "def-cjs-from-esm-interop",
+            "surface": "definition",
+            "note": "An ESM file default-imports a CommonJS package: the default binding is that package's module.exports object.",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": "import bench from \"@atelier/bench\";"
+            },
+            "expect": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "module.exports = {"
+            }
+        },
+        {
+            "id": "def-dynamic-require",
+            "surface": "definition",
+            "note": "The module path is built from an argument, so no single file is the answer: the honest result is the 24 candidates under reports/.",
+            "from": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "return require(`./reports/${slug}.cjs`);"
+            },
+            "expect": {
+                "kind": "unresolvable_static",
+                "exact_count": 24,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/cash-flow.cjs",
+                        "needle": "static SLUG = \"cash-flow\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churn-risk.cjs",
+                        "needle": "static SLUG = \"churn-risk\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-lifetime.cjs",
+                        "needle": "static SLUG = \"customer-lifetime\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-retention.cjs",
+                        "needle": "static SLUG = \"customer-retention\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/daily-revenue.cjs",
+                        "needle": "static SLUG = \"daily-revenue\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/gross-profit.cjs",
+                        "needle": "static SLUG = \"gross-profit\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventory-turnover.cjs",
+                        "needle": "static SLUG = \"inventory-turnover\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthly-revenue.cjs",
+                        "needle": "static SLUG = \"monthly-revenue\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/net-margin.cjs",
+                        "needle": "static SLUG = \"net-margin\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-backlog.cjs",
+                        "needle": "static SLUG = \"order-backlog\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-throughput.cjs",
+                        "needle": "static SLUG = \"order-throughput\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-volume.cjs",
+                        "needle": "static SLUG = \"order-volume\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-shortage.cjs",
+                        "needle": "static SLUG = \"part-shortage\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-usage.cjs",
+                        "needle": "static SLUG = \"part-usage\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-default.cjs",
+                        "needle": "static SLUG = \"payment-default\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-latency.cjs",
+                        "needle": "static SLUG = \"payment-latency\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profit-margin.cjs",
+                        "needle": "static SLUG = \"profit-margin\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-efficiency.cjs",
+                        "needle": "static SLUG = \"technician-efficiency\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-load.cjs",
+                        "needle": "static SLUG = \"technician-load\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-payroll.cjs",
+                        "needle": "static SLUG = \"technician-payroll\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-claim.cjs",
+                        "needle": "static SLUG = \"warranty-claim\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-cost.cjs",
+                        "needle": "static SLUG = \"warranty-cost\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-trend.cjs",
+                        "needle": "static SLUG = \"warranty-trend\";"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weekly-revenue.cjs",
+                        "needle": "static SLUG = \"weekly-revenue\";"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-free-function",
+            "surface": "definition",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "return atelierFormatReference(this.referencePrefix, this.referenceNumber);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/helpers.js",
+                "needle": "export function atelierFormatReference(prefix, num, year = Reference.DEFAULT_YEAR) {"
+            }
+        },
+        {
+            "id": "def-module-const",
+            "surface": "definition",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "export const DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/helpers.js",
+                "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+            }
+        },
+        {
+            "id": "def-assoc-const",
+            "surface": "definition",
+            "note": "Static class field on a class that is never instantiated.",
+            "from": {
+                "file": "packages/core/src/support/helpers.js",
+                "needle": "const sep = Reference.PREFIX_SEPARATOR;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/reference.js",
+                "needle": "    static PREFIX_SEPARATOR = \"-\";"
+            }
+        },
+        {
+            "id": "def-static-block-init",
+            "surface": "definition",
+            "note": "Money.ZERO is declared as an empty static field and assigned inside a static initialisation block; the block is the definition site.",
+            "from": {
+                "file": "packages/core/src/models/invoice.js",
+                "needle": "return this.paid ? Money.ZERO : this.total;"
+            },
+            "expect": {
+                "file": "packages/core/src/money.js",
+                "needle": "Money.ZERO = new Money(0);"
+            }
+        },
+        {
+            "id": "def-getter-private-field",
+            "surface": "definition",
+            "note": "`cents` is a getter over a #private field: there is no property of that name on the instance.",
+            "from": {
+                "file": "packages/bench/src/reports/cash-flow.cjs",
+                "needle": ".reduce((total, invoice) => total + invoice.total.cents, 0);"
+            },
+            "expect": {
+                "file": "packages/core/src/money.js",
+                "needle": "    get cents() {"
+            }
+        },
+        {
+            "id": "def-route-to-handler",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/index.js",
+                "needle": "app.get(\"/report/:reference\", showReport(state));"
+            },
+            "expect": {
+                "file": "packages/app/src/http/report.js",
+                "needle": "export function showReport(state) {"
+            }
+        },
+        {
+            "id": "def-error-subclass",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/http/errors.js",
+                "needle": "if (error instanceof AtelierError) {"
+            },
+            "expect": {
+                "file": "packages/core/src/errors.js",
+                "needle": "export class AtelierError extends Error {"
+            }
+        },
+        {
+            "id": "def-static-factory",
+            "surface": "definition",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "Customer.seed(1, \"Ada Byron\", \"ada@example.test\", \"+32 470 00 00 01\"),"
+            },
+            "expect": {
+                "file": "packages/core/src/models/customer.js",
+                "needle": "    static seed(id, name, email, phone) {"
+            }
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "note": "The call site sees only the container; two implementations answer calculate, and the binding decides which one runs.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "return container.invoiceCalculator().calculate(this);"
+            },
+            "expect": {
+                "exact_count": 2,
+                "candidate": {
+                    "file": "packages/core/src/services/standardInvoiceCalculator.js",
+                    "needle": "    calculate(order) {"
+                },
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/services/standardInvoiceCalculator.js",
+                        "needle": "    calculate(order) {"
+                    },
+                    {
+                        "file": "packages/core/src/services/rushInvoiceCalculator.js",
+                        "needle": "    calculate(order) {"
+                    }
+                ],
+                "must_not_include": [
+                    "Container.invoiceCalculator"
+                ]
+            }
+        },
+        {
+            "id": "def-generator-iterator",
+            "surface": "definition",
+            "note": "`for (const order of data)` resolves to a generator method keyed by a computed Symbol, not to a property named orders.",
+            "from": {
+                "file": "packages/bench/tests/interop.test.cjs",
+                "needle": "for (const order of data) {"
+            },
+            "expect": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "    *[Symbol.iterator]() {"
+            }
+        },
+        {
+            "id": "def-import-alias",
+            "surface": "definition",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": "import { Formatter as MoneyFormatter } from \"@atelier/core/billing\";"
+            },
+            "expect": {
+                "file": "packages/core/src/billing/formatter.js",
+                "needle": "export class Formatter {"
+            }
+        },
+        {
+            "id": "refs-transition-to",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "    transitionTo(next, changedBy) {"
+            },
+            "expect": {
+                "min_references": 10,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.js",
+                        "needle": "if (!this.transitionTo(RepairStatus.Completed, changedBy)) {"
+                    },
+                    {
+                        "file": "packages/bench/src/dataset.cjs",
+                        "needle": "orders[1].transitionTo(RepairStatus.AwaitingParts, \"seeder\");"
+                    },
+                    {
+                        "file": "packages/core/tests/lifecycle.test.js",
+                        "needle": "assert.ok(!order.transitionTo(RepairStatus.Collected, \"seeder\"));"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-consumed-quantity",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/models/part.js",
+                "needle": "    consumedQuantity() {"
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/part-usage.cjs",
+                        "needle": "return data.parts.map((part) => reportRow(part.name, part.consumedQuantity()));"
+                    },
+                    {
+                        "file": "packages/bench/src/services/inventoryTurnoverService.cjs",
+                        "needle": "return part.stock === 0 ? 0 : part.consumedQuantity() / part.stock;"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-dataset-seeded",
+            "surface": "references",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "    static seeded() {"
+            },
+            "expect": {
+                "min_references": 8,
+                "known_sites": [
+                    {
+                        "file": "packages/app/src/state.js",
+                        "needle": "data: Dataset.seeded(),"
+                    },
+                    {
+                        "file": "packages/app/tests/jobs.test.js",
+                        "needle": "assert.equal(new RecalculateInventory().run(Dataset.seeded(), dispatcher), 1);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-money-class",
+            "surface": "references",
+            "from": {
+                "file": "packages/core/src/money.js",
+                "needle": "export class Money {"
+            },
+            "expect": {
+                "min_references": 6,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/invoice.js",
+                        "needle": "import { Money } from \"../money.js\";"
+                    },
+                    {
+                        "file": "packages/bench/src/dataset.cjs",
+                        "needle": "new Part(1, \"SCR-13\", 'Screen 13\"', new Money(19900), 4),"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-row-from-cents",
+            "surface": "references",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": "function rowFromCents(label, cents) {"
+            },
+            "expect": {
+                "min_references": 8,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/gross-profit.cjs",
+                        "needle": "rowFromCents(\"gross profit\", revenue - cost),"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/cash-flow.cjs",
+                        "needle": "return [rowFromCents(\"paid\", paid), rowFromCents(\"outstanding\", outstanding)];"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-registry",
+            "surface": "references",
+            "note": "The registry has a handful of read sites; the 24 `new XReport()` entries inside it are construction sites of report implementors, not references to REPORTS.",
+            "from": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "const REPORTS = ["
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/index.cjs",
+                        "needle": "return REPORTS.find((candidate) => candidate.slug === slug);"
+                    },
+                    {
+                        "file": "packages/bench/tests/breadth.test.cjs",
+                        "needle": "assert.equal(REPORTS.length, 24);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-string-event-name",
+            "surface": "references",
+            "note": "Nothing declares 'repair.completed'. The subscribe site and the emit path are connected by the literal alone.",
+            "from": {
+                "file": "packages/core/src/events.js",
+                "needle": "dispatcher.on(\"repair.completed\", (payload) => this.handle(payload));"
+            },
+            "expect": {
+                "kind": "name_only",
+                "exact_count": 2,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/events.js",
+                        "needle": "export const REPAIR_COMPLETED = \"repair.completed\";"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.js",
+                        "needle": "assert.deepEqual(dispatcher.listenerNames(), [\"repair.completed\"]);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "resolution-this-rebinding",
+            "surface": "resolution",
+            "note": "`quiet` is an arrow and keeps the notifier as `this`; `loud` is a function declaration whose `this` only exists because of the .call.",
+            "from": {
+                "file": "packages/bench/src/support/abstractNotifier.cjs",
+                "needle": "return subjects.map((subject) => `${quiet(subject)} ${loud.call(this, subject)}`);"
+            },
+            "expect": {
+                "candidate": {
+                    "file": "packages/bench/src/support/abstractNotifier.cjs",
+                    "needle": "        function loud(subject) {"
+                },
+                "must_not_include": [
+                    "arrow function quiet"
+                ]
+            }
+        },
+        {
+            "id": "resolution-shadow-alias-cjs",
+            "surface": "resolution",
+            "note": "CommonJS half of the shadow pair: the alias is a destructuring rename in the require call.",
+            "from": {
+                "file": "packages/bench/tests/interop.test.cjs",
+                "needle": "const { Formatter: StatusFormatter } = require(\"@atelier/core/reporting\");"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/reporting/formatter.js",
+                    "needle": "export class Formatter {"
+                },
+                "must_not_include": [
+                    "packages/core/src/billing/formatter.js"
+                ]
+            }
+        },
+        {
+            "id": "resolution-shadow-alias-esm",
+            "surface": "resolution",
+            "note": "ESM half of the shadow pair: same class name, different module, aliased at the import site.",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": "import { Formatter as StatusFormatter } from \"@atelier/core/reporting\";"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/reporting/formatter.js",
+                    "needle": "export class Formatter {"
+                },
+                "must_not_include": [
+                    "packages/core/src/billing/formatter.js"
+                ]
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "Nothing declares that it implements HasFormatting; the value satisfies the typedef structurally. A tool that follows only extends/Object.assign edges finds no implementor.",
+            "from": {
+                "file": "packages/bench/src/concerns/hasFormatting.cjs",
+                "needle": "const formatting = {"
+            },
+            "expect": {
+                "kind": "structural",
+                "candidate": {
+                    "file": "packages/bench/src/concerns/hasFormatting.cjs",
+                    "needle": " * @typedef {object} HasFormatting"
+                }
+            }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 implementors of one contract: 24 classes, one per file, plus 24 object literals in rules/structural.cjs.",
+            "from": {
+                "file": "packages/bench/src/contracts/ruleContract.cjs",
+                "needle": " * @typedef {object} RuleContract"
+            },
+            "expect": {
+                "exact_count": 48,
+                "nominal_count": 24,
+                "structural_count": 24,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/rules/index.cjs",
+                        "needle": "const RULES = [...NOMINAL_RULES, ...STRUCTURAL_RULES];"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/structural.cjs",
+                        "needle": "const STRUCTURAL_RULES = ["
+                    },
+                    {
+                        "file": "packages/bench/src/rules/minimum-stock.cjs",
+                        "needle": "module.exports = class MinimumStockRule {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "Every implementor is a bare `module.exports = class`, so the class name is only reachable through the file.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": " * @typedef {object} ReportContract"
+            },
+            "expect": {
+                "exact_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/reports/cash-flow.cjs",
+                        "needle": "module.exports = class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churn-risk.cjs",
+                        "needle": "module.exports = class ChurnRiskReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-lifetime.cjs",
+                        "needle": "module.exports = class CustomerLifetimeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-retention.cjs",
+                        "needle": "module.exports = class CustomerRetentionReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/daily-revenue.cjs",
+                        "needle": "module.exports = class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/gross-profit.cjs",
+                        "needle": "module.exports = class GrossProfitReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventory-turnover.cjs",
+                        "needle": "module.exports = class InventoryTurnoverReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthly-revenue.cjs",
+                        "needle": "module.exports = class MonthlyRevenueReport extends AbstractCompositeReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/net-margin.cjs",
+                        "needle": "module.exports = class NetMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-backlog.cjs",
+                        "needle": "module.exports = class OrderBacklogReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-throughput.cjs",
+                        "needle": "module.exports = class OrderThroughputReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-volume.cjs",
+                        "needle": "module.exports = class OrderVolumeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-shortage.cjs",
+                        "needle": "module.exports = class PartShortageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-usage.cjs",
+                        "needle": "module.exports = class PartUsageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-default.cjs",
+                        "needle": "module.exports = class PaymentDefaultReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-latency.cjs",
+                        "needle": "module.exports = class PaymentLatencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profit-margin.cjs",
+                        "needle": "module.exports = class ProfitMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-efficiency.cjs",
+                        "needle": "module.exports = class TechnicianEfficiencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-load.cjs",
+                        "needle": "module.exports = class TechnicianLoadReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-payroll.cjs",
+                        "needle": "module.exports = class TechnicianPayrollReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-claim.cjs",
+                        "needle": "module.exports = class WarrantyClaimReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-cost.cjs",
+                        "needle": "module.exports = class WarrantyCostReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-trend.cjs",
+                        "needle": "module.exports = class WarrantyTrendReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weekly-revenue.cjs",
+                        "needle": "module.exports = class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "note": "Direction matters: the contract is the parent of the implementor, not the other way round.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": " * @typedef {object} ReportContract"
+            },
+            "expect": {
+                "kind": "parent_of",
+                "candidate": {
+                    "file": "packages/bench/src/reports/cash-flow.cjs",
+                    "needle": "module.exports = class CashFlowReport extends AbstractReport {"
+                },
+                "must_not_include": [
+                    "child_of",
+                    "CashFlowReport is the parent of ReportContract"
+                ]
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "from": {
+                "file": "packages/bench/src/reports/cash-flow.cjs",
+                "needle": "module.exports = class CashFlowReport extends AbstractReport {"
+            },
+            "expect": {
+                "kind": "child_of",
+                "candidate": {
+                    "file": "packages/bench/src/support/abstractReport.cjs",
+                    "needle": "class AbstractReport extends AbstractComponent {"
+                },
+                "must_not_include": [
+                    "parent_of"
+                ]
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "note": "children and parent are both TreeNode: the reference points back at the declaring class.",
+            "from": {
+                "file": "packages/core/src/support/treeNode.js",
+                "needle": "return this.children.reduce((all, child) => all.concat(child.flatten()), [this]);"
+            },
+            "expect": {
+                "kind": "uses_self",
+                "candidate": {
+                    "file": "packages/core/src/support/treeNode.js",
+                    "needle": "export class TreeNode {"
+                }
+            }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "note": "Left and Right are declared in one file; the consumer imports Left only.",
+            "from": {
+                "file": "packages/app/src/http/api.js",
+                "needle": "import { Left } from \"@atelier/core/support/pair.js\";"
+            },
+            "expect": {
+                "kind": "imports",
+                "candidate": {
+                    "file": "packages/core/src/support/pair.js",
+                    "needle": "export class Left {"
+                },
+                "must_not_include": [
+                    "Right"
+                ]
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "The JSDoc import creates no runtime edge: nothing in this file requires @atelier/core.",
+            "from": {
+                "file": "packages/bench/src/repositories/orderRepository.cjs",
+                "needle": "@type {import(\"@atelier/core/contracts/repository.js\").Repository<number, import(\"@atelier/core\").RepairOrder>}"
+            },
+            "expect": {
+                "kind": "type_only",
+                "candidate": {
+                    "file": "packages/core/src/contracts/repository.js",
+                    "needle": " * @typedef {object} Repository"
+                },
+                "must_not_include": [
+                    "require(\"@atelier/core\")"
+                ]
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "The barrel declares nothing; the answer is the declaring module, not packages/core/src/index.js.",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": "import { Container } from \"@atelier/core\";"
+            },
+            "expect": {
+                "kind": "barrel",
+                "candidate": {
+                    "file": "packages/core/src/container.js",
+                    "needle": "export class Container {"
+                },
+                "must_not_include": [
+                    "packages/core/src/index.js"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "const invoices = [new Invoice(1, 1, new Money(34900)), new Invoice(2, 2, new Money(23425))];"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/money.js",
+                    "needle": "export class Money {"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/bench/src/reports/churn-risk.cjs",
+                "needle": ".map((customer) => reportRow(customer.name, 1));"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/models/customer.js",
+                    "needle": "export class Customer {"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": "const { Dataset } = bench;"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/bench/src/dataset.cjs",
+                    "needle": "class Dataset {"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "import { ATELIER_REF_PREFIX, atelierFormatReference } from \"../support/helpers.js\";"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/support/helpers.js",
+                    "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/core/src/services/rushInvoiceCalculator.js",
+                "needle": "const base = this.inner.calculate(order);"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/services/standardInvoiceCalculator.js",
+                    "needle": "    calculate(order) {"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "from": {
+                "file": "packages/app/src/http/report.js",
+                "needle": "total: state.money.money(order.total(state.container), \"EUR\"),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": {
+                    "file": "packages/core/src/billing/formatter.js",
+                    "needle": "    money(amount, currency = \"\") {"
+                },
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "typescript/"
+                ]
+            }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "note": "One extends edge plus two mixins copied with Object.assign: three parents, and only one of them is visible at the class line.",
+            "from": {
+                "file": "packages/bench/src/contracts/compositeContract.cjs",
+                "needle": "class CompositeContract extends AbstractComponent {"
+            },
+            "expect": {
+                "kind": "mixin_parents",
+                "exact_count": 3,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/support/abstractComponent.cjs",
+                        "needle": "class AbstractComponent {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/cacheableContract.cjs",
+                        "needle": "const cacheableContract = {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/scheduleContract.cjs",
+                        "needle": "const scheduleContract = {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "from": {
+                "file": "packages/bench/src/support/abstractCompositeReport.cjs",
+                "needle": "class AbstractCompositeReport extends AbstractPeriodicReport {"
+            },
+            "expect": {
+                "kind": "mixin_parents",
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/support/abstractPeriodicReport.cjs",
+                        "needle": "class AbstractPeriodicReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/concerns/hasAudit.cjs",
+                        "needle": "const hasAudit = {"
+                    },
+                    {
+                        "file": "packages/bench/src/concerns/hasMetadata.cjs",
+                        "needle": "const hasMetadataAccess = {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hover-frozen-seed",
+            "surface": "hover",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "    static seeded() {"
+            },
+            "expect": {
+                "contains": "Changing these rows changes bench ground truth"
+            }
+        },
+        {
+            "id": "hover-proxy-forwarding",
+            "surface": "hover",
+            "from": {
+                "file": "packages/core/src/models/technician.js",
+                "needle": "export function makeTechnician(id, name, schedule = new Schedule()) {"
+            },
+            "expect": {
+                "contains": "resolves through the Proxy"
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-function",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture. A parser must report an error here, never a partial tree. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/unclosed_function.js",
+                "needle": "const slot = technician.nextSlot();"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "unclosed"
+            }
+        },
+        {
+            "id": "parse-negative-bad-destructure",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture: unbalanced destructuring and an unclosed require call. DO NOT FIX.",
+            "from": {
+                "file": "fixtures/broken-syntax/bad_destructure.cjs",
+                "needle": "const [first, , third = REPORTS;"
+            },
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "destructure"
+            }
+        }
+    ]
+}
