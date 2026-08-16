@@ -1,27 +1,27 @@
-"""ScheduleContract ABC and its error type."""
+"""ScheduleContract ABC with the Cadence enum."""
 
-from abc import ABC, abstractmethod
-from datetime import datetime
+from __future__ import annotations
+
+from abc import ABC
+from enum import Enum
 
 
-class ScheduleError(Exception):
-    """Base error for schedule contract violations."""
+class Cadence(Enum):
+    HOURLY = "hourly"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+
+    def seconds(self) -> int:
+        return _SECONDS[self]
+
+
+_SECONDS = {Cadence.HOURLY: 3600, Cadence.DAILY: 86400, Cadence.WEEKLY: 604800, Cadence.MONTHLY: 2592000}
 
 
 class ScheduleContract(ABC):
-    """Nominal parent for scheduled operations."""
+    cadence: Cadence = Cadence.DAILY
 
-    @abstractmethod
-    def scheduled_at(self) -> datetime:
-        """Return the scheduled execution time."""
-        pass
-
-    @abstractmethod
-    def is_due(self) -> bool:
-        """Check if operation is due to run."""
-        pass
-
-    @abstractmethod
-    def mark_executed(self) -> None:
-        """Mark as executed."""
-        pass
+    def next_run_seconds(self, now: int) -> int:
+        period = self.cadence.seconds()
+        return now - (now % period) + period

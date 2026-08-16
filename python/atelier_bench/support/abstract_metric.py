@@ -1,21 +1,20 @@
-"""AbstractMetric base class."""
+"""Base metric: `formatted` renders compute() with the unit suffix."""
 
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ..concerns.has_logging import HasLogging
+from ..contracts.metric_contract import MetricContract, MetricUnit, suffix
+
+if TYPE_CHECKING:
+    from ..dataset import Dataset
 
 
-class AbstractMetric(ABC):
-    """Base class for all metrics."""
+class AbstractMetric(MetricContract, HasLogging):
+    def __init__(self, key: str, unit: MetricUnit) -> None:
+        self.key = key
+        self.unit = unit
 
-    def __init__(self, name: str):
-        self.name = name
-        self._value = 0
-
-    @abstractmethod
-    def calculate(self, data) -> float:
-        """Calculate the metric value."""
-        pass
-
-    def formatted(self, data) -> str:
-        """Return formatted metric."""
-        value = self.calculate(data)
-        return str(value)
+    def formatted(self, data: "Dataset") -> str:
+        return f"{self.compute(data):.2f}{suffix(self.unit)}"

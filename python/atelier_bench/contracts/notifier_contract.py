@@ -1,21 +1,25 @@
 """NotifierContract ABC and its error type."""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TypedDict
+
+
+class Delivery(TypedDict):
+    channel: str
+    reference: str
 
 
 class NotifyError(Exception):
-    """Base error for notifier contract violations."""
+    def __init__(self, channel: str, reason: str, message: str) -> None:
+        super().__init__(message)
+        self.channel = channel
+        self.reason = reason
 
 
 class NotifierContract(ABC):
-    """Nominal parent for notifiers."""
+    channel: str
 
     @abstractmethod
-    def notify(self, message: str) -> None:
-        """Send a notification."""
-        pass
-
-    @abstractmethod
-    def is_available(self) -> bool:
-        """Check if notifier is available."""
-        pass
+    def send(self, subject: str, body: str) -> Delivery: ...

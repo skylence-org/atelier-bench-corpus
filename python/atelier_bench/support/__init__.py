@@ -1,1 +1,1 @@
-"""Support module with abstract bases."""
+"""Abstract bases."""

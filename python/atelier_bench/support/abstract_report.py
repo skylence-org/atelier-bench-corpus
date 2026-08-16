@@ -1,26 +1,31 @@
-"""AbstractReport with __init_subclass__ registry."""
+"""
+Base for every report. `__init_subclass__` auto-registers each CONCRETE
+subclass by its SLUG at class-creation time (`AbstractReport.REGISTRY`), so
+the report registry has no hand-written list of 24 constructors.
+"""
 
-from abc import ABC, abstractmethod
-from typing import Callable
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import cast
+
+from ..concerns.has_cache import HasCache
+from ..contracts.cacheable_contract import CacheableContract
+from ..contracts.report_contract import ReportContract
+from .abstract_component import AbstractComponent
 
 
-class AbstractReport(ABC):
-    """Base class for all reports with automatic registry via __init_subclass__."""
-
+class AbstractReport(ReportContract, CacheableContract, HasCache, AbstractComponent):
+    DEFAULT_DECIMALS = 2
+    SLUG = ""
     REGISTRY: dict[str, Callable[[], "AbstractReport"]] = {}
 
-    def __init_subclass__(cls, **kwargs):
-        """Register subclass in the report registry."""
+    def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
-        if not hasattr(cls, "_abstract"):
-            cls.REGISTRY[cls.__name__] = cls
+        if cls.SLUG:
+            AbstractReport.REGISTRY[cls.SLUG] = cast(Callable[[], "AbstractReport"], cls)
 
-    @abstractmethod
-    def run(self):
-        """Execute the report."""
-        pass
-
-    @abstractmethod
-    def formatted(self) -> str:
-        """Return formatted report output."""
-        pass
+    def __init__(self, slug: str, title: str) -> None:
+        super().__init__(slug, title)
+        self.decimals = self.DEFAULT_DECIMALS
+        self.cache_namespace = "reports"

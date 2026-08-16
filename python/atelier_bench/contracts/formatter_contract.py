@@ -1,30 +1,46 @@
-"""FormatterContract ABC, format_cell function, and its error type."""
+"""
+FormatterContract: a mixin ABC with concrete formatting, plus `format_cell`,
+a `functools.singledispatch` function whose registrations live below the
+generic definition.
+"""
 
-from abc import ABC, abstractmethod
-from typing import Any
+from __future__ import annotations
 
+from abc import ABC
+from functools import singledispatch
 
-class FormatterError(Exception):
-    """Base error for formatter contract violations."""
+from atelier_core import Money
 
 
 class FormatterContract(ABC):
-    """Nominal parent for formatters."""
+    def format_cents(self, cents: int) -> str:
+        sign = "-" if cents < 0 else ""
+        magnitude = abs(cents)
+        return f"{sign}{magnitude // 100}.{magnitude % 100:02d}"
 
-    @abstractmethod
-    def format(self, value: Any) -> str:
-        """Format a value to string."""
-        pass
+    def format_percent(self, ratio: float) -> str:
+        return f"{ratio * 100:.1f}%"
+
+    def format_count(self, count: int) -> str:
+        return str(count)
 
 
-def format_cell(value: Any) -> str:
-    """Format a cell value for display."""
-    from atelier_core import Money
-    
-    if isinstance(value, Money):
-        return f"{value.cents / 100:.2f}"
-    elif isinstance(value, float):
-        return f"{value:.2f}"
-    elif isinstance(value, int):
-        return str(value)
+@singledispatch
+def format_cell(value: object) -> str:
+    """Generic fallback; the registered overloads below win for their types."""
     return str(value)
+
+
+@format_cell.register
+def _(value: Money) -> str:
+    return str(value)
+
+
+@format_cell.register
+def _(value: float) -> str:
+    return f"{value:.2f}"
+
+
+@format_cell.register
+def _(value: int) -> str:
+    return f"{value:d}"

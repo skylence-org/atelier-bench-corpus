@@ -1,1 +1,1 @@
-"""Contracts: ABCs for nominal parents, Protocols for structural composition."""
+"""Contracts: ABCs (nominal parents) and Protocols (structural)."""

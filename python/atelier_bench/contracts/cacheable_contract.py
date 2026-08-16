@@ -1,26 +1,21 @@
-"""CacheableContract ABC and its error type."""
+"""CacheableContract: an ABC with concrete defaults (a mixin-shaped contract)."""
 
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
+from abc import ABC
 
-class CacheError(Exception):
-    """Base error for cache contract violations."""
+DEFAULT_CACHE_TTL_SECONDS = 300
 
 
 class CacheableContract(ABC):
-    """Nominal parent for cacheable operations."""
+    cache_namespace: str = "cache"
+    slug: str = "anonymous"
 
-    @abstractmethod
     def cache_key(self) -> str:
-        """Generate a cache key for this operation."""
-        pass
+        return f"{self.cache_namespace}:{self.slug}"
 
-    @abstractmethod
-    def is_cached(self) -> bool:
-        """Check if result is in cache."""
-        pass
+    def ttl_seconds(self) -> int:
+        return DEFAULT_CACHE_TTL_SECONDS
 
-    @abstractmethod
-    def invalidate(self) -> None:
-        """Invalidate the cache."""
-        pass
+    def is_cacheable(self) -> bool:
+        return self.ttl_seconds() > 0

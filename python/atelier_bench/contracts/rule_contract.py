@@ -1,34 +1,35 @@
-"""RuleContract ABC, RuleLike Protocol, and their error type."""
+"""
+Two faces of one contract:
+
+- `RuleContract` is an ABC — the 24 NOMINAL rules subclass it (`class X(RuleContract)`).
+- `RuleLike` is a `Protocol` — the 24 STRUCTURAL rules are plain objects that
+  merely have `.key` and `.evaluate(data)`; nothing in their source names the
+  contract. `is_rule_like` is the runtime check for both.
+"""
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-
-class RuleError(Exception):
-    """Base error for rule contract violations."""
+if TYPE_CHECKING:
+    from ..dataset import Dataset
 
 
 class RuleContract(ABC):
-    """Nominal parent for rule engines."""
+    key: str
 
     @abstractmethod
-    def evaluate(self, context) -> bool:
-        """Evaluate the rule against a context."""
-        pass
-
-    @abstractmethod
-    def apply(self, target) -> None:
-        """Apply the rule to a target."""
-        pass
+    def evaluate(self, data: "Dataset") -> bool: ...
 
 
+@runtime_checkable
 class RuleLike(Protocol):
-    """Structural protocol for rule-like objects.
-    
-    Requires only a read-only key property so frozen dataclasses satisfy it.
-    """
-
     @property
-    def key(self) -> str:
-        """The unique key identifying this rule."""
-        ...
+    def key(self) -> str: ...
+
+    def evaluate(self, data: "Dataset") -> bool: ...
+
+
+def is_rule_like(candidate: object) -> bool:
+    return isinstance(candidate, RuleLike)

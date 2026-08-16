@@ -1,1 +1,1 @@
-"""Concern mixins for cross-cutting behavior."""
+"""Concerns: mixin classes composed through the MRO."""
