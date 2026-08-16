@@ -64,6 +64,12 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | First-party packages USED as intended (auth, billing, search, flags, broadcast) | sanctum guard on the API mutation + HasApiTokens · passport guard `api` · cashier Billable on User · scout Searchable on Part (database driver) · pennant `rush-surcharge` flag in RushInvoiceCalculator · reverb-ready ShouldBroadcast event + private channel · socialite login pair · fortify actions + TwoFactorAuthenticatable |
 | First-party packages USED as intended (pages, UI, ops, plugins) | folio pages (incl. filename binding) · volt functional component at /rush-counter · flux badge + layout · horizon/octane/telescope/pulse configured (recorders env-gated) · slack notification (guarded) · spatie media/tags/settings via Filament plugins. Proven in `tests/Feature/IntegrationsTest.php` |
 | Wide contract implementation | `app/Bench/`: 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services over 8 contracts, 8 concerns and 7 abstract bases |
+| Cardinality (exact-count fan-in) | `app/Bench/Contracts/RuleContract` — 48 implementors under `app/Bench/Rules/`, fanned in through `RuleRegistry::RULES`; existing `ReportContract` (24 implementors) |
+| Direction (edge orientation) | `dir-contract-parent`/`dir-implementor-child` on `ReportContract` → `CashFlowReport` → `AbstractPeriodicReport`; `dir-self-reference` on `app/Support/TreeNode` (USES, never inheritance) |
+| Import-precision (one-of-many, const vs function) | `app/Support/Units.php` (global const + function) consumed one-at-a-time by `app/Support/Formatting/{UnitLabel,UnitFormatter}`; sibling pair `app/Support/Pair/{Left,Right}` with a Left-only consumer |
+| Collision (lane-local resolution) | Names colliding with `rust/`/`typescript/` lanes — `Money`, `Customer`, `DatabaseSeeder` (the lane's `Dataset`), `ATELIER_REF_PREFIX`, `InvoiceCalculator::calculate`, `Formatter` — each resolved to this lane's declaration |
+| Multi-parent declarations | `app/Bench/Contracts/CompositeContract` (three parent interfaces); `app/Bench/Reports/CompositeSummaryReport` (one `extends` + two `implements`) |
+| Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
 
 ### Migrations note
 
@@ -92,7 +98,7 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 40 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/tasks.json` | 69 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) |
 | `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
