@@ -1011,6 +1011,87 @@
                     }
                 ]
             }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "note": "ReportContract is the parent; the CashFlow implementor's declaring line is the candidate child. must_not_include guards the reversed (interface-extends) phrasing.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportContract {"
+            },
+            "expect": {
+                "kind": "parent_of",
+                "must_not_include": [
+                    "ReportContract extends"
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/reports/cashFlowReport.ts",
+                    "needle": "export class CashFlowReport extends AbstractReport {"
+                }
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "note": "CashFlowReport is the child; its parent is the abstract base it extends, not ReportContract directly.",
+            "from": {
+                "file": "packages/bench/src/reports/cashFlowReport.ts",
+                "needle": "export class CashFlowReport extends AbstractReport {"
+            },
+            "expect": {
+                "kind": "child_of",
+                "candidate": {
+                    "file": "packages/bench/src/support/abstractReport.ts",
+                    "needle": "export abstract class AbstractReport"
+                }
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "note": "TreeNode.children and TreeNode.parent both reference TreeNode itself; this is recursion in the type, never an extends/implements edge.",
+            "from": {
+                "file": "packages/core/src/support/treeNode.ts",
+                "needle": "children: TreeNode[];"
+            },
+            "expect": {
+                "kind": "uses_self",
+                "must_not_include": [
+                    "extends TreeNode"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/treeNode.ts",
+                    "needle": "export interface TreeNode {"
+                }
+            }
+        },
+        {
+            "id": "dir-declaration-merge-not-inheritance",
+            "surface": "direction",
+            "note": "enum RepairStatus + namespace RepairStatus merge into one name; the merge is not an inheritance edge in either direction.",
+            "from": {
+                "file": "packages/core/src/support/status.ts",
+                "needle": "export enum RepairStatus {"
+            },
+            "expect": {
+                "kind": "declaration_merge",
+                "exact_count": 2,
+                "must_not_include": [
+                    "extends",
+                    "implements"
+                ],
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export enum RepairStatus {"
+                    },
+                    {
+                        "file": "packages/core/src/support/status.ts",
+                        "needle": "export namespace RepairStatus {"
+                    }
+                ]
+            }
         }
     ]
 }
