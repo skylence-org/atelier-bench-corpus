@@ -1,4 +1,4 @@
-# filament-bench-corpus / rust lane
+# atelier-bench-corpus / rust lane
 
 Accuracy-bench corpus for agent/tool evaluation over a real Rust application graph.
 Same repair-atelier domain as the `php/` lane (customers, devices, repair orders, parts,

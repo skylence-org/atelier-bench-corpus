@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "TypeScript lane of filament-bench-corpus: repair-atelier domain graph for accuracy benchmarking.",
+    "description": "TypeScript lane of atelier-bench-corpus: repair-atelier domain graph for accuracy benchmarking.",
     "license": "MIT",
     "workspaces": [
         "packages/*"

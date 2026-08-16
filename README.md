@@ -1,4 +1,4 @@
-# filament-bench-corpus
+# atelier-bench-corpus
 
 Purpose-built **accuracy-bench corpora** for agent/tool evaluation over real application graphs.
 One directory per language lane; each lane is self-contained and carries its own ground truth.

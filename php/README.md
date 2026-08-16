@@ -1,4 +1,4 @@
-# filament-bench-corpus
+# atelier-bench-corpus
 
 Purpose-built **accuracy-bench corpus** for agent/tool evaluation over a real Laravel + Filament app graph.
 

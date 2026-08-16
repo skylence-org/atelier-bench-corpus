@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "corpus": "filament-bench-corpus",
+    "corpus": "atelier-bench-corpus",
     "lane": "rust",
     "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
     "tasks": [
