@@ -28,10 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - name: Set up PHP 8.3
+      - name: Set up PHP 8.4
         uses: shivammathur/setup-php@2.37.2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: sqlite3, pdo_sqlite, mbstring, intl
           coverage: none
           tools: composer:v2
@@ -257,11 +257,11 @@ jobs:
           EOF
 
       # Once bench/check-matrix.mjs exists (issue #5) it needs php + cargo + node to re-run every lane verifier.
-      - name: Set up PHP 8.3
+      - name: Set up PHP 8.4
         if: hashFiles('bench/check-matrix.mjs') != ''
         uses: shivammathur/setup-php@2.37.2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: sqlite3, pdo_sqlite, mbstring, intl
           coverage: none
           tools: composer:v2
