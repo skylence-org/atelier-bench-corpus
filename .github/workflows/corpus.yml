@@ -1,0 +1,292 @@
+name: corpus
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  php:
+    name: php
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: php
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@2.37.2
+        with:
+          php-version: "8.4"
+          extensions: sqlite3, pdo_sqlite, mbstring, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer packages
+        uses: actions/cache@v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('php/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: composer install (from committed lock)
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Bootstrap app (.env, key, sqlite file)
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --force
+
+      - name: Migrate (sqlite)
+        run: php artisan migrate --force
+
+      - name: Verify ground truth
+        run: php bench/verify_tasks.php | tee php-verify.txt
+
+      - name: Verify lint
+        run: php bench/verify_tasks.php --lint
+
+      - name: Test suite
+        run: php artisan test
+
+      - name: Upload verifier output
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: php-verify
+          path: php/php-verify.txt
+          if-no-files-found: ignore
+
+  rust:
+    name: rust
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Rust toolchain 1.96.0 (matches rust-toolchain.toml)
+        uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Cargo cache
+        uses: Swatinem/rust-cache@v2.9.2
+        with:
+          workspaces: rust
+
+      - name: fmt
+        run: cargo fmt --all --check
+
+      - name: build (locked)
+        run: cargo build --workspace --locked
+
+      - name: test (locked)
+        run: cargo test --workspace --locked
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Verify ground truth
+        run: cargo run -q -p bench-verify | tee rust-verify.txt
+
+      - name: Verify lint
+        run: cargo run -q -p bench-verify -- --lint
+
+      - name: Upload verifier output
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: rust-verify
+          path: rust/rust-verify.txt
+          if-no-files-found: ignore
+
+  typescript:
+    name: typescript
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: npm ci
+        run: npm ci
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: test
+        run: npm test
+
+      # Ground truth lands with issue #3; until typescript/bench/tasks.json exists these steps are skipped.
+      - name: Verify ground truth
+        if: hashFiles('typescript/bench/tasks.json') != ''
+        run: npm run verify | tee typescript-verify.txt
+
+      - name: Verify lint
+        if: hashFiles('typescript/bench/tasks.json') != ''
+        run: npm run verify:lint
+
+      - name: Upload verifier output
+        if: always() && hashFiles('typescript/bench/tasks.json') != ''
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: typescript-verify
+          path: typescript/typescript-verify.txt
+          if-no-files-found: ignore
+
+  javascript:
+    name: javascript
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: javascript
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # The javascript lane lands with issue #4; until javascript/package.json exists every step below is skipped.
+      - name: Node 22
+        if: hashFiles('javascript/package.json') != ''
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: javascript/package-lock.json
+
+      - name: npm ci
+        if: hashFiles('javascript/package.json') != ''
+        run: npm ci
+
+      - name: test
+        if: hashFiles('javascript/package.json') != ''
+        run: npm test
+
+      - name: Verify ground truth
+        if: hashFiles('javascript/package.json') != ''
+        run: npm run verify | tee javascript-verify.txt
+
+      - name: Verify lint
+        if: hashFiles('javascript/package.json') != ''
+        run: npm run verify:lint
+
+      - name: Upload verifier output
+        if: always() && hashFiles('javascript/package.json') != ''
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: javascript-verify
+          path: javascript/javascript-verify.txt
+          if-no-files-found: ignore
+
+  matrix:
+    name: matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: [php, rust, typescript, javascript]
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Download every lane's verifier output
+        uses: actions/download-artifact@v8.0.1
+        with:
+          pattern: "*-verify"
+          merge-multiple: true
+          path: verify
+
+      # Until issue #5 lands bench/check-matrix.mjs, the corpus-wide check is: every lane that has a
+      # bench/tasks.json printed exactly one "<id>: OK" line per task.
+      - name: OK-count vs task-count per lane (pre-#5 fallback)
+        if: hashFiles('bench/check-matrix.mjs') == ''
+        run: |
+          node - <<'EOF'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          let bad = 0;
+          for (const lane of ["php", "rust", "typescript", "javascript"]) {
+            const manifest = path.join(lane, "bench", "tasks.json");
+            if (!fs.existsSync(manifest)) {
+              console.log(`${lane}: no bench/tasks.json, skipped`);
+              continue;
+            }
+            const tasks = JSON.parse(fs.readFileSync(manifest, "utf8")).tasks.length;
+            const output = path.join("verify", `${lane}-verify.txt`);
+            if (!fs.existsSync(output)) {
+              console.log(`${lane}: FAIL (verifier artifact ${output} missing)`);
+              bad += 1;
+              continue;
+            }
+            const ok = fs.readFileSync(output, "utf8").split("\n").filter((line) => /: OK \(from /.test(line)).length;
+            console.log(`${lane}: ${ok} OK of ${tasks} tasks`);
+            if (ok !== tasks) bad += 1;
+          }
+          console.log(bad === 0 ? "matrix: OK (fallback count check)" : `matrix: FAIL (${bad} lane(s) drifted)`);
+          process.exit(bad === 0 ? 0 : 1);
+          EOF
+
+      # Once bench/check-matrix.mjs exists (issue #5) it needs php + cargo + node to re-run every lane verifier.
+      - name: Set up PHP 8.4
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        uses: shivammathur/setup-php@2.37.2
+        with:
+          php-version: "8.4"
+          extensions: sqlite3, pdo_sqlite, mbstring, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: composer install (php lane, for the vendor-* tasks)
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        working-directory: php
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Rust toolchain 1.96.0
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        uses: dtolnay/rust-toolchain@1.96.0
+
+      - name: Cargo cache
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        uses: Swatinem/rust-cache@v2.9.2
+        with:
+          workspaces: rust
+
+      - name: Node 22
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Corpus-wide matrix check
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        run: node bench/check-matrix.mjs
