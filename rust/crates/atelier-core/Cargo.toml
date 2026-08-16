@@ -1,0 +1,14 @@
+[package]
+name = "atelier-core"
+description = "Repair-atelier domain core: models, enums, traits, container bindings."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+indexmap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
