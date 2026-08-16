@@ -483,6 +483,7 @@
             "from": { "file": "app/Bench/Reports/CompositeSummaryReport.php", "needle": "class CompositeSummaryReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
             "expect": {
                 "extends_count": 1,
+                "exact_count": 3,
                 "implements_count": 2,
                 "implementations": [
                     { "file": "app/Bench/Support/AbstractPeriodicReport.php", "needle": "abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract" },
@@ -490,6 +491,99 @@
                     { "file": "app/Bench/Contracts/AuditableContract.php", "needle": "interface AuditableContract" }
                 ]
             }
+        },
+        {
+            "id": "def-enum-implements",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/SeverityLevel.php", "needle": "return SeverityLevel::fromScore($score);" },
+            "expect": { "file": "app/Support/Edge/SeverityLevel.php", "needle": "enum SeverityLevel: string implements HasLabel" }
+        },
+        {
+            "id": "def-first-class-callable",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/CallableStore.php", "needle": "$this->handlers[] = $this->double(...);" },
+            "expect": { "file": "app/Support/Edge/CallableStore.php", "needle": "public function double(int $value): int" }
+        },
+        {
+            "id": "def-readonly-promoted",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/ImmutablePoint.php", "needle": "return new self($this->x + $dx, $this->y + $dy);" },
+            "expect": { "file": "app/Support/Edge/ImmutablePoint.php", "needle": "readonly class ImmutablePoint" }
+        },
+        {
+            "id": "def-intersection-type",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/Tally.php", "needle": "return $this->sizeOf(new \\ArrayIterator($rows));" },
+            "expect": { "file": "app/Support/Edge/Tally.php", "needle": "public function sizeOf(Countable&Traversable $items): int" }
+        },
+        {
+            "id": "def-attribute-class",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/Trackable.php", "needle": "#[Trackable('probe-heartbeat')]" },
+            "expect": { "file": "app/Support/Edge/Trackable.php", "needle": "final class Trackable" }
+        },
+        {
+            "id": "refs-attribute-usage",
+            "surface": "references",
+            "from": { "file": "app/Support/Edge/Trackable.php", "needle": "final class Trackable" },
+            "expect": {
+                "min_references": 2,
+                "known_sites": [
+                    { "file": "app/Support/Edge/Trackable.php", "needle": "#[Trackable('probe-heartbeat')]" },
+                    { "file": "app/Support/Edge/Trackable.php", "needle": "$attrs = $method->getAttributes(Trackable::class);" }
+                ]
+            }
+        },
+        {
+            "id": "def-new-in-initializer",
+            "surface": "definition",
+            "note": "Also exercises a `never` return type on reject() in the same class.",
+            "from": { "file": "app/Support/Edge/ClockAware.php", "needle": "return (new ClockAware())->currentTimestamp();" },
+            "expect": { "file": "app/Support/Edge/ClockAware.php", "needle": "public function __construct(private Clock $clock = new SystemClock())" }
+        },
+        {
+            "id": "def-static-closure",
+            "surface": "definition",
+            "note": "The closure's match expression has no default arm.",
+            "from": { "file": "app/Support/Edge/PriorityMatcher.php", "needle": "return ($this->resolver())($level);" },
+            "expect": { "file": "app/Support/Edge/PriorityMatcher.php", "needle": "return static function (string $level): int {" }
+        },
+        {
+            "id": "def-named-args",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/InvoiceLineBuilder.php", "needle": "return $this->build(label: 'Diagnostic fee', unitPriceCents: 5000);" },
+            "expect": { "file": "app/Support/Edge/InvoiceLineBuilder.php", "needle": "public function build(string $label, int $quantity = 1, int $unitPriceCents = 0): array" }
+        },
+        {
+            "id": "def-nullsafe-chain",
+            "surface": "definition",
+            "from": { "file": "app/Support/Edge/OrderLabel.php", "needle": "return $order?->device?->label();" },
+            "expect": { "file": "app/Models/Device.php", "needle": "public function label(): string" }
+        },
+        {
+            "id": "def-docblock-generic",
+            "surface": "definition",
+            "note": "@extends Collection<int, Part> on the declaring class.",
+            "from": { "file": "app/Support/Edge/PartCollection.php", "needle": "return new PartCollection($parts);" },
+            "expect": { "file": "app/Support/Edge/PartCollection.php", "needle": "final class PartCollection extends Collection" }
+        },
+        {
+            "id": "impl-trait-abstract",
+            "surface": "implementation",
+            "from": { "file": "app/Support/Edge/HasWeighting.php", "needle": "abstract public function weight(): int;" },
+            "expect": {
+                "implementations": [
+                    { "file": "app/Support/Edge/LightItem.php", "needle": "public function weight(): int" },
+                    { "file": "app/Support/Edge/HeavyItem.php", "needle": "public function weight(): int" }
+                ]
+            }
+        },
+        {
+            "id": "def-interface-const-via-impl",
+            "surface": "definition",
+            "note": "CACHE_TTL is declared on CacheableContract; CashFlowReport inherits it (interface const, not overridden).",
+            "from": { "file": "app/Support/Edge/CacheableTtlProbe.php", "needle": "return CashFlowReport::CACHE_TTL;" },
+            "expect": { "file": "app/Bench/Contracts/CacheableContract.php", "needle": "public const int CACHE_TTL = 3600;" }
         }
     ]
 }
