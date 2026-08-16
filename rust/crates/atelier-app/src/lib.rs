@@ -4,9 +4,11 @@
 //! through a container binding and the breadth subsystem through the report
 //! registry, so a request-level test exercises both crates at once.
 
+pub mod async_check;
 pub mod commands;
 pub mod http;
 pub mod jobs;
+pub mod rules_probe;
 pub mod seed;
 pub mod state;
 
