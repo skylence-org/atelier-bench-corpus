@@ -12,7 +12,8 @@
 // 2. Cross-checks the ids each verifier reported against that lane's bench/tasks.json, then
 //    builds {lane -> {id -> surface}} straight from tasks.json.
 // 3. Asserts every task id is listed in matrix.canonical, every canonical entry's `lanes` array
-//    matches reality, and any id shared by two or more lanes carries the same `surface` in each.
+//    matches reality, any id shared by two or more lanes carries the same `surface` in each, and
+//    shared cardinality / multi-parent ids state the same `exact_count` in every lane that states one.
 // 4. Runs every lane verifier against bench/conformance/ (via --root) and diffs stdout against
 //    bench/conformance/expected.txt byte for byte.
 // 5. Prints a coverage grid and `matrix: OK (<n> canonical ids, <m> lanes)`, or the first
@@ -188,6 +189,41 @@ function readLaneTasks(lane) {
     return tasks;
 }
 
+/** Same as readLaneTasks, but id -> expect.exact_count for the tasks that carry one. */
+function readLaneExactCounts(lane) {
+    const manifestPath = join(REPO_ROOT, lane.name, "bench", "tasks.json");
+    const data = JSON.parse(readFileSync(manifestPath, "utf8"));
+    const counts = new Map();
+    for (const task of data.tasks) {
+        const count = task.expect?.exact_count;
+        if (Number.isInteger(count)) {
+            counts.set(task.id, count);
+        }
+    }
+    return counts;
+}
+
+/**
+ * Shared ids on the cardinality and multi-parent surfaces count a DOMAIN invariant
+ * (48 rules, 24 reports, 3 parents), so every lane that states an exact_count for such
+ * an id must state the same number. Other surfaces (glob imports, overload sets) count
+ * lane-specific facts and are not compared. Returns a conflict message or undefined.
+ */
+function exactCountConflict(id, surface, inLanes, laneCounts) {
+    if (surface !== "cardinality" && surface !== "multi-parent") {
+        return undefined;
+    }
+    const stated = inLanes
+        .filter((name) => laneCounts.get(name).has(id))
+        .map((name) => [name, laneCounts.get(name).get(id)]);
+    const distinct = new Set(stated.map(([, count]) => count));
+    if (distinct.size <= 1) {
+        return undefined;
+    }
+    const detail = stated.map(([name, count]) => `${name}=${count}`).join(", ");
+    return `${id}: exact_count differs across lanes (${detail})`;
+}
+
 /**
  * Build {version, lanes, canonical} purely from each lane's tasks.json (no verifier
  * execution). Deterministic and side-effect free, so both --write and the read-only
@@ -205,6 +241,7 @@ function buildMatrix(lanes) {
 
     const canonical = {};
     const conflicts = [];
+    const laneCounts = new Map(lanes.map((lane) => [lane.name, readLaneExactCounts(lane)]));
     for (const id of [...ids].sort()) {
         const inLanes = lanes.filter((lane) => laneTasks.get(lane.name).has(id)).map((lane) => lane.name);
         const surfaces = new Set(inLanes.map((name) => laneTasks.get(name).get(id)));
@@ -212,7 +249,13 @@ function buildMatrix(lanes) {
             conflicts.push(`${id}: surface differs across lanes (${[...surfaces].join(", ")})`);
             continue;
         }
-        canonical[id] = { surface: [...surfaces][0], lanes: inLanes };
+        const surface = [...surfaces][0];
+        const countConflict = exactCountConflict(id, surface, inLanes, laneCounts);
+        if (countConflict !== undefined) {
+            conflicts.push(countConflict);
+            continue;
+        }
+        canonical[id] = { surface, lanes: inLanes };
     }
 
     const matrixLanes = {};
