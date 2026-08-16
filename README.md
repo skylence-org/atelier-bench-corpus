@@ -52,13 +52,11 @@ node bench/check-matrix.mjs
 ```
 
 One command answers "is the whole corpus green at this SHA?": it runs every lane's verifier,
-One command answers "is the whole corpus green at this SHA?": it runs every lane's verifier,
 cross-checks every task id against `bench/matrix.json`'s canonical map so a task cannot vanish
 from a lane without check-matrix failing, and diffs every lane verifier's output against
 `bench/conformance/expected.txt` byte for byte so the three independent verifier implementations
 (php, rust, node) are proven to agree on every branch of the verifier contract, not just on
 "exit 0". `bench/matrix.json` is generated, never hand-edited: run
-not just on "exit 0". `bench/matrix.json` is generated, never hand-edited: run
 `node bench/check-matrix.mjs --write` to regenerate it after adding or renaming a task id, then
 review the diff like code. CI runs the default (read-only) mode.
 
