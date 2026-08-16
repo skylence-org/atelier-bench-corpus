@@ -1,7 +1,7 @@
 {
     "version": 1,
     "corpus": "atelier-bench-corpus",
-    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -584,6 +584,123 @@
             "note": "CACHE_TTL is declared on CacheableContract; CashFlowReport inherits it (interface const, not overridden).",
             "from": { "file": "app/Support/Edge/CacheableTtlProbe.php", "needle": "return CashFlowReport::CACHE_TTL;" },
             "expect": { "file": "app/Bench/Contracts/CacheableContract.php", "needle": "public const int CACHE_TTL = 3600;" }
+        },
+        {
+            "id": "def-facade-static-call",
+            "surface": "definition",
+            "note": "Facade edge: the static call resolves through Illuminate\\Support\\Facades\\Log (@see LogManager) to the manager's instance method; the facade class is an intermediate, not the answer. Needs composer install (vendor/).",
+            "from": { "file": "app/Listeners/SendCompletionNotice.php", "needle": "Log::info('Repair completed', [" },
+            "expect": {
+                "kind": "facade",
+                "file": "vendor/laravel/framework/src/Illuminate/Log/LogManager.php",
+                "needle": "public function info($message, array $context = []): void",
+                "must_include": ["LogManager"]
+            }
+        },
+        {
+            "id": "def-policy-ability",
+            "surface": "definition",
+            "note": "Ability string -> policy method, mapped by Gate::policy in AppServiceProvider::boot (known_sites); the method is named by the string alone.",
+            "from": { "file": "app/Support/Edge/StringKeyProbe.php", "needle": "return Gate::forUser($user)->allows('update', $order);" },
+            "expect": {
+                "kind": "string_key",
+                "file": "app/Policies/RepairOrderPolicy.php",
+                "needle": "public function update(User $user, RepairOrder $order): bool",
+                "known_sites": [
+                    { "file": "app/Providers/AppServiceProvider.php", "needle": "Gate::policy(RepairOrder::class, RepairOrderPolicy::class);" }
+                ]
+            }
+        },
+        {
+            "id": "def-query-scope",
+            "surface": "definition",
+            "note": "Local query scope: ->open() on a Builder resolves to scopeOpen() on the model through the scope prefix; nothing named open() exists.",
+            "from": { "file": "app/Filament/Widgets/RepairStats.php", "needle": "Stat::make('Open orders', (string) RepairOrder::query()->open()->count())," },
+            "expect": {
+                "kind": "scope",
+                "file": "app/Models/RepairOrder.php",
+                "needle": "public function scopeOpen(Builder $query): Builder"
+            }
+        },
+        {
+            "id": "def-accessor-attribute",
+            "surface": "definition",
+            "note": "New-style accessor: the snake_case property read resolves to the camelCase method returning Attribute::get; no property named display_name exists.",
+            "from": { "file": "resources/views/report/summary.blade.php", "needle": "<p>Customer: {{ $order->customer->display_name }}</p>" },
+            "expect": {
+                "kind": "accessor",
+                "file": "app/Models/Customer.php",
+                "needle": "protected function displayName(): Attribute"
+            }
+        },
+        {
+            "id": "def-container-string-key",
+            "surface": "definition",
+            "note": "String-keyed container binding: app('atelier.clock') has no class to look up; the answer is the singleton registration, whose closure returns ClockAware.",
+            "from": { "file": "app/Support/Edge/StringKeyProbe.php", "needle": "return app('atelier.clock')->currentTimestamp();" },
+            "expect": {
+                "kind": "string_key",
+                "file": "app/Providers/AppServiceProvider.php",
+                "needle": "$this->app->singleton('atelier.clock', fn (): ClockAware => new ClockAware());",
+                "must_include": ["ClockAware"]
+            }
+        },
+        {
+            "id": "def-middleware-alias",
+            "surface": "definition",
+            "note": "Middleware alias: 'record.visit' is mapped to the class in bootstrap/app.php (known_sites); the class is the definition.",
+            "from": { "file": "routes/web.php", "needle": "->middleware('record.visit')" },
+            "expect": {
+                "kind": "string_key",
+                "file": "app/Http/Middleware/RecordReportVisit.php",
+                "needle": "class RecordReportVisit",
+                "known_sites": [
+                    { "file": "bootstrap/app.php", "needle": "$middleware->alias(['record.visit' => \\App\\Http\\Middleware\\RecordReportVisit::class]);" }
+                ]
+            }
+        },
+        {
+            "id": "def-route-to-handler",
+            "surface": "definition",
+            "note": "Route registration array [Controller::class, 'show'] -> the controller method. Same id as the rust/typescript/javascript lanes.",
+            "from": { "file": "routes/web.php", "needle": "Route::get('/report/{repairOrder:reference}', [ReportController::class, 'show'])" },
+            "expect": {
+                "file": "app/Http/Controllers/ReportController.php",
+                "needle": "public function show(RepairOrder $repairOrder): View"
+            }
+        },
+        {
+            "id": "resolution-route-model-binding",
+            "surface": "resolution",
+            "note": "{repairOrder:reference} binds the RepairOrder model by its reference column, not its id; the parameter name selects the model, the suffix selects the key.",
+            "from": { "file": "routes/web.php", "needle": "Route::get('/report/{repairOrder:reference}', [ReportController::class, 'show'])" },
+            "expect": {
+                "kind": "route_model_binding",
+                "candidate": { "file": "app/Models/RepairOrder.php", "needle": "class RepairOrder extends Model" },
+                "must_include": ["reference"]
+            }
+        },
+        {
+            "id": "def-config-key",
+            "surface": "definition",
+            "note": "config('atelier.labor_rate_cents') -> the array key in config/atelier.php (file = first segment, key = second).",
+            "from": { "file": "app/Services/StandardInvoiceCalculator.php", "needle": "return $parts + (int) config('atelier.labor_rate_cents');" },
+            "expect": {
+                "kind": "string_key",
+                "file": "config/atelier.php",
+                "needle": "'labor_rate_cents' => env('ATELIER_LABOR_RATE_CENTS', 4500),"
+            }
+        },
+        {
+            "id": "def-lang-key",
+            "surface": "definition",
+            "note": "__('atelier.note_created') -> the array key in lang/en/atelier.php.",
+            "from": { "file": "app/Http/Controllers/Api/OrderController.php", "needle": "'message' => __('atelier.note_created')," },
+            "expect": {
+                "kind": "string_key",
+                "file": "lang/en/atelier.php",
+                "needle": "'note_created' => 'Note recorded.',"
+            }
         }
     ]
 }
