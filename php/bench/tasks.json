@@ -371,6 +371,36 @@
                 "candidate": { "file": "app/Support/TreeNode.php", "needle": "final class TreeNode" },
                 "must_not_include": ["extends TreeNode"]
             }
+        },
+        {
+            "id": "imp-const-not-function",
+            "surface": "import-precision",
+            "from": { "file": "app/Support/Formatting/UnitLabel.php", "needle": "use const App\\Support\\ATELIER_UNIT_SUFFIX;" },
+            "expect": {
+                "kind": "imports",
+                "candidate": { "file": "app/Support/Units.php", "needle": "const ATELIER_UNIT_SUFFIX = 'u';" },
+                "must_not_include": ["function atelier_format_unit"]
+            }
+        },
+        {
+            "id": "imp-function-not-const",
+            "surface": "import-precision",
+            "from": { "file": "app/Support/Formatting/UnitFormatter.php", "needle": "use function App\\Support\\atelier_format_unit;" },
+            "expect": {
+                "kind": "imports",
+                "candidate": { "file": "app/Support/Units.php", "needle": "function atelier_format_unit(int $value): string" },
+                "must_not_include": ["ATELIER_UNIT_SUFFIX = 'u'"]
+            }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "from": { "file": "app/Support/Pair/PairConsumer.php", "needle": "use App\\Support\\Pair\\Left;" },
+            "expect": {
+                "kind": "imports",
+                "candidate": { "file": "app/Support/Pair/Left.php", "needle": "final class Left" },
+                "must_not_include": ["Right"]
+            }
         }
     ]
 }
