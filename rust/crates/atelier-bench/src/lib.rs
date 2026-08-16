@@ -20,9 +20,9 @@ pub mod support;
 
 use crate::contracts::metric_contract::MetricContract;
 use crate::contracts::report_contract::ReportContract;
-use once_cell::sync::Lazy;
 pub use crate::dataset::Dataset;
 pub use crate::prelude::RuleContract;
+use once_cell::sync::Lazy;
 
 /// Every report in the lane, in registry order.
 ///

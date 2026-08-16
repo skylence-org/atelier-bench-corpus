@@ -10,7 +10,9 @@ where
     V: Clone,
 {
     pub fn new() -> Self {
-        Self { entries: Vec::new() }
+        Self {
+            entries: Vec::new(),
+        }
     }
 
     pub fn insert(&mut self, key: K, value: V) {
