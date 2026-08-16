@@ -1298,6 +1298,59 @@
                     "needle": "export class Formatter {"
                 }
             }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "note": "CompositeContract extends three interfaces at once; all three must be reported.",
+            "from": {
+                "file": "packages/bench/src/contracts/compositeContract.ts",
+                "needle": "export interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract {}"
+            },
+            "expect": {
+                "exact_count": 3,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/contracts/reportContract.ts",
+                        "needle": "export interface ReportContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/cacheableContract.ts",
+                        "needle": "export interface CacheableContract {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/scheduleContract.ts",
+                        "needle": "export interface ScheduleContract {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "note": "One extends (AbstractComponent) plus two implements (CompositeContract, HasLogging). Deliberately not in the AbstractReport/ReportContract fan-out, which card-report-contract pins at exact_count 24.",
+            "from": {
+                "file": "packages/bench/src/support/compositeFixture.ts",
+                "needle": "export class CompositeFixture extends AbstractComponent implements CompositeContract, HasLogging {"
+            },
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/support/abstractComponent.ts",
+                        "needle": "export abstract class AbstractComponent implements HasLogging {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/compositeContract.ts",
+                        "needle": "export interface CompositeContract extends ReportContract, CacheableContract, ScheduleContract {}"
+                    },
+                    {
+                        "file": "packages/bench/src/concerns/hasLogging.ts",
+                        "needle": "export interface HasLogging {"
+                    }
+                ]
+            }
         }
     ]
 }
