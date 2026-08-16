@@ -340,7 +340,7 @@
             "surface": "cardinality",
             "note": "exact_count is exact, not a minimum: a tool returning 20, 25 or 100 implementors is wrong.",
             "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
-            "expect": { "exact_count": 24 }
+            "expect": { "exact_count": 25 }
         },
         {
             "id": "dir-contract-parent",
