@@ -29,3 +29,6 @@ Thumbs.db
 # bench corpus: never commit local db state
 /database/*.sqlite
 /database/*.sqlite-journal
+
+# bench corpus: phpunit runs on :memory:; never commit a stray sqlite file at the lane root
+/testing
