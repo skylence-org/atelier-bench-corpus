@@ -1,0 +1,1248 @@
+{
+  "version": 1,
+  "lanes": {
+    "php": {
+      "verify": [
+        "php",
+        "bench/verify_tasks.php"
+      ]
+    },
+    "rust": {
+      "verify": [
+        "cargo",
+        "run",
+        "-q",
+        "-p",
+        "bench-verify"
+      ]
+    },
+    "typescript": {
+      "verify": [
+        "node",
+        "bench/verify-tasks/verify.mjs"
+      ]
+    },
+    "javascript": {
+      "verify": [
+        "node",
+        "bench/verify-tasks/verify.mjs"
+      ]
+    }
+  },
+  "canonical": {
+    "broken-syntax-degradation": {
+      "surface": "diagnostics",
+      "lanes": [
+        "php"
+      ]
+    },
+    "card-complete-hub": {
+      "surface": "symbol_card",
+      "lanes": [
+        "php"
+      ]
+    },
+    "card-magic-forward": {
+      "surface": "symbol_card",
+      "lanes": [
+        "php"
+      ]
+    },
+    "card-report-contract": {
+      "surface": "cardinality",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "card-rule-contract": {
+      "surface": "cardinality",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-assoc-const": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-associated-type": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-async-handler": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-async-trait-method": {
+      "surface": "implementation",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-attribute-class": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-blade-model-method": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-blanket-impl-method": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-cfg-gated": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-cjs-from-esm-interop": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-cjs-reexport": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-class-const": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-class-expression": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-closure-field": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-conditional-type": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-const-enum": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-const-generic": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-container-binding": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-crate-const": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-cross-crate-trait": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-decorator": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-deref-forwarded-method": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-docblock-generic": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-dynamic-require": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-enum-case": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-enum-implements": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-enum-method": {
+      "surface": "definition",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-enum-variant": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-error-conversion": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-error-subclass": {
+      "surface": "definition",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-export-star-as": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-exports-assignment": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-extension-trait-on-primitive": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-first-class-callable": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-free-function": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-generator-iterator": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-generic-impl-two-params": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-generic-pinned-method": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-getter-private-field": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-global-augmentation": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-global-const": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-global-function": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-impl-trait-return": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-import-alias": {
+      "surface": "definition",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-inferred-type": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-interface-const-via-impl": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-interface-through-binding": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-intersection-type": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-jsdoc-typedef": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-keyof-typeof": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-livewire-computed": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-macro-generated-method": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-macro-invocation": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-macro-repetition-impl": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-mapped-type": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-method-overload": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-mixin-method": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-module-augmentation": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-module-const": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-module-exports-object": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-named-args": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-namespace-merge-value": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-new-in-initializer": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-nullsafe-chain": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-object-assign-mixin": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-object-create-parent": {
+      "surface": "direction",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-operator-overload": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-overload": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-prototype-method": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-proxy-forwarded-method": {
+      "surface": "definition",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-readonly-promoted": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-reexport-two-levels": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-registry-entry": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-route-to-handler": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-serde-tagged-enum": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-shadow-alias-billing": {
+      "surface": "definition",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-shadow-alias-reporting": {
+      "surface": "definition",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-static-block-init": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-static-closure": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-static-factory": {
+      "surface": "definition",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "def-subpath-export": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-template-literal-type": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-through-barrel": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-through-reexport": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "def-through-require": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-trait-method-scope": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "def-trait-method-through-binding": {
+      "surface": "definition",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "def-type-alias-intersection": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-type-guard": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "def-unique-symbol": {
+      "surface": "definition",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "dir-contract-parent": {
+      "surface": "direction",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "dir-declaration-merge-not-inheritance": {
+      "surface": "direction",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "dir-implementor-child": {
+      "surface": "direction",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "dir-inherent-not-trait": {
+      "surface": "direction",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "dir-self-reference": {
+      "surface": "direction",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "docsym-repair-order": {
+      "surface": "document_symbol",
+      "lanes": [
+        "php"
+      ]
+    },
+    "hierarchy-complete-chain": {
+      "surface": "call_hierarchy",
+      "lanes": [
+        "php"
+      ]
+    },
+    "hover-free-function": {
+      "surface": "hover",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "hover-frozen-seed": {
+      "surface": "hover",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "hover-global-function": {
+      "surface": "hover",
+      "lanes": [
+        "php"
+      ]
+    },
+    "hover-macro-generated": {
+      "surface": "hover",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "hover-proxy-forwarding": {
+      "surface": "hover",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "hover-schedule-method": {
+      "surface": "hover",
+      "lanes": [
+        "php"
+      ]
+    },
+    "imp-barrel-no-fanout": {
+      "surface": "import-precision",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "imp-const-not-function": {
+      "surface": "import-precision",
+      "lanes": [
+        "php"
+      ]
+    },
+    "imp-cross-crate-one-item": {
+      "surface": "import-precision",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "imp-function-not-const": {
+      "surface": "import-precision",
+      "lanes": [
+        "php"
+      ]
+    },
+    "imp-glob-import": {
+      "surface": "import-precision",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "imp-namespace-one-member": {
+      "surface": "import-precision",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "imp-one-of-two-siblings": {
+      "surface": "import-precision",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "imp-type-only-no-value-edge": {
+      "surface": "import-precision",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "impl-abstract-report": {
+      "surface": "implementation",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "impl-derived-serialize": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "impl-interface": {
+      "surface": "implementation",
+      "lanes": [
+        "php"
+      ]
+    },
+    "impl-invoice-calculator": {
+      "surface": "implementation",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "impl-notifier-contract": {
+      "surface": "implementation",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "impl-report-contract": {
+      "surface": "implementation",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "impl-repository-cross-crate": {
+      "surface": "implementation",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "impl-repository-generic": {
+      "surface": "implementation",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "impl-trait-abstract": {
+      "surface": "implementation",
+      "lanes": [
+        "php"
+      ]
+    },
+    "int-folio-filename-binding": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "int-pennant-flag": {
+      "surface": "references",
+      "lanes": [
+        "php"
+      ]
+    },
+    "int-volt-functional-prop": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lane-local-calculate": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lane-local-customer": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lane-local-dataset": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lane-local-formatter-billing": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lane-local-money": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lane-local-ref-prefix": {
+      "surface": "resolution",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "lw-di-in-mount": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-embed-tag": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-form-object-magic": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-fullpage-route": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-on-listener-edge": {
+      "surface": "references",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-sfc-computed": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-url-attribute": {
+      "surface": "hover",
+      "lanes": [
+        "php"
+      ]
+    },
+    "lw-wireclick-method": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "parents-class-one-plus-two": {
+      "surface": "multi-parent",
+      "lanes": [
+        "php",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "parents-contract-three": {
+      "surface": "multi-parent",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "parents-supertrait-send-sync": {
+      "surface": "multi-parent",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "parse-negative-bad-destructure": {
+      "surface": "parse-negative",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "parse-negative-bad-generics": {
+      "surface": "parse-negative",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "parse-negative-unclosed-class": {
+      "surface": "parse-negative",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "parse-negative-unclosed-function": {
+      "surface": "parse-negative",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "parse-negative-unclosed-impl": {
+      "surface": "parse-negative",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-assoc-const-override": {
+      "surface": "references",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-attribute-usage": {
+      "surface": "references",
+      "lanes": [
+        "php"
+      ]
+    },
+    "refs-consumed-quantity": {
+      "surface": "references",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "refs-dataset-seeded": {
+      "surface": "references",
+      "lanes": [
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "refs-decorator-usage": {
+      "surface": "references",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "refs-money-class": {
+      "surface": "references",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "refs-money-newtype": {
+      "surface": "references",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-report-contract-registry": {
+      "surface": "references",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-report-registry": {
+      "surface": "references",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "refs-report-row-from-cents": {
+      "surface": "references",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-row-from-cents": {
+      "surface": "references",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "refs-rule-registry": {
+      "surface": "references",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "refs-string-event-name": {
+      "surface": "references",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "refs-trait-usage": {
+      "surface": "references",
+      "lanes": [
+        "php"
+      ]
+    },
+    "refs-transition-to": {
+      "surface": "references",
+      "lanes": [
+        "php",
+        "rust",
+        "typescript",
+        "javascript"
+      ]
+    },
+    "rel-hasmanythrough": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "rel-hasonethrough": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "rel-morphedbymany": {
+      "surface": "references",
+      "lanes": [
+        "php"
+      ]
+    },
+    "rel-ofmany-builder": {
+      "surface": "hover",
+      "lanes": [
+        "php"
+      ]
+    },
+    "resolution-assoc-const-override": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-blanket-foreign-generic": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-blanket-impl": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-class-interface-merge": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "resolution-discriminated-union": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "resolution-dyn-upcast": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-foreign-bound-blanket": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-namespace-vs-enum": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "resolution-satisfies": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "resolution-shadow-alias-cjs": {
+      "surface": "resolution",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "resolution-shadow-alias-esm": {
+      "surface": "resolution",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "resolution-shadow-type-billing": {
+      "surface": "resolution",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "resolution-shadow-type-reporting": {
+      "surface": "resolution",
+      "lanes": [
+        "rust",
+        "typescript"
+      ]
+    },
+    "resolution-structural-concern": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript",
+        "javascript"
+      ]
+    },
+    "resolution-this-rebinding": {
+      "surface": "resolution",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "resolution-trait-default-body": {
+      "surface": "resolution",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "resolution-type-only-import": {
+      "surface": "resolution",
+      "lanes": [
+        "typescript"
+      ]
+    },
+    "vendor-sanctum-trait": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "vendor-scout-trait": {
+      "surface": "definition",
+      "lanes": [
+        "php"
+      ]
+    },
+    "vendor-shouldbroadcast-contract": {
+      "surface": "implementation",
+      "lanes": [
+        "php"
+      ]
+    }
+  }
+}

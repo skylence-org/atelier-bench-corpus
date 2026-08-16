@@ -1,0 +1,8 @@
+c-unique: OK (from src/one.txt:2 -> 1 expect needles resolved)
+c-zero: FAIL src/one.txt needle nope (found 0 times)
+c-dup: FAIL src/two.txt needle twice (found 2 times)
+c-missing: FAIL src/absent.txt needle x (file missing)
+c-nested: OK (from src/nested.txt:1 -> 5 expect needles resolved)
+c-long: FAIL src/one.txt needle zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz... (found 0 times)
+c-crlf: OK (from src/crlf.txt:1 -> 1 expect needles resolved)
+c-ignored: OK (from src/one.txt:2 -> 0 expect needles resolved)

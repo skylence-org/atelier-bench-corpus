@@ -1,0 +1,3 @@
+some setup line
+first twice occurrence
+second twice occurrence

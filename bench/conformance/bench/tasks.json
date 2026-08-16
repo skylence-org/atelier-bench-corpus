@@ -1,0 +1,67 @@
+{
+    "version": 1,
+    "tasks": [
+        {
+            "id": "c-unique",
+            "surface": "definition",
+            "note": "conformance: from + one expect needle each resolve to exactly one line.",
+            "from": { "file": "src/one.txt", "needle": "anchor here" },
+            "expect": { "file": "src/one.txt", "needle": "target value" }
+        },
+        {
+            "id": "c-zero",
+            "surface": "definition",
+            "note": "conformance: expect needle resolves nowhere.",
+            "from": { "file": "src/one.txt", "needle": "anchor here" },
+            "expect": { "file": "src/one.txt", "needle": "nope" }
+        },
+        {
+            "id": "c-dup",
+            "surface": "definition",
+            "note": "conformance: expect needle resolves on two lines.",
+            "from": { "file": "src/two.txt", "needle": "some setup line" },
+            "expect": { "file": "src/two.txt", "needle": "twice" }
+        },
+        {
+            "id": "c-missing",
+            "surface": "definition",
+            "note": "conformance: expect targets a file that does not exist.",
+            "from": { "file": "src/one.txt", "needle": "anchor here" },
+            "expect": { "file": "src/absent.txt", "needle": "x" }
+        },
+        {
+            "id": "c-nested",
+            "surface": "direction",
+            "note": "conformance: known_sites, implementations, known_callers, outgoing_includes and candidate all resolved and counted.",
+            "from": { "file": "src/nested.txt", "needle": "c-nested anchor" },
+            "expect": {
+                "known_sites": [ { "file": "src/nested.txt", "needle": "site alpha" } ],
+                "implementations": [ { "file": "src/nested.txt", "needle": "impl alpha" } ],
+                "known_callers": [ { "file": "src/nested.txt", "needle": "caller alpha" } ],
+                "outgoing_includes": [ { "file": "src/nested.txt", "needle": "include alpha" } ],
+                "candidate": { "file": "src/nested.txt", "needle": "candidate alpha" }
+            }
+        },
+        {
+            "id": "c-long",
+            "surface": "definition",
+            "note": "conformance: 100-char absent needle summarises to 77 chars + ellipsis.",
+            "from": { "file": "src/one.txt", "needle": "anchor here" },
+            "expect": { "file": "src/one.txt", "needle": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" }
+        },
+        {
+            "id": "c-crlf",
+            "surface": "definition",
+            "note": "conformance: CRLF line endings resolve like LF.",
+            "from": { "file": "src/crlf.txt", "needle": "crlf anchor line" },
+            "expect": { "file": "src/crlf.txt", "needle": "crlf target value" }
+        },
+        {
+            "id": "c-ignored",
+            "surface": "resolution",
+            "note": "conformance: non-needle expect keys (contains, min_references, kind) are ignored by design.",
+            "from": { "file": "src/one.txt", "needle": "anchor here" },
+            "expect": { "contains": "whatever", "min_references": 3, "kind": "lane_local" }
+        }
+    ]
+}
