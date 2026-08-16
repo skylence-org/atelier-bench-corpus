@@ -341,6 +341,36 @@
             "note": "exact_count is exact, not a minimum: a tool returning 20, 25 or 100 implementors is wrong.",
             "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
             "expect": { "exact_count": 24 }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
+            "expect": {
+                "kind": "parent_of",
+                "candidate": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                "must_not_include": ["ReportContract implements"]
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "from": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+            "expect": {
+                "kind": "child_of",
+                "candidate": { "file": "app/Bench/Support/AbstractPeriodicReport.php", "needle": "abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract" }
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "note": "children/parent() on TreeNode is a USES edge, never inheritance.",
+            "from": { "file": "app/Support/TreeNode.php", "needle": "public array $children = [];" },
+            "expect": {
+                "kind": "uses_self",
+                "candidate": { "file": "app/Support/TreeNode.php", "needle": "final class TreeNode" },
+                "must_not_include": ["extends TreeNode"]
+            }
         }
     ]
 }
