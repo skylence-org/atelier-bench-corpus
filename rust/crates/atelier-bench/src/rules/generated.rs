@@ -6,12 +6,12 @@ use crate::contracts::rule_contract::RuleContract;
 use crate::dataset::Dataset;
 
 macro_rules! define_rules {
-    ($($name:ident => $body:expr),* $(,)?) => {
+    ($($name:ident => |$data:ident| $body:expr),* $(,)?) => {
         $(
             pub struct $name;
 
             impl RuleContract for $name {
-                fn evaluate(&self, data: &Dataset) -> bool {
+                fn evaluate(&self, $data: &Dataset) -> bool {
                     $body
                 }
             }
@@ -20,28 +20,28 @@ macro_rules! define_rules {
 }
 
 define_rules! {
-    DuplicateReferenceRule => !data.orders.is_empty(),
-    ReferencePrefixRule => !data.customers.is_empty(),
-    CurrencyConsistencyRule => !data.invoices.is_empty(),
-    RoundingRule => !data.parts.is_empty(),
-    TaxAppliedRule => !data.invoices.is_empty(),
-    ExportFreshnessRule => !data.orders.is_empty(),
-    NotificationSentRule => !data.customers.is_empty(),
-    AuditTrailRule => !data.orders.is_empty(),
-    CacheTtlRule => !data.parts.is_empty(),
-    ReportCoverageRule => !data.orders.is_empty(),
-    MetricRangeRule => !data.invoices.is_empty(),
-    DatasetIntegrityRule => !data.technicians.is_empty(),
-    SeedDeterminismRule => data.orders.len() >= 1,
-    OrderCountRule => data.orders.len() >= 1,
-    CustomerCountRule => data.customers.len() >= 1,
-    PartCountRule => data.parts.len() >= 1,
-    InvoiceCountRule => data.invoices.len() >= 1,
-    OpenOrderRatioRule => !data.open_orders().is_empty(),
-    CompletionRateRule => !data.completed_orders().is_empty(),
-    AverageTicketRule => data.revenue_cents() >= 0,
-    PartsPerOrderRule => !data.orders.is_empty(),
-    RepeatCustomerRule => !data.customers.is_empty(),
-    DeviceCategoryRule => !data.devices.is_empty(),
-    InventoryTurnoverRule => !data.parts.is_empty(),
+    DuplicateReferenceRule => |data| !data.orders.is_empty(),
+    ReferencePrefixRule => |data| !data.customers.is_empty(),
+    CurrencyConsistencyRule => |data| !data.invoices.is_empty(),
+    RoundingRule => |data| !data.parts.is_empty(),
+    TaxAppliedRule => |data| !data.invoices.is_empty(),
+    ExportFreshnessRule => |data| !data.orders.is_empty(),
+    NotificationSentRule => |data| !data.customers.is_empty(),
+    AuditTrailRule => |data| !data.orders.is_empty(),
+    CacheTtlRule => |data| !data.parts.is_empty(),
+    ReportCoverageRule => |data| !data.orders.is_empty(),
+    MetricRangeRule => |data| !data.invoices.is_empty(),
+    DatasetIntegrityRule => |data| !data.technicians.is_empty(),
+    SeedDeterminismRule => |data| data.orders.len() >= 1,
+    OrderCountRule => |data| data.orders.len() >= 1,
+    CustomerCountRule => |data| data.customers.len() >= 1,
+    PartCountRule => |data| data.parts.len() >= 1,
+    InvoiceCountRule => |data| data.invoices.len() >= 1,
+    OpenOrderRatioRule => |data| !data.open_orders().is_empty(),
+    CompletionRateRule => |data| !data.completed_orders().is_empty(),
+    AverageTicketRule => |data| data.revenue_cents() >= 0,
+    PartsPerOrderRule => |data| !data.orders.is_empty(),
+    RepeatCustomerRule => |data| !data.customers.is_empty(),
+    DeviceCategoryRule => |data| !data.devices.is_empty(),
+    InventoryTurnoverRule => |data| !data.parts.is_empty(),
 }
