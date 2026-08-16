@@ -401,6 +401,67 @@
                 "candidate": { "file": "app/Support/Pair/Left.php", "needle": "final class Left" },
                 "must_not_include": ["Right"]
             }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "'subtotal_cents' => Money::class," },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "app/Casts/Money.php", "needle": "class Money implements CastsAttributes" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "from": { "file": "app/Models/Device.php", "needle": "return $this->belongsTo(Customer::class);" },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "app/Models/Customer.php", "needle": "class Customer extends Model" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "note": "php has no Dataset class: targets DatabaseSeeder, the lane's Dataset equivalent.",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "Collision-surface anchor: this is the php lane's \"Dataset\" equivalent (the" },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "database/seeders/DatabaseSeeder.php", "needle": "class DatabaseSeeder extends Seeder" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "ATELIER_REF_PREFIX)," },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "app/Support/helpers.php", "needle": "const ATELIER_REF_PREFIX = 'AT';" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "from": { "file": "app/Support/HelperInventory.php", "needle": "$calculator = app(InvoiceCalculator::class); // container: app()" },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "public function calculate(RepairOrder $order): int;" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "$this->money->money($order->subtotal_cents)" },
+            "expect": {
+                "kind": "lane_local",
+                "candidate": { "file": "app/Billing/Formatter.php", "needle": "class Formatter" },
+                "must_not_include": ["rust/", "typescript/", "javascript/"]
+            }
         }
     ]
 }

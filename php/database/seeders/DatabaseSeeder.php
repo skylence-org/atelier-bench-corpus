@@ -17,6 +17,9 @@ use Illuminate\Database\Seeder;
 /**
  * Deterministic seed: fixed rows, no faker randomness, so benchmark queries
  * against seeded data have stable answers.
+ *
+ * Collision-surface anchor: this is the php lane's "Dataset" equivalent (the
+ * lane has no separate Dataset class).
  */
 class DatabaseSeeder extends Seeder
 {
