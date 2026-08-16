@@ -1,15 +1,11 @@
-# atelier-bench-corpus
+# atelier-bench-corpus / php lane
 
-Purpose-built **accuracy-bench corpus** for agent/tool evaluation over a real Laravel + Filament app graph.
+Accuracy-bench corpus for agent/tool evaluation over a real Laravel + Filament application graph.
+Same repair-atelier domain as the `rust/` and `typescript/` lanes (customers, devices, repair
+orders, parts, technicians), with deliberate **PHP / Laravel / Livewire / Filament** edges for
+definition/reference/resolution tasks. The shared lane contract lives in [`../README.md`](../README.md).
 
-This corpus **replaces** two prior fixtures:
-
-| Former fixture | Why it left |
-| --- | --- |
-| `filament-erp` (R2 tarball) | Remote artifact + unpack path; not a first-class git pin |
-| `laravel-event-ticketing` (private git) | Private clone / SSH / secrets in the runner path |
-
-**Operator order 2026-07-16.** Clean-room rewrite: **zero code copied** from either predecessor. Domain is a small repair-atelier (customers, devices, repair orders, parts, technicians) with deliberate language and framework edges for definition/reference tasks.
+Clean-room, **zero code copied** from any prior fixture (operator order 2026-07-16).
 
 ## Stack
 
@@ -18,11 +14,25 @@ This corpus **replaces** two prior fixtures:
 | PHP | `^8.3` |
 | Laravel | **13.20** (`laravel/framework` ^13.8; runtime verified 13.20.x) |
 | Filament | **5.6** (`filament/filament` ^5.6) |
-| Database | SQLite (`database/database.sqlite`) |
+| Database | SQLite (`database/database.sqlite`; tests run on `:memory:`) |
 | Seeder | Deterministic fixed rows in `DatabaseSeeder` — **no faker randomness** in the corpus seed path |
 | First-party vendor breadth | 43 laravel/livewire/filament packages in the lock (operator order 2026-07-16): horizon, telescope*, sanctum, passport, cashier, scout, socialite, fortify, pennant, pulse*, reverb, octane, folio, slack-notification-channel, volt, flux, the three Filament spatie plugins, plus dev: dusk, breeze, envoy, sail. *Telescope/Pulse ship disabled via env (no migrations run); packages are present for vendor-resolution benchmarking, not wired into app behavior. |
 
-Install from the **committed** `composer.lock` only. Do not freestyle `composer update` on a bench machine if you need bit-stable ground truth.
+Install from the **committed** `composer.lock` only (`composer install`). Do not freestyle
+`composer update` on a bench machine if you need bit-stable ground truth.
+
+## Layout
+
+| Path | Role | .php files |
+| --- | --- | --- |
+| `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 177 |
+| `app/Bench/` | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services | 99 |
+| `database/` | Migrations, factories, deterministic `DatabaseSeeder` | 40 |
+| `routes/` | `web.php`, `api.php`, `console.php` | 3 |
+| `resources/views/` | Report view, Blade components, Livewire SFC, Filament pages | 12 |
+| `tests/` | Feature suite (31 tests / 80 assertions), Dusk scaffold | 15 |
+| `bench/` | `tasks.json` + `verify_tasks.php` self-check; **zero composer dependencies** | 1 |
+| `fixtures/broken-syntax/` | Intentionally invalid PHP + Blade, **DO NOT FIX** | 2 |
 
 ## Coverage map
 
@@ -51,7 +61,9 @@ Install from the **committed** `composer.lock` only. Do not freestyle `composer 
 | Observer via attribute | `app/Observers/DeviceObserver` registered with `#[ObservedBy]` on Device |
 | Feature tests (incl. Livewire::test) | `tests/Feature/*`: 31 tests / 80 assertions covering HTTP, lifecycle/events, all Livewire components, observer registration, the full relationship matrix, and every package integration |
 | COMPLETE Eloquent relationship matrix | BelongsTo, HasOne, HasMany, BelongsToMany+pivot, HasOneThrough (Device→invoice), HasManyThrough (Customer→statusLogs), HasOne/MorphOne `ofMany`, MorphTo, MorphOne (Signature), MorphMany (Note), MorphToMany/MorphedByMany first-party (Label/labelables) AND vendor (spatie tags on Part). Proven in `tests/Feature/RelationshipsTest.php` |
-| First-party packages USED as intended | sanctum guard on the API mutation + HasApiTokens · passport guard `api` · cashier Billable on User · scout Searchable on Part (database driver) · pennant `rush-surcharge` flag in RushInvoiceCalculator · reverb-ready ShouldBroadcast event + private channel · socialite login pair · fortify actions + TwoFactorAuthenticatable · folio pages (incl. filename binding) · volt functional component at /rush-counter · flux badge + layout · horizon/octane/telescope/pulse configured (recorders env-gated) · slack notification (guarded) · spatie media/tags/settings via Filament plugins. Proven in `tests/Feature/IntegrationsTest.php` |
+| First-party packages USED as intended (auth, billing, search, flags, broadcast) | sanctum guard on the API mutation + HasApiTokens · passport guard `api` · cashier Billable on User · scout Searchable on Part (database driver) · pennant `rush-surcharge` flag in RushInvoiceCalculator · reverb-ready ShouldBroadcast event + private channel · socialite login pair · fortify actions + TwoFactorAuthenticatable |
+| First-party packages USED as intended (pages, UI, ops, plugins) | folio pages (incl. filename binding) · volt functional component at /rush-counter · flux badge + layout · horizon/octane/telescope/pulse configured (recorders env-gated) · slack notification (guarded) · spatie media/tags/settings via Filament plugins. Proven in `tests/Feature/IntegrationsTest.php` |
+| Wide contract implementation | `app/Bench/`: 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services over 8 contracts, 8 concerns and 7 abstract bases |
 
 ### Migrations note
 
@@ -59,19 +71,11 @@ The five migrations `2026_07_16_08000*` (benchmark_tests / test_datasets / test_
 
 ## Consumption (runner)
 
-Corpora consumers pin this tree via `corpora.lock.json`:
-
-```json
-{ "type": "git", "sha": "<commit>" }
-```
-
-Runner contract:
-
-1. Check out the pinned SHA.
+1. Check out the pinned SHA (see [`../README.md`](../README.md) for the `corpora.lock.json` contract).
 2. `composer install` from the **committed** `composer.lock` (no unlock, no update).
-3. No R2 downloads, no SSH private remotes, no vault/secrets required for install or seed.
+3. No remote artifacts, no SSH private remotes, no secrets.
 
-Local bootstrap (dev only):
+Local use:
 
 ```bash
 composer install
@@ -79,6 +83,7 @@ cp .env.example .env   # if needed
 php artisan key:generate
 php artisan migrate --force
 php artisan db:seed    # DatabaseSeeder — deterministic
+php artisan test       # 31 tests, sqlite :memory:
 ```
 
 Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:reference}` (see `ReportController`).
@@ -87,29 +92,25 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | Needle-based accuracy tasks (from → expect file/needle pairs) |
-| `bench/verify_tasks.php` | Self-check that every task needle still resolves in the tree |
-
-**Regenerate discipline:** any edit under `app/`, `routes/`, `resources/views/`, seeders, or other task-target paths must leave:
+| `bench/tasks.json` | 40 needle-based accuracy tasks (`from` → `expect` file/needle pairs) |
+| `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
-php bench/verify_tasks.php
+php bench/verify_tasks.php          # resolve every file+needle pair (3 vendor-* tasks need composer install)
+php bench/verify_tasks.php --lint   # php -l over app/ bench/ config/ database/ routes/
 ```
 
-at **exit 0**. If needles move, update `bench/tasks.json` in the same change (bench lane owns `bench/`; app lanes keep needles green).
+The verifier has **no composer dependencies**, so it also runs on a machine that has never installed
+the corpus dependency tree (the three `vendor-*` tasks then report `file missing` by design).
 
-Broken fixtures under `fixtures/broken-syntax/` are out of scope for "fix until green" — they are negative cases on purpose.
+Task `file` paths are relative to this lane root (`php/`), not to the repository root.
 
-## Layout (short)
+**Regenerate discipline:** any edit under `app/`, `routes/`, `resources/views/`, seeders, or other
+task-target paths must leave `php bench/verify_tasks.php` at **exit 0**. If needles move, update
+`bench/tasks.json` in the same change (bench lane owns `bench/`; app lanes keep needles green).
 
-```
-app/                 # domain + Filament + deliberate coverage surfaces
-bench/               # tasks.json (+ verify_tasks.php self-check)
-database/seeders/    # deterministic DatabaseSeeder
-fixtures/            # broken-syntax (do not fix)
-routes/              # web + api
-resources/views/     # report + filament pages
-```
+Broken fixtures under `fixtures/broken-syntax/` are out of scope for "fix until green" — they are
+negative cases on purpose.
 
 ## License
 
