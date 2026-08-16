@@ -1172,6 +1172,132 @@
                     "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {"
                 }
             }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "note": "Money is declared once per lane, under an identical name. This guards against a resolver crossing lane boundaries.",
+            "from": {
+                "file": "packages/core/src/models/part.ts",
+                "needle": "readonly unitPrice: Money,"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/money.ts",
+                    "needle": "export class Money {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "note": "Customer is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/bench/src/dataset.ts",
+                "needle": "Customer.seed(1, \"Ada Byron\", \"ada@example.test\", \"+32 470 00 00 01\"),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/models/customer.ts",
+                    "needle": "export class Customer extends withReference(CustomerBase, \"CU\") {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "note": "Dataset is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "data: Dataset.seeded(),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/bench/src/dataset.ts",
+                    "needle": "export class Dataset {"
+                }
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "note": "ATELIER_REF_PREFIX is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "export const DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/support/helpers.ts",
+                    "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+                }
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "note": "InvoiceCalculator.calculate is declared once per lane, under an identical name.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "return container.invoiceCalculator().calculate(this);"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/contracts/invoiceCalculator.ts",
+                    "needle": "calculate(order: RepairOrder): Money;"
+                }
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "note": "The billing Formatter is declared once per lane, under an identical name (each lane also carries a same-name reporting Formatter -- see resolution-shadow-type-billing).",
+            "from": {
+                "file": "packages/app/src/state.ts",
+                "needle": "money: new MoneyFormatter(\"EUR\"),"
+            },
+            "expect": {
+                "kind": "lane_local",
+                "must_not_include": [
+                    "php/",
+                    "rust/",
+                    "javascript/"
+                ],
+                "candidate": {
+                    "file": "packages/core/src/billing/formatter.ts",
+                    "needle": "export class Formatter {"
+                }
+            }
         }
     ]
 }
