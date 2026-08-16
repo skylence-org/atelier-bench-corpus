@@ -1,5 +1,7 @@
 * text=auto eol=lf
 
+bench/conformance/src/crlf.txt -text
+
 *.blade.php diff=html
 *.css diff=css
 *.html diff=html

@@ -5,16 +5,20 @@
  * Self-check for bench/tasks.json needle uniqueness.
  *
  * Usage:
- *   php bench/verify_tasks.php          # resolve every file+needle pair
- *   php bench/verify_tasks.php --lint   # php -l over app/ bench/ config/ database/ routes/
+ *   php bench/verify_tasks.php                # resolve every file+needle pair
+ *   php bench/verify_tasks.php --lint          # php -l over app/ bench/ config/ database/ routes/
+ *   php bench/verify_tasks.php --root <dir>    # verify another lane-shaped directory
  *
- * Zero composer deps. Exit 0 only when every check passes.
+ * Zero composer deps. Exit 0 only when every check passes. Mirrors
+ * rust/bench/verify-tasks/src/main.rs, typescript/bench/verify-tasks/verify.mjs
+ * and javascript/bench/verify-tasks/verify.mjs line for line so every lane is
+ * scored the same way.
  */
 
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
 $argvFlags = array_slice($argv, 1);
+$root = resolveRoot($argvFlags);
 
 if (in_array('--lint', $argvFlags, true)) {
     exit(runLint($root));
@@ -179,6 +183,18 @@ function summarizeNeedle(string $needle): string
     }
 
     return substr($needle, 0, 77) . '...';
+}
+
+/** Lane root = the parent of bench/, unless --root <dir> is given. */
+function resolveRoot(array $flags): string
+{
+    $index = array_search('--root', $flags, true);
+    if ($index !== false && isset($flags[$index + 1])) {
+        $resolved = realpath($flags[$index + 1]);
+        return $resolved !== false ? $resolved : $flags[$index + 1];
+    }
+
+    return dirname(__DIR__);
 }
 
 function runLint(string $root): int

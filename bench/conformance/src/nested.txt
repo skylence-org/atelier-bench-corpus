@@ -1,0 +1,6 @@
+c-nested anchor
+site alpha
+impl alpha
+caller alpha
+include alpha
+candidate alpha
