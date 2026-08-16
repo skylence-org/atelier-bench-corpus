@@ -9,7 +9,7 @@
             "surface": "definition",
             "from": {
                 "file": "crates/atelier-core/src/models/repair_order.rs",
-                "needle": "self.status.transitions_to().contains(&next)"
+                "needle": "self.status.transitions_toX().contains(&next)"
             },
             "expect": {
                 "file": "crates/atelier-core/src/support/status.rs",
