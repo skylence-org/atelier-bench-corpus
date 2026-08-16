@@ -1,0 +1,60 @@
+packages/app/src/http/api.js: error TS2339: Property 'reference' does not exist on type 'RepairOrder'.
+packages/app/src/http/report.js: error TS2339: Property 'reference' does not exist on type 'RepairOrder'.
+packages/bench/src/concerns/hasAudit.cjs: error TS2339: Property 'trail' does not exist on type 'HasAudit'.
+packages/bench/src/concerns/hasLogging.cjs: error TS2339: Property 'key' does not exist on type 'HasLogging'.
+packages/bench/src/concerns/hasLogging.cjs: error TS2339: Property 'name' does not exist on type 'HasLogging'.
+packages/bench/src/concerns/hasLogging.cjs: error TS2339: Property 'slug' does not exist on type 'HasLogging'.
+packages/bench/src/concerns/hasMetadata.cjs: error TS2339: Property 'bag' does not exist on type 'HasMetadata'.
+packages/bench/src/contracts/cacheableContract.cjs: error TS2339: Property 'cacheNamespace' does not exist on type 'CacheableContract'.
+packages/bench/src/contracts/cacheableContract.cjs: error TS2339: Property 'slug' does not exist on type 'CacheableContract'.
+packages/bench/src/dataset.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/exporters/csvExporter.cjs: error TS2339: Property 'formatCents' does not exist on type 'CsvExporter'.
+packages/bench/src/exporters/htmlExporter.cjs: error TS2339: Property 'formatCents' does not exist on type 'HtmlExporter'.
+packages/bench/src/exporters/markdownExporter.cjs: error TS2339: Property 'formatCents' does not exist on type 'MarkdownExporter'.
+packages/bench/src/exporters/pdfExporter.cjs: error TS2339: Property 'formatCount' does not exist on type 'PdfExporter'.
+packages/bench/src/metrics/warrantyRateMetric.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/reports/order-backlog.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/reports/order-volume.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/reports/warranty-claim.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/reports/warranty-cost.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/reports/warranty-trend.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/customerRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/inventoryRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/invoiceRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/orderRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/partRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/paymentRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/technicianRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/repositories/warrantyRepository.cjs: error TS1542: Type import of an ECMAScript module from a CommonJS module must have a 'resolution-mode' attribute.
+packages/bench/src/rules/structural.cjs: error TS2339: Property 'reference' does not exist on type 'RepairOrder'.
+packages/bench/src/rules/structural.cjs: error TS2339: Property 'reference' does not exist on type 'RepairOrder'.
+packages/bench/src/services/warrantyClaimService.cjs: error TS1479: The current file is a CommonJS module whose imports will produce 'require' calls; however, the referenced file is an ECMAScript module and cannot be imported with 'require'. Consider writing a dynamic 'import("@atelier/core")' call instead.
+packages/core/src/concerns/forwardsToSchedule.js: error TS2322: Type 'object' is not assignable to type 'T'.
+packages/core/src/concerns/forwardsToSchedule.js: error TS2345: Argument of type 'T' is not assignable to parameter of type 'object'.
+packages/core/src/concerns/hasReference.js: error TS2339: Property 'referenceNumber' does not exist on type '{ reference(): string; shortReference(): string; }'.
+packages/core/src/concerns/hasReference.js: error TS2339: Property 'referenceNumber' does not exist on type '{ reference(): string; shortReference(): string; }'.
+packages/core/src/concerns/hasReference.js: error TS2339: Property 'referencePrefix' does not exist on type '{ reference(): string; shortReference(): string; }'.
+packages/core/src/concerns/hasReference.js: error TS2339: Property 'referencePrefix' does not exist on type '{ reference(): string; shortReference(): string; }'.
+packages/core/src/models/customer.js: error TS2339: Property 'referenceNumber' does not exist on type 'Customer'.
+packages/core/src/models/repairOrder.js: error TS2339: Property 'referenceNumber' does not exist on type 'RepairOrder'.
+packages/core/src/support/treeNode.js: error TS2769: No overload matches this call.
