@@ -1,7 +1,7 @@
 {
     "version": 1,
     "corpus": "atelier-bench-corpus",
-    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -340,7 +340,7 @@
             "surface": "cardinality",
             "note": "exact_count is exact, not a minimum: a tool returning 20, 25 or 100 implementors is wrong.",
             "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
-            "expect": { "exact_count": 25 }
+            "expect": { "exact_count": 24 }
         },
         {
             "id": "dir-contract-parent",
@@ -348,14 +348,14 @@
             "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
             "expect": {
                 "kind": "parent_of",
-                "candidate": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                "candidate": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
                 "must_not_include": ["ReportContract implements"]
             }
         },
         {
             "id": "dir-implementor-child",
             "surface": "direction",
-            "from": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+            "from": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
             "expect": {
                 "kind": "child_of",
                 "candidate": { "file": "app/Bench/Support/AbstractPeriodicReport.php", "needle": "abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract" }
@@ -480,7 +480,7 @@
         {
             "id": "parents-class-one-plus-two",
             "surface": "multi-parent",
-            "from": { "file": "app/Bench/Reports/CompositeSummaryReport.php", "needle": "class CompositeSummaryReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
+            "from": { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
             "expect": {
                 "extends_count": 1,
                 "exact_count": 3,
