@@ -149,7 +149,12 @@ function presentLanes() {
 function runVerifier(lane, extraArgs = []) {
     const cwd = join(REPO_ROOT, lane.name);
     const [cmd, ...cmdArgs] = lane.verify;
-    return spawnSync(cmd, [...cmdArgs, ...extraArgs], { cwd, encoding: "utf8" });
+    // `cargo run` needs a `--` separator before args meant for the binary itself,
+    // or it rejects them as unknown cargo flags. php/node take extra args directly.
+    const args = extraArgs.length > 0 && cmd === "cargo"
+        ? [...cmdArgs, "--", ...extraArgs]
+        : [...cmdArgs, ...extraArgs];
+    return spawnSync(cmd, args, { cwd, encoding: "utf8" });
 }
 
 function verifierPassed(result) {
