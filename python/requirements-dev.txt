@@ -1,0 +1,6 @@
+# Type-check gate only (verify_tasks.py --lint compares mypy output against bench/mypy-allowlist.txt).
+-r requirements.txt
+mypy==1.17.1
+mypy_extensions==1.1.0
+typing_extensions==4.16.0
+pathspec==1.1.1

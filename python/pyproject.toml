@@ -1,0 +1,10 @@
+[project]
+name = "atelier-python-lane"
+version = "0.1.0"
+description = "Python lane of atelier-bench-corpus: repair-atelier domain graph for accuracy benchmarking."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = ["Flask==3.1.1"]
+
+[tool.setuptools]
+packages = ["atelier_core", "atelier_bench", "atelier_app"]
