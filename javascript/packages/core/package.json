@@ -9,6 +9,7 @@
         ".": "./src/index.js",
         "./billing": "./src/billing/formatter.js",
         "./reporting": "./src/reporting/formatter.js",
+        "./contracts/*": "./src/contracts/*",
         "./support/*": "./src/support/*",
         "./concerns/*": "./src/concerns/*",
         "./models/*": "./src/models/*"

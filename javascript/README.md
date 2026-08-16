@@ -100,6 +100,14 @@ local typescript is installed. That pass **reports, it never fails the lint**, f
   assignment — are precisely what `checkJs` cannot model. `order.reference()` is reported as
   missing on `RepairOrder`; that diagnostic is the lane working as designed, not a defect.
 
+Measured with `typescript@5 + @types/node + @types/express` installed: **24 diagnostics**, 21 of
+them `TS2339` on mixin-injected members (`reference`, `referenceNumber`, mixin `this`) and 3 on
+`Proxy`/generic variance. Advisory does not mean unread: an earlier head shipped 32, and the extra
+8 were `TS2307` from a real gap — `@atelier/core/contracts/repository.js` was missing from the
+core `exports` map, so a specifier used only inside JSDoc `import(...)` types was unresolvable
+while every test, `node --check` and the needle verifier stayed green. `packages/bench/tests/interop.test.cjs`
+now resolves every `@atelier/*` specifier in the lane so that class of defect fails a test instead.
+
 To look at the JSDoc surface anyway:
 
 ```bash

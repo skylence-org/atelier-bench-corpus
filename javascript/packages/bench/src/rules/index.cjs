@@ -36,12 +36,41 @@ const NOMINAL_KEYS = [
     "idle-technician",
 ];
 
-/** @type {readonly import("../contracts/ruleContract.cjs").RuleContract[]} */
-const NOMINAL_RULES = NOMINAL_KEYS.map((key) => {
-    const Rule = require(`./${key}.cjs`);
+/**
+ * The same 24 modules, statically required in registry order, so every rule
+ * class is reachable without executing the registry. `NOMINAL_KEYS` stays the
+ * authoritative key order (the tests assert the two agree); the dynamic-require
+ * edge of this lane lives in the report registry, `../index.cjs` `loadReport()`.
+ */
+const NOMINAL_CLASSES = [
+    require("./minimum-stock.cjs"),
+    require("./maximum-backlog.cjs"),
+    require("./warranty-window.cjs"),
+    require("./rush-surcharge.cjs"),
+    require("./technician-capacity.cjs"),
+    require("./part-availability.cjs"),
+    require("./invoice-balance.cjs"),
+    require("./customer-credit.cjs"),
+    require("./device-age.cjs"),
+    require("./repair-duration.cjs"),
+    require("./rework-limit.cjs"),
+    require("./discount-ceiling.cjs"),
+    require("./deposit-required.cjs"),
+    require("./label-presence.cjs"),
+    require("./note-required.cjs"),
+    require("./signature-required.cjs"),
+    require("./priority-escalation.cjs"),
+    require("./status-sequence.cjs"),
+    require("./part-cost-margin.cjs"),
+    require("./revenue-floor.cjs"),
+    require("./gross-profit.cjs"),
+    require("./schedule-gap.cjs"),
+    require("./slot-overbooking.cjs"),
+    require("./idle-technician.cjs"),
+];
 
-    return new Rule();
-});
+/** @type {readonly import("../contracts/ruleContract.cjs").RuleContract[]} */
+const NOMINAL_RULES = NOMINAL_CLASSES.map((Rule) => new Rule());
 
 /**
  * Every rule in the lane: nominal half first, structural half second.
@@ -74,6 +103,7 @@ class RuleRegistry {
     }
 }
 
+module.exports.NOMINAL_CLASSES = NOMINAL_CLASSES;
 module.exports.NOMINAL_KEYS = NOMINAL_KEYS;
 module.exports.NOMINAL_RULES = NOMINAL_RULES;
 module.exports.RULES = RULES;

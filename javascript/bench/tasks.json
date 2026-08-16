@@ -46,14 +46,20 @@
         {
             "id": "def-cjs-reexport",
             "surface": "definition",
-            "note": "src/reportContract.cjs is one line: `module.exports = require(...)`. A lookup must hop through it to the declaring module.",
+            "note": "src/reportContract.cjs is one line: `module.exports = require(...)`. A lookup on rowFromCents must hop through it to the declaring function in contracts/reportContract.cjs; the hop itself is a known site, not the answer.",
             "from": {
                 "file": "packages/bench/src/index.cjs",
                 "needle": "const { reportRow, rowFromCents } = require(\"./reportContract.cjs\");"
             },
             "expect": {
-                "file": "packages/bench/src/reportContract.cjs",
-                "needle": "module.exports = require(\"./contracts/reportContract.cjs\");"
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": "function rowFromCents(label, cents) {",
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reportContract.cjs",
+                        "needle": "module.exports = require(\"./contracts/reportContract.cjs\");"
+                    }
+                ]
             }
         },
         {
@@ -533,14 +539,14 @@
         {
             "id": "refs-string-event-name",
             "surface": "references",
-            "note": "Nothing declares 'repair.completed'. The subscribe site and the emit path are connected by the literal alone.",
+            "note": "Nothing declares 'repair.completed'. The subscribe site and the emit path are connected by the literal alone. Five code sites carry it; the floor counts the four outside the `from` site, matching the min_references convention of the sibling refs-* tasks.",
             "from": {
                 "file": "packages/core/src/events.js",
                 "needle": "dispatcher.on(\"repair.completed\", (payload) => this.handle(payload));"
             },
             "expect": {
                 "kind": "name_only",
-                "exact_count": 2,
+                "min_references": 4,
                 "known_sites": [
                     {
                         "file": "packages/core/src/events.js",
@@ -548,7 +554,15 @@
                     },
                     {
                         "file": "packages/core/tests/events.test.js",
+                        "needle": "assert.deepEqual(dispatcher.seen, [\"repair.completed\", \"stock.depleted\"]);"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.js",
                         "needle": "assert.deepEqual(dispatcher.listenerNames(), [\"repair.completed\"]);"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.js",
+                        "needle": "assert.equal(channelFor(\"repair.completed\", { orderId: 4 }), \"orders.4\");"
                     }
                 ]
             }
@@ -628,7 +642,7 @@
         {
             "id": "card-rule-contract",
             "surface": "cardinality",
-            "note": "48 implementors of one contract: 24 classes, one per file, plus 24 object literals in rules/structural.cjs.",
+            "note": "48 implementors of one contract: 24 classes, one per file, statically required in rules/index.cjs, plus 24 object literals in rules/structural.cjs. Only the class half has a name to report; the structural half answers `evaluate(data)` with no name at all.",
             "from": {
                 "file": "packages/bench/src/contracts/ruleContract.cjs",
                 "needle": " * @typedef {object} RuleContract"
@@ -637,18 +651,28 @@
                 "exact_count": 48,
                 "nominal_count": 24,
                 "structural_count": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/rules/minimum-stock.cjs",
+                        "needle": "module.exports = class MinimumStockRule {"
+                    },
+                    {
+                        "file": "packages/bench/src/rules/structural.cjs",
+                        "needle": "key: \"duplicate-reference\","
+                    },
+                    {
+                        "file": "packages/bench/src/rules/structural.cjs",
+                        "needle": "key: \"invoice-count\","
+                    }
+                ],
                 "known_sites": [
                     {
                         "file": "packages/bench/src/rules/index.cjs",
                         "needle": "const RULES = [...NOMINAL_RULES, ...STRUCTURAL_RULES];"
                     },
                     {
-                        "file": "packages/bench/src/rules/structural.cjs",
-                        "needle": "const STRUCTURAL_RULES = ["
-                    },
-                    {
-                        "file": "packages/bench/src/rules/minimum-stock.cjs",
-                        "needle": "module.exports = class MinimumStockRule {"
+                        "file": "packages/bench/src/rules/index.cjs",
+                        "needle": "const NOMINAL_CLASSES = ["
                     }
                 ]
             }
@@ -877,6 +901,7 @@
         {
             "id": "lane-local-money",
             "surface": "resolution",
+            "note": "Money is declared once per lane, under an identical name. This guards against a resolver crossing lane boundaries.",
             "from": {
                 "file": "packages/bench/src/dataset.cjs",
                 "needle": "const invoices = [new Invoice(1, 1, new Money(34900)), new Invoice(2, 2, new Money(23425))];"
@@ -897,6 +922,7 @@
         {
             "id": "lane-local-customer",
             "surface": "resolution",
+            "note": "Customer is declared once per lane, under an identical name.",
             "from": {
                 "file": "packages/bench/src/reports/churn-risk.cjs",
                 "needle": ".map((customer) => reportRow(customer.name, 1));"
@@ -917,6 +943,7 @@
         {
             "id": "lane-local-dataset",
             "surface": "resolution",
+            "note": "Dataset is declared once per lane, under an identical name.",
             "from": {
                 "file": "packages/app/src/state.js",
                 "needle": "const { Dataset } = bench;"
@@ -937,6 +964,7 @@
         {
             "id": "lane-local-ref-prefix",
             "surface": "resolution",
+            "note": "ATELIER_REF_PREFIX is declared once per lane, under an identical name.",
             "from": {
                 "file": "packages/core/src/concerns/hasReference.js",
                 "needle": "import { ATELIER_REF_PREFIX, atelierFormatReference } from \"../support/helpers.js\";"
@@ -957,6 +985,7 @@
         {
             "id": "lane-local-calculate",
             "surface": "resolution",
+            "note": "InvoiceCalculator.calculate is declared once per lane, under an identical name. In this lane the contract is a JSDoc @typedef with no method body, so the candidate is the implementation in standardInvoiceCalculator.js rather than the contract declaration the typed lanes point at.",
             "from": {
                 "file": "packages/core/src/services/rushInvoiceCalculator.js",
                 "needle": "const base = this.inner.calculate(order);"
@@ -977,6 +1006,7 @@
         {
             "id": "lane-local-formatter-billing",
             "surface": "resolution",
+            "note": "The billing Formatter is declared once per lane, under an identical name (each lane also carries a same-name reporting Formatter -- see resolution-shadow-type-billing).",
             "from": {
                 "file": "packages/app/src/http/report.js",
                 "needle": "total: state.money.money(order.total(state.container), \"EUR\"),"
@@ -985,7 +1015,7 @@
                 "kind": "lane_local",
                 "candidate": {
                     "file": "packages/core/src/billing/formatter.js",
-                    "needle": "    money(amount, currency = \"\") {"
+                    "needle": "export class Formatter {"
                 },
                 "must_not_include": [
                     "php/",

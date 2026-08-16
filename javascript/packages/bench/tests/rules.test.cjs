@@ -3,7 +3,7 @@ const { describe, it } = require("node:test");
 
 const { Dataset, RULES, RuleRegistry, isRuleContract } = require("@atelier/bench");
 const { CompositeContract } = require("@atelier/bench/contracts/compositeContract.cjs");
-const { NOMINAL_RULES } = require("@atelier/bench/rules/index.cjs");
+const { NOMINAL_CLASSES, NOMINAL_KEYS, NOMINAL_RULES } = require("@atelier/bench/rules/index.cjs");
 const { STRUCTURAL_RULES } = require("@atelier/bench/rules/structural.cjs");
 const MinimumStockRule = require("@atelier/bench/rules/minimum-stock.cjs");
 const { AbstractCompositeReport } = require("@atelier/bench/support/abstractCompositeReport.cjs");
@@ -15,6 +15,12 @@ describe("rule registry", () => {
         assert.equal(NOMINAL_RULES.length, 24);
         assert.equal(STRUCTURAL_RULES.length, 24);
         assert.equal(new Set(RULES.map((rule) => rule.key)).size, 48);
+    });
+
+    it("keeps the statically required classes in NOMINAL_KEYS order", () => {
+        assert.equal(NOMINAL_CLASSES.length, 24);
+        assert.deepEqual(NOMINAL_RULES.map((rule) => rule.key), NOMINAL_KEYS);
+        assert.deepEqual(NOMINAL_CLASSES.map((Rule) => Rule.KEY), NOMINAL_KEYS);
     });
 
     it("satisfies every rule on the frozen seed", () => {
