@@ -50,8 +50,14 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Parallel iteration (rayon) | `services/revenue_service.rs::metric_sweep` — also what forces `MetricContract: Send + Sync` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `atelier-bench/src/dataset.rs::seeded` — revenue `58_325c`, part cost `46_300c`, gross profit `12_025c` |
-| Tests (incl. request-level) | 46 tests: domain lifecycle, shadow pair, Deref/macro forwarding, breadth registry, axum routes, console commands, JSON parser |
+| Tests (incl. request-level) | 55 tests: domain lifecycle, shadow pair, Deref/macro forwarding, breadth registry, axum routes, console commands, JSON parser |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; outside every crate, so cargo never sees them) |
+| Cardinality: macro-generated half of a wide contract | `contracts/rule_contract.rs` + `rules/`: 48 `RuleContract` implementors, 24 textual (one file each) + 24 from `define_rules!` in `rules/generated.rs` |
+| Direction: parent/child/self-reference/inherent | `dir-contract-parent`/`dir-implementor-child` (`ReportContract` ↔ `CashFlowReport`), `support/expr.rs` (`Expr` self-reference), `money.rs` inherent `impl Money` |
+| Import-precision: one-of-siblings, cross-crate, glob | `support/pair.rs` (`Left`/`Right`, only `Left` imported), `dataset.rs` (`Money` without `ParseMoneyError`), `support/report_glob.rs` (`use ...report_contract::*;`) |
+| Collision: lane-local identifiers | `Money`, `Customer`, `Dataset`, `ATELIER_REF_PREFIX`, `InvoiceCalculator::calculate`, `billing::Formatter` — same names exist in the php/typescript/javascript lanes |
+| Multi-parent: three-way supertrait fan-in | `contracts/composite_contract.rs`: `CompositeContract: ReportContract + CacheableContract + ScheduleContract`, implemented by `CashFlowReport`; `&dyn CompositeContract` upcasts to `&dyn ReportContract` |
+| Breadth: const generics, closures, async traits, cfg-gating | `support/grid.rs`, `support/closure_predicate.rs`, `support/pair_map.rs`, `support/rule_summary.rs` (`#[derive(Serialize)]`), `atelier-app/src/async_check.rs`, `rules/cfg_gated.rs`, `prelude.rs` + `rules_probe.rs` (two-level re-export) |
 
 ## Consumption (runner)
 
@@ -62,7 +68,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 Local use:
 
 ```bash
-cargo test --workspace          # 46 tests
+cargo test --workspace          # 55 tests
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p atelier-app -- serve 8080
 cargo run -p atelier-app -- seed

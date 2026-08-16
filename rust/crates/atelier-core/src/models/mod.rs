@@ -7,3 +7,4 @@ pub mod part;
 pub mod repair_order;
 pub mod signature;
 pub mod technician;
+pub mod voucher;

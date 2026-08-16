@@ -1,6 +1,9 @@
 //! Paid versus outstanding invoice cash.
 
+use crate::contracts::cacheable_contract::CacheableContract;
+use crate::contracts::composite_contract::CompositeContract;
 use crate::contracts::report_contract::{ReportContract, ReportRow};
+use crate::contracts::schedule_contract::{Cadence, ScheduleContract};
 use crate::dataset::Dataset;
 use crate::support::abstract_report::ReportBase;
 
@@ -60,3 +63,19 @@ impl ReportContract for CashFlowReport {
         ]
     }
 }
+
+impl CacheableContract for CashFlowReport {
+    fn cache_key(&self) -> String {
+        format!("report:{}", self.slug())
+    }
+}
+
+impl ScheduleContract for CashFlowReport {
+    fn cadence(&self) -> Cadence {
+        Cadence::Daily
+    }
+}
+
+/// Sole [`CompositeContract`] implementor: reportable, cacheable and
+/// schedulable all at once, without adding a 25th [`ReportContract`].
+impl CompositeContract for CashFlowReport {}
