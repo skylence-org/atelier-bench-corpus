@@ -1,5 +1,7 @@
 # atelier-bench-corpus
 
+[![corpus](https://github.com/skylence-org/atelier-bench-corpus/actions/workflows/corpus.yml/badge.svg?branch=main)](https://github.com/skylence-org/atelier-bench-corpus/actions/workflows/corpus.yml)
+
 Purpose-built **accuracy-bench corpora** for agent/tool evaluation over real application graphs.
 One directory per language lane; each lane is self-contained and carries its own ground truth.
 
