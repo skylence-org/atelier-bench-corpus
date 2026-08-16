@@ -320,6 +320,27 @@
             "note": "VENDOR resolution: HasApiTokens from laravel/sanctum on the User model.",
             "from": { "file": "app/Models/User.php", "needle": "use Billable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;" },
             "expect": { "file": "vendor/laravel/sanctum/src/HasApiTokens.php", "needle": "trait HasApiTokens" }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 RuleContract implementors under app/Bench/Rules/, fanned in through RuleRegistry::RULES.",
+            "from": { "file": "app/Bench/Contracts/RuleContract.php", "needle": "interface RuleContract" },
+            "expect": {
+                "exact_count": 48,
+                "implementations": [
+                    { "file": "app/Bench/Rules/MinimumStockRule.php", "needle": "final class MinimumStockRule implements RuleContract" },
+                    { "file": "app/Bench/Rules/InvoiceBalanceRule.php", "needle": "final class InvoiceBalanceRule implements RuleContract" },
+                    { "file": "app/Bench/Rules/InventoryTurnoverRule.php", "needle": "final class InventoryTurnoverRule implements RuleContract" }
+                ]
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "exact_count is exact, not a minimum: a tool returning 20, 25 or 100 implementors is wrong.",
+            "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
+            "expect": { "exact_count": 24 }
         }
     ]
 }
