@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "typescript",
-    "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked.",
+        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -364,7 +364,7 @@
                     },
                     {
                         "file": "packages/bench/src/reports/dailyRevenueReport.ts",
-                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport implements CompositeContract, HasLogging {"
                     },
                     {
                         "file": "packages/bench/src/reports/grossProfitReport.ts",
@@ -466,7 +466,7 @@
                     },
                     {
                         "file": "packages/bench/src/reports/dailyRevenueReport.ts",
-                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport implements CompositeContract, HasLogging {"
                     },
                     {
                         "file": "packages/bench/src/reports/weeklyRevenueReport.ts",
@@ -931,7 +931,7 @@
                     },
                     {
                         "file": "packages/bench/src/reports/dailyRevenueReport.ts",
-                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport {"
+                        "needle": "export class DailyRevenueReport extends AbstractPeriodicReport implements CompositeContract, HasLogging {"
                     },
                     {
                         "file": "packages/bench/src/reports/grossProfitReport.ts",
@@ -1328,18 +1328,18 @@
         {
             "id": "parents-class-one-plus-two",
             "surface": "multi-parent",
-            "note": "One extends (AbstractComponent) plus two implements (CompositeContract, HasLogging). Deliberately not in the AbstractReport/ReportContract fan-out, which card-report-contract pins at exact_count 24.",
+            "note": "One extends (AbstractPeriodicReport) plus two implements (CompositeContract, HasLogging) on an EXISTING report, so the composite implementor adds no 25th ReportContract implementor and card-report-contract stays at exact_count 24.",
             "from": {
-                "file": "packages/bench/src/support/compositeFixture.ts",
-                "needle": "export class CompositeFixture extends AbstractComponent implements CompositeContract, HasLogging {"
+                "file": "packages/bench/src/reports/dailyRevenueReport.ts",
+                "needle": "export class DailyRevenueReport extends AbstractPeriodicReport implements CompositeContract, HasLogging {"
             },
             "expect": {
                 "extends_count": 1,
                 "implements_count": 2,
                 "implementations": [
                     {
-                        "file": "packages/bench/src/support/abstractComponent.ts",
-                        "needle": "export abstract class AbstractComponent implements HasLogging {"
+                        "file": "packages/bench/src/support/abstractPeriodicReport.ts",
+                        "needle": "export abstract class AbstractPeriodicReport extends AbstractReport implements ScheduleContract {"
                     },
                     {
                         "file": "packages/bench/src/contracts/compositeContract.ts",
@@ -1358,11 +1358,11 @@
             "note": "Conditional type unwraps a Promise; a real value is typed through it, not just declared.",
             "from": {
                 "file": "packages/bench/src/support/unwrap.ts",
-                "needle": "export type Unwrap<T> = T extends Promise<infer U> ? U : T;"
+                "needle": "export const unwrappedOrderCount: Unwrap<Promise<number>> = 4;"
             },
             "expect": {
                 "file": "packages/bench/src/support/unwrap.ts",
-                "needle": "export const unwrappedOrderCount: Unwrap<Promise<number>> = 4;"
+                "needle": "export type Unwrap<T> = T extends Promise<infer U> ? U : T;"
             }
         },
         {
@@ -1371,11 +1371,11 @@
             "note": "Mapped type builds one boolean flag per key of the union.",
             "from": {
                 "file": "packages/bench/src/support/flags.ts",
-                "needle": "export type Flags<K extends string> = { [P in K]: boolean };"
+                "needle": "export const reportFlags: Flags<\"cacheable\" | \"billable\"> = {"
             },
             "expect": {
                 "file": "packages/bench/src/support/flags.ts",
-                "needle": "export const reportFlags: Flags<\"cacheable\" | \"billable\"> = {"
+                "needle": "export type Flags<K extends string> = { [P in K]: boolean };"
             }
         },
         {
@@ -1384,11 +1384,11 @@
             "note": "Template literal type constrains every Slug to end in `-report`.",
             "from": {
                 "file": "packages/bench/src/support/slug.ts",
-                "needle": "export type Slug = `${Lowercase<string>}-report`;"
+                "needle": "export const cashFlowSlug: Slug = \"cash-flow-report\";"
             },
             "expect": {
                 "file": "packages/bench/src/support/slug.ts",
-                "needle": "export const cashFlowSlug: Slug = \"cash-flow-report\";"
+                "needle": "export type Slug = `${Lowercase<string>}-report`;"
             }
         },
         {
