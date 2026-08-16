@@ -110,6 +110,12 @@
         "rust"
       ]
     },
+    "def-build-script-generated": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
     "def-cfg-gated": {
       "surface": "definition",
       "lanes": [
@@ -281,6 +287,12 @@
         "javascript"
       ]
     },
+    "def-gat-assoc-type": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
+      ]
+    },
     "def-generator-iterator": {
       "surface": "definition",
       "lanes": [
@@ -321,6 +333,12 @@
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-hrtb-bound": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
       ]
     },
     "def-impl-trait-return": {
@@ -370,6 +388,12 @@
       "surface": "definition",
       "lanes": [
         "typescript"
+      ]
+    },
+    "def-lifetime-struct": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
       ]
     },
     "def-livewire-computed": {
@@ -472,6 +496,12 @@
       "surface": "definition",
       "lanes": [
         "typescript"
+      ]
+    },
+    "def-path-attribute-module": {
+      "surface": "definition",
+      "lanes": [
+        "rust"
       ]
     },
     "def-prototype-method": {

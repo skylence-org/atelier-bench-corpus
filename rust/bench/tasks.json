@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "rust",
-    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
+    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: build_generated (item spliced in by include! from OUT_DIR), path_attribute (#[path]-declared module), gat (generic associated type).",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -840,8 +840,8 @@
             "id": "lane-local-money",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-core/src/money.rs",
-                "needle": "pub struct Money(pub i64);"
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "Part::new(1, \"SCR-13\", \"Screen 13\\\"\", Money(19_900)).with_stock(4),"
             },
             "expect": {
                 "kind": "lane_local",
@@ -856,8 +856,8 @@
             "id": "lane-local-customer",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-core/src/models/customer.rs",
-                "needle": "pub struct Customer {"
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "Customer::new(1, \"Ada Byron\", \"ada@example.test\").with_phone(\"+32 470 00 00 01\"),"
             },
             "expect": {
                 "kind": "lane_local",
@@ -872,8 +872,8 @@
             "id": "lane-local-dataset",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-bench/src/dataset.rs",
-                "needle": "pub struct Dataset {"
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "data: Arc::new(Dataset::seeded()),"
             },
             "expect": {
                 "kind": "lane_local",
@@ -888,8 +888,8 @@
             "id": "lane-local-ref-prefix",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-core/src/support/helpers.rs",
-                "needle": "pub const ATELIER_REF_PREFIX: &str = \"AT\";"
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "const PREFIX: &'static str = ATELIER_REF_PREFIX;"
             },
             "expect": {
                 "kind": "lane_local",
@@ -904,8 +904,8 @@
             "id": "lane-local-calculate",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-core/src/contracts/invoice_calculator.rs",
-                "needle": "fn calculate(&self, order: &RepairOrder) -> Money;"
+                "file": "crates/atelier-core/src/models/repair_order.rs",
+                "needle": "container.invoice_calculator().calculate(self)"
             },
             "expect": {
                 "kind": "lane_local",
@@ -920,8 +920,8 @@
             "id": "lane-local-formatter-billing",
             "surface": "resolution",
             "from": {
-                "file": "crates/atelier-core/src/billing/formatter.rs",
-                "needle": "pub struct Formatter {"
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "use atelier_core::billing::Formatter as MoneyFormatter;"
             },
             "expect": {
                 "kind": "lane_local",
@@ -1181,6 +1181,102 @@
                     {
                         "file": "crates/atelier-bench/src/rules/mod.rs",
                         "needle": "assert_eq!(RULES.len(), 48);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-build-script-generated",
+            "surface": "definition",
+            "note": "Build-script surface: generated_units() is written by build.rs into OUT_DIR and spliced in with include!; there is no textual definition under src/. The include! line is the in-tree anchor; build.rs holds the source text of the function.",
+            "from": {
+                "file": "crates/atelier-core/src/support/generated_units.rs",
+                "needle": "generated_units().len()"
+            },
+            "expect": {
+                "kind": "build_generated",
+                "candidate": {
+                    "file": "crates/atelier-core/src/support/generated_units.rs",
+                    "needle": "include!(concat!(env!(\"OUT_DIR\"), \"/generated_units.rs\"));"
+                },
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/build.rs",
+                        "needle": "pub fn generated_units() -> [&'static str; 4] {"
+                    }
+                ],
+                "must_include": ["build.rs"]
+            }
+        },
+        {
+            "id": "def-path-attribute-module",
+            "surface": "definition",
+            "note": "#[path] surface: support::ledger is declared with #[path = \"pathed/tally_sheet.rs\"], so the module name and the file name differ and there is no support/ledger.rs.",
+            "from": {
+                "file": "crates/atelier-core/tests/wave5.rs",
+                "needle": "assert_eq!(ledger_lines(), 12);"
+            },
+            "expect": {
+                "kind": "path_attribute",
+                "file": "crates/atelier-core/src/support/pathed/tally_sheet.rs",
+                "needle": "pub fn ledger_lines() -> usize {",
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/support/mod.rs",
+                        "needle": "#[path = \"pathed/tally_sheet.rs\"]"
+                    }
+                ],
+                "must_not_include": ["support/ledger.rs"]
+            }
+        },
+        {
+            "id": "def-lifetime-struct",
+            "surface": "definition",
+            "note": "Struct with an explicit lifetime parameter; the use site names it as Borrowed<'_>.",
+            "from": {
+                "file": "crates/atelier-core/src/support/borrowed.rs",
+                "needle": "let views: Vec<Borrowed<'_>> = labels.iter().map(|label| Borrowed::new(label)).collect();"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/borrowed.rs",
+                "needle": "pub struct Borrowed<'a> {"
+            }
+        },
+        {
+            "id": "def-hrtb-bound",
+            "surface": "definition",
+            "note": "Higher-ranked trait bound: the callee's where-clause is F: for<'x> Fn(&'x str) -> usize; the call passes str::len.",
+            "from": {
+                "file": "crates/atelier-core/src/support/borrowed.rs",
+                "needle": "apply_all(&borrowed, str::len)"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/borrowed.rs",
+                "needle": "pub fn apply_all<F>(items: &[&str], f: F) -> Vec<usize>",
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/support/borrowed.rs",
+                        "needle": "F: for<'x> Fn(&'x str) -> usize,"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-gat-assoc-type",
+            "surface": "definition",
+            "note": "Generic associated type: Lender::Loan<'a> carries a lifetime; store.lend() resolves to the trait method whose return type is Self::Loan<'_>, and the impl pins it to Option<&'a str>.",
+            "from": {
+                "file": "crates/atelier-core/src/support/lender.rs",
+                "needle": "store.lend()"
+            },
+            "expect": {
+                "kind": "gat",
+                "file": "crates/atelier-core/src/support/lender.rs",
+                "needle": "fn lend(&self) -> Self::Loan<'_>;",
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/support/lender.rs",
+                        "needle": "type Loan<'a> = Option<&'a str>;"
                     }
                 ]
             }
