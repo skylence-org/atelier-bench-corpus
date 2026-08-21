@@ -45,7 +45,8 @@
     },
     "autoload": {
         "files": [
-            "app/Support/helpers.php"
+            "app/Support/helpers.php",
+            "app/Support/Canonical/Exports/barrel.php"
         ],
         "psr-4": {
             "App\\": "app/",
