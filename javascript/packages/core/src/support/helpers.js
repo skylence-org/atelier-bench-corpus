@@ -11,7 +11,7 @@ export const ATELIER_REF_WIDTH = 6;
 /**
  * Build a human-facing reference such as `AT-2026-000123`.
  *
- * The numeric segment is zero-padded to {@link ATELIER_REF_WIDTH}; the
+ * The numeric segment is zero-padded width {@link ATELIER_REF_WIDTH}; the
  * separator comes from the static {@link Reference.PREFIX_SEPARATOR}.
  *
  * @param {string} prefix
