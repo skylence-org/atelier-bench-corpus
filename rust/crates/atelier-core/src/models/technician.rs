@@ -12,6 +12,8 @@ pub struct Technician {
 }
 
 impl Technician {
+    /// Build a technician with an empty [`Schedule`]; slot lookups on the
+    /// result forward to its Schedule through `Deref`.
     pub fn new(id: u32, name: impl Into<String>) -> Self {
         Self {
             id,

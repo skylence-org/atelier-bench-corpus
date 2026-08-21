@@ -4,7 +4,7 @@
 //! two different `Formatter` types reached through aliases.
 
 use atelier_core::concerns::has_reference::HasReference;
-use atelier_core::errors::AtelierError;
+use atelier_core::errors::NotFoundError;
 use axum::Json;
 use axum::extract::{Path, State};
 use serde::Serialize;
@@ -33,7 +33,7 @@ pub async fn show(
         .orders
         .iter()
         .find(|order| order.reference() == reference)
-        .ok_or_else(|| AtelierError::OrderNotFound(reference.clone()))?;
+        .ok_or_else(|| NotFoundError::new("repair order", reference.clone()))?;
 
     let customer = state
         .data
