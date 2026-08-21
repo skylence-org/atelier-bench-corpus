@@ -25,12 +25,12 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 
 | Path | Role | .php files |
 | --- | --- | --- |
-| `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 177 |
-| `app/Bench/` | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services | 99 |
-| `database/` | Migrations, factories, deterministic `DatabaseSeeder` | 40 |
+| `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 268 |
+| `app/Bench/` | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 24 reports (+ `ReportRegistry` fan-in), 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules | 151 |
+| `database/` | Migrations, factories, deterministic `DatabaseSeeder`, delegating `CanonicalSeeder` | 41 |
 | `routes/` | `web.php`, `api.php`, `console.php` | 3 |
 | `resources/views/` | Report view, Blade components, Livewire SFC, Filament pages | 12 |
-| `tests/` | Feature suite (34 tests / 86 assertions), Dusk scaffold | 16 |
+| `tests/` | Feature suite (44 tests / 171 assertions), Dusk scaffold | 17 |
 | `bench/` | `tasks.json` + `verify_tasks.php` self-check; **zero composer dependencies** | 1 |
 | `fixtures/broken-syntax/` | Intentionally invalid PHP + Blade, **DO NOT FIX** | 2 |
 
@@ -71,6 +71,11 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Multi-parent declarations | `app/Bench/Contracts/CompositeContract` (three parent interfaces); `app/Bench/Reports/CashFlowReport` (one `extends` + two `implements`; the composite implementor is an existing report so `ReportContract` stays at 24) |
 | Framework magic 1/2 (string-keyed edges) | facade static call (`Log::info` -> `Illuminate\Log\LogManager::info`), gate ability (`allows('update')` -> `RepairOrderPolicy::update`), query scope (`->open()` -> `scopeOpen`), `Attribute::get` accessor (`display_name` -> `displayName()`), container string key (`app('atelier.clock')` -> the `singleton` line) |
 | Framework magic 2/2 (string-keyed edges) | middleware alias (`record.visit` -> `RecordReportVisit`), route -> controller method + `{repairOrder:reference}` binding, `config('atelier.labor_rate_cents')` -> `config/atelier.php`, `__('atelier.note_created')` -> `lang/en/atelier.php`; probes in `app/Support/Edge/StringKeyProbe.php` |
+| Canonical shared ids: call sites | `app/Support/Canonical/CanonicalProbe` carries the global-function, class-const, static-factory, container-resolved-contract and error-throw call sites the shared ids point at |
+| Canonical shared ids: resolution edges | `app/Support/Canonical/`: `Exports/barrel.php` aliasing `Ledger` (re-export with no declaration of its own), `TypeOnlyProbe` (docblock-only import), `DuckFormatter` (duck-typed `FormatterContract` satisfier) |
+| Canonical shared ids: row fan-in | `app/Support/Canonical/Reporting/ReportRow::rowFromCents`, called once by each of the 8 `Reporting/Summaries/*` |
+| Report fan-in registry | `app/Bench/Reports/ReportRegistry::REPORTS`, the 24 `ReportContract` implementors in one constant, mirroring `RuleRegistry::RULES` |
+| Delegating seeder | `database/seeders/CanonicalSeeder` calls `DatabaseSeeder::class`, giving the frozen dataset an in-code reference instead of only an artisan string |
 | Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
 
 ## Consumption (runner)
@@ -87,7 +92,7 @@ cp .env.example .env   # if needed
 php artisan key:generate
 php artisan migrate --force
 php artisan db:seed    # DatabaseSeeder — deterministic
-php artisan test       # 34 tests, sqlite :memory:
+php artisan test       # 44 tests, sqlite :memory:
 ```
 
 Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:reference}` (see `ReportController`).
@@ -96,7 +101,7 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 79 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges |
+| `bench/tasks.json` | 103 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges + 24 shared canonical ids carried by the other lanes |
 | `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

@@ -95,6 +95,7 @@
     "def-assoc-const": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -232,6 +233,7 @@
     "def-container-binding": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -343,6 +345,7 @@
     "def-enum-variant": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -358,6 +361,7 @@
     "def-error-subclass": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -403,6 +407,7 @@
     "def-free-function": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -491,6 +496,7 @@
     "def-import-alias": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -743,6 +749,7 @@
     "def-proxy-forwarded-method": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -836,6 +843,7 @@
     "def-static-factory": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -900,6 +908,7 @@
     "def-trait-method-through-binding": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1034,6 +1043,7 @@
     "hover-free-function": {
       "surface": "hover",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1043,6 +1053,7 @@
     "hover-frozen-seed": {
       "surface": "hover",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1064,6 +1075,7 @@
     "hover-proxy-forwarding": {
       "surface": "hover",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1079,6 +1091,7 @@
     "imp-barrel-no-fanout": {
       "surface": "import-precision",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1136,6 +1149,7 @@
     "imp-type-only-no-value-edge": {
       "surface": "import-precision",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1163,6 +1177,7 @@
     "impl-invoice-calculator": {
       "surface": "implementation",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1172,6 +1187,7 @@
     "impl-notifier-contract": {
       "surface": "implementation",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1181,6 +1197,7 @@
     "impl-report-contract": {
       "surface": "implementation",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1421,6 +1438,7 @@
     "refs-dataset-seeded": {
       "surface": "references",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1443,6 +1461,7 @@
     "refs-money-class": {
       "surface": "references",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1464,6 +1483,7 @@
     "refs-report-registry": {
       "surface": "references",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1479,6 +1499,7 @@
     "refs-row-from-cents": {
       "surface": "references",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1632,6 +1653,7 @@
     "resolution-shadow-type-billing": {
       "surface": "resolution",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1641,6 +1663,7 @@
     "resolution-shadow-type-reporting": {
       "surface": "resolution",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1650,6 +1673,7 @@
     "resolution-structural-concern": {
       "surface": "resolution",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
