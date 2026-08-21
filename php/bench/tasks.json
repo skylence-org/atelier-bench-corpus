@@ -1,7 +1,7 @@
 {
     "version": 1,
     "corpus": "atelier-bench-corpus",
-    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding.",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding. Canonical-id kinds added by the parity wave: dynamic_method (magic __call forwarding: the receiver declares no such method), barrel (an import routed through a declaration-free re-export file), type_only (a `use` consumed only by a docblock, no runtime edge), structural (shape matches a contract the class never names), shadow_alias (a type position written through an alias of a same-name class). min_implementations counts exactly the way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -700,6 +700,278 @@
                 "kind": "string_key",
                 "file": "lang/en/atelier.php",
                 "needle": "'note_created' => 'Note recorded.',"
+            }
+        },
+        {
+            "id": "def-free-function",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local def-global-function id, asked from a second call site: the declaration is the global function in helpers.php, not the trait that also calls it.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "return atelier_format_reference('CN', $number);" },
+            "expect": { "file": "app/Support/helpers.php", "needle": "function atelier_format_reference(string $prefix, int $number): string" }
+        },
+        {
+            "id": "def-assoc-const",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local def-class-const id: class constant read as Reference::PREFIX_SEPARATOR, no instance involved.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "$separator = Reference::PREFIX_SEPARATOR;" },
+            "expect": { "file": "app/Support/Reference.php", "needle": "public const PREFIX_SEPARATOR = '-';" }
+        },
+        {
+            "id": "def-enum-variant",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local def-enum-case id, asked from the scopeRush query site: the enum case is a class-body declaration on the enum.",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "->where('priority', Priority::Rush->value)" },
+            "expect": { "file": "app/Enums/Priority.php", "needle": "case Rush = 'rush';" }
+        },
+        {
+            "id": "def-static-factory",
+            "surface": "definition",
+            "note": "Static alternate constructor on the enum; php had no lane-local id for this.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "return Priority::fromWeight(2);" },
+            "expect": { "file": "app/Enums/Priority.php", "needle": "public static function fromWeight(int $weight): self" }
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "note": "Same question as the other lanes: the default binding constructs StandardInvoiceCalculator, so the definition is that class, not the interface.",
+            "from": { "file": "app/Providers/AppServiceProvider.php", "needle": "$this->app->bind(InvoiceCalculator::class, StandardInvoiceCalculator::class);" },
+            "expect": { "file": "app/Services/StandardInvoiceCalculator.php", "needle": "class StandardInvoiceCalculator implements InvoiceCalculator" }
+        },
+        {
+            "id": "def-trait-method-through-binding",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local def-interface-through-binding id: the call goes through the container to whichever InvoiceCalculator is bound, so the declaration is the interface method (two implementors, see impl-invoice-calculator).",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "return app(InvoiceCalculator::class)->calculate($order);" },
+            "expect": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "public function calculate(RepairOrder $order): int;" }
+        },
+        {
+            "id": "def-import-alias",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local def-shadow-alias-billing id, asked at the import itself: `use ... as BillingFormatter` resolves to App\\Billing\\Formatter, never App\\Reporting\\Formatter.",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "use App\\Billing\\Formatter as BillingFormatter;" },
+            "expect": { "file": "app/Billing/Formatter.php", "needle": "class Formatter" }
+        },
+        {
+            "id": "def-error-subclass",
+            "surface": "definition",
+            "note": "Same question as the typescript/javascript/python lanes: the thrown subclass, not its base (AtelierError) and not RuntimeException.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "throw new NotFoundError('repair order', (string) $reference);" },
+            "expect": { "file": "app/Support/Canonical/NotFoundError.php", "needle": "class NotFoundError extends AtelierError" }
+        },
+        {
+            "id": "def-proxy-forwarded-method",
+            "surface": "definition",
+            "note": "Canonical mirror of the php-local card-magic-forward id. Technician declares no bookSlot method: ForwardsToSchedule::__call hands the name to Schedule at runtime (same question as the ts/js Proxy and the python __getattr__). The `@method` docblock line on Technician is a hint, not a declaration.",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "$technician->bookSlot($slot);" },
+            "expect": {
+                "kind": "dynamic_method",
+                "file": "app/Support/Schedule.php",
+                "needle": "public function bookSlot(CarbonImmutable $slot): bool",
+                "known_sites": [
+                    { "file": "app/Concerns/ForwardsToSchedule.php", "needle": "public function __call($method, $parameters)" }
+                ],
+                "must_not_include": ["@method bool bookSlot"]
+            }
+        },
+        {
+            "id": "impl-invoice-calculator",
+            "surface": "implementation",
+            "note": "Canonical mirror of the php-local impl-interface id. php is nominal: both implementors write `implements InvoiceCalculator`, unlike the python lane's structural Protocol.",
+            "from": { "file": "app/Contracts/InvoiceCalculator.php", "needle": "interface InvoiceCalculator" },
+            "expect": {
+                "min_implementations": 2,
+                "implementations": [
+                    { "file": "app/Services/StandardInvoiceCalculator.php", "needle": "class StandardInvoiceCalculator implements InvoiceCalculator" },
+                    { "file": "app/Services/RushInvoiceCalculator.php", "needle": "class RushInvoiceCalculator implements InvoiceCalculator" }
+                ]
+            }
+        },
+        {
+            "id": "impl-notifier-contract",
+            "surface": "implementation",
+            "note": "8 concrete implementors, all reaching the contract through AbstractNotifier; the abstract base itself is excluded by the counting rule in notes.",
+            "from": { "file": "app/Bench/Contracts/NotifierContract.php", "needle": "interface NotifierContract" },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    { "file": "app/Bench/Notifiers/DiscordNotifier.php", "needle": "class DiscordNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/EmailNotifier.php", "needle": "class EmailNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/PagerNotifier.php", "needle": "class PagerNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/PushNotifier.php", "needle": "class PushNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/SlackNotifier.php", "needle": "class SlackNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/SmsNotifier.php", "needle": "class SmsNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/TeamsNotifier.php", "needle": "class TeamsNotifier extends AbstractNotifier" },
+                    { "file": "app/Bench/Notifiers/WebhookNotifier.php", "needle": "class WebhookNotifier extends AbstractNotifier" }
+                ]
+            }
+        },
+        {
+            "id": "impl-report-contract",
+            "surface": "implementation",
+            "note": "24 concrete implementors through AbstractReport / AbstractPeriodicReport. Same counting rule and the same 24 as card-report-contract: abstract bases excluded, ReportRegistry is a fan-in holder and not an implementor.",
+            "from": { "file": "app/Bench/Contracts/ReportContract.php", "needle": "interface ReportContract" },
+            "expect": {
+                "min_implementations": 24,
+                "implementations": [
+                    { "file": "app/Bench/Reports/CashFlowReport.php", "needle": "class CashFlowReport extends AbstractPeriodicReport implements CompositeContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/ChurnRiskReport.php", "needle": "class ChurnRiskReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/CustomerLifetimeReport.php", "needle": "class CustomerLifetimeReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/CustomerRetentionReport.php", "needle": "class CustomerRetentionReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/DailyRevenueReport.php", "needle": "class DailyRevenueReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/GrossProfitReport.php", "needle": "class GrossProfitReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/InventoryTurnoverReport.php", "needle": "class InventoryTurnoverReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/MonthlyRevenueReport.php", "needle": "class MonthlyRevenueReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/NetMarginReport.php", "needle": "class NetMarginReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/OrderBacklogReport.php", "needle": "class OrderBacklogReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/OrderThroughputReport.php", "needle": "class OrderThroughputReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/OrderVolumeReport.php", "needle": "class OrderVolumeReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/PartShortageReport.php", "needle": "class PartShortageReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/PartUsageReport.php", "needle": "class PartUsageReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/PaymentDefaultReport.php", "needle": "class PaymentDefaultReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/PaymentLatencyReport.php", "needle": "class PaymentLatencyReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/ProfitMarginReport.php", "needle": "class ProfitMarginReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/TechnicianEfficiencyReport.php", "needle": "class TechnicianEfficiencyReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/TechnicianLoadReport.php", "needle": "class TechnicianLoadReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/TechnicianPayrollReport.php", "needle": "class TechnicianPayrollReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/WarrantyClaimReport.php", "needle": "class WarrantyClaimReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/WarrantyCostReport.php", "needle": "class WarrantyCostReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/WarrantyTrendReport.php", "needle": "class WarrantyTrendReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" },
+                    { "file": "app/Bench/Reports/WeeklyRevenueReport.php", "needle": "class WeeklyRevenueReport extends AbstractPeriodicReport implements CacheableContract, AuditableContract" }
+                ]
+            }
+        },
+        {
+            "id": "refs-money-class",
+            "surface": "references",
+            "note": "The lane-local Money cast (see lane-local-money): three `use` imports plus three cast-map entries.",
+            "from": { "file": "app/Casts/Money.php", "needle": "class Money implements CastsAttributes" },
+            "expect": {
+                "min_references": 6,
+                "known_sites": [
+                    { "file": "app/Models/RepairOrder.php", "needle": "'subtotal_cents' => Money::class," },
+                    { "file": "app/Models/Invoice.php", "needle": "'total_cents' => Money::class," },
+                    { "file": "app/Models/Part.php", "needle": "'unit_price_cents' => Money::class," }
+                ]
+            }
+        },
+        {
+            "id": "refs-dataset-seeded",
+            "surface": "references",
+            "note": "DatabaseSeeder is the php lane's frozen Dataset (see lane-local-dataset); the in-code references are the delegating CanonicalSeeder and the canonical feature test.",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "public function run(): void" },
+            "expect": {
+                "min_references": 3,
+                "known_sites": [
+                    { "file": "database/seeders/CanonicalSeeder.php", "needle": "$this->call(DatabaseSeeder::class);" },
+                    { "file": "tests/Feature/CanonicalSurfaceTest.php", "needle": "$this->seed(DatabaseSeeder::class);" }
+                ]
+            }
+        },
+        {
+            "id": "refs-row-from-cents",
+            "surface": "references",
+            "note": "Eight canonical summaries call the row helper once each; nothing else constructs a ReportRow.",
+            "from": { "file": "app/Support/Canonical/Reporting/ReportRow.php", "needle": "public static function rowFromCents(string $label, int $cents): self" },
+            "expect": {
+                "min_references": 8,
+                "known_sites": [
+                    { "file": "app/Support/Canonical/Reporting/Summaries/CashSummary.php", "needle": "return [ReportRow::rowFromCents('cash on hand', 125000)];" },
+                    { "file": "app/Support/Canonical/Reporting/Summaries/TaxSummary.php", "needle": "return [ReportRow::rowFromCents('tax collected', 22150)];" }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-registry",
+            "surface": "references",
+            "note": "Single fan-in constant for the 24 reports, mirroring RuleRegistry::RULES; read by the registry's own accessors and by the canonical feature test.",
+            "from": { "file": "app/Bench/Reports/ReportRegistry.php", "needle": "public const array REPORTS = [" },
+            "expect": {
+                "min_references": 3,
+                "known_sites": [
+                    { "file": "app/Bench/Reports/ReportRegistry.php", "needle": "return self::REPORTS;" },
+                    { "file": "tests/Feature/CanonicalSurfaceTest.php", "needle": "$this->assertCount(24, ReportRegistry::REPORTS);" }
+                ]
+            }
+        },
+        {
+            "id": "hover-free-function",
+            "surface": "hover",
+            "note": "Canonical mirror of the php-local hover-global-function id, asked from the canonical call site.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "return atelier_format_reference('CN', $number);" },
+            "expect": { "contains": "zero-padded width" }
+        },
+        {
+            "id": "hover-frozen-seed",
+            "surface": "hover",
+            "note": "Hover on the frozen dataset must surface the determinism warning, not just the class name.",
+            "from": { "file": "database/seeders/DatabaseSeeder.php", "needle": "class DatabaseSeeder extends Seeder" },
+            "expect": { "contains": "no faker randomness" }
+        },
+        {
+            "id": "hover-proxy-forwarding",
+            "surface": "hover",
+            "note": "Hover on the forwarding host must explain that undeclared methods reach Schedule through __call.",
+            "from": { "file": "app/Models/Technician.php", "needle": "class Technician extends Model" },
+            "expect": { "contains": "resolve through __call" }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "note": "Type position written through an alias of a same-name class: BillingFormatter is App\\Billing\\Formatter.",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "private readonly BillingFormatter $money," },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "App\\Billing\\Formatter",
+                "candidate": { "file": "app/Billing/Formatter.php", "needle": "class Formatter" }
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "note": "The other half of the same-name pair: ReportingFormatter is App\\Reporting\\Formatter.",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "private readonly ReportingFormatter $status," },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "App\\Reporting\\Formatter",
+                "candidate": { "file": "app/Reporting/Formatter.php", "needle": "class Formatter" }
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "DuckFormatter matches FormatterContract's shape (format(mixed): string) but never writes `implements`, so the structural link is the correct answer while a nominal implementor list must NOT contain it.",
+            "from": { "file": "app/Support/Canonical/DuckFormatter.php", "needle": "final class DuckFormatter" },
+            "expect": {
+                "kind": "structural",
+                "candidate": { "file": "app/Bench/Contracts/FormatterContract.php", "needle": "interface FormatterContract" },
+                "must_not_include": ["implements FormatterContract"]
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "php has no `import type`; the faithful equivalent is a `use` consumed only by a docblock. TypeOnlyProbe types its parameter `mixed` on purpose, so this file has no runtime edge to RepairOrder.",
+            "from": { "file": "app/Support/Canonical/TypeOnlyProbe.php", "needle": "use App\\Models\\RepairOrder;" },
+            "expect": {
+                "kind": "type_only",
+                "candidate": { "file": "app/Models/RepairOrder.php", "needle": "class RepairOrder extends Model" },
+                "known_sites": [
+                    { "file": "app/Support/Canonical/TypeOnlyProbe.php", "needle": "@param  RepairOrder  $order" }
+                ]
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "Exports/barrel.php declares nothing: it registers class_alias entries and is loaded through composer autoload.files. Resolution must land on the real Ledger declaration, never on the barrel file or an unrelated canonical sibling.",
+            "from": { "file": "app/Support/Canonical/CanonicalProbe.php", "needle": "use App\\Support\\Canonical\\Exports\\Ledger as ExportedLedger;" },
+            "expect": {
+                "kind": "barrel",
+                "candidate": { "file": "app/Support/Canonical/Ledger.php", "needle": "final class Ledger" },
+                "must_not_include": [
+                    "app/Support/Canonical/Exports/barrel.php",
+                    "app/Support/Canonical/DuckFormatter.php"
+                ]
             }
         }
     ]
