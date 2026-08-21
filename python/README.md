@@ -59,6 +59,7 @@ hints as the only static-typing surface.
 | HTTP surface (Flask) | `atelier_app/__init__.py`: `GET /report/<reference>`, `GET /api/orders`, `POST /api/orders/<id>/notes`, `GET /api/reports/<slug>`, `GET /health` |
 | Tests (incl. request-level) | 28 unittest tests: money, lifecycle, forwarding, shadow pair, events, structure, breadth, http, console, jobs |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (outside every package; `--lint` requires them to fail `py_compile`) |
+| Document-symbol + call-hierarchy | `atelier_core/models/repair_order.py` (18 named symbols) and `atelier_bench/__init__.py` (8) for the symbol listing; `complete` → `transition_to`, three callers of `transition_to`, and `atelier_app.commands.recalculate_inventory` → `atelier_core` `SendCompletionNotice.subscribe` for the call graph |
 
 ## Consumption (runner)
 
@@ -79,7 +80,7 @@ python3 -m atelier_app serve 8080
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 82 needle-based accuracy tasks (`from` → `expect` file/needle pairs) incl. the cardinality/direction/import-precision/collision/multi-parent surfaces from day one |
+| `bench/tasks.json` | 87 needle-based accuracy tasks (`from` → `expect` file/needle pairs) incl. the cardinality/direction/import-precision/collision/multi-parent surfaces from day one + 5 document-symbol/call-hierarchy surfaces |
 | `bench/verify_tasks.py` | Self-check that every task needle still resolves to exactly one line; **standard library only** |
 | Lane-specific `kind` strings | `setattr_mixin` (method grafted by a class decorator), `dynamic_attribute` (`__getattr__` forwarding), `property`, `dataclass_generated`, `class_creation_hook` (`__init_subclass__`), `descriptor`, `name_mangling`, `singledispatch`, `context_manager`, `same_name`, `pattern_match`, `module_getattr` (PEP 562), `unresolvable_static` (importlib with a runtime-built name), `string_key`, `mro`, `relative_import` |
 | `bench/mypy-allowlist.txt` | The exact `mypy` diagnostics `--lint` accepts (5 at the pinned version: the setattr-grafted `reference()`/`reference_number` the lane exists to exercise); regenerate with `--lint --write-allowlist` |

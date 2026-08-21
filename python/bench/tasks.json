@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "python",
-    "notes": "Known-answer navigation tasks for the python lane. Needle-based, not line-based: bench/verify_tasks.py resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (python/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Lane-specific kind strings are listed in README.md (Ground truth). IDs shared with the other lanes ask the same question in each language.",
+    "notes": "Known-answer navigation tasks for the python lane. Needle-based, not line-based: bench/verify_tasks.py resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (python/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Lane-specific kind strings are listed in README.md (Ground truth). IDs shared with the other lanes ask the same question in each language. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, members, functions, module constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -992,6 +992,62 @@
                     {"file": "atelier_bench/support/abstract_periodic_report.py", "needle": "class AbstractPeriodicReport(AbstractReport, ScheduleContract):"},
                     {"file": "atelier_bench/concerns/has_audit.py", "needle": "class HasAudit:"},
                     {"file": "atelier_bench/concerns/has_metadata.py", "needle": "class HasMetadataAccess:"}
+                ]
+            }
+        },
+        {
+            "id": "docsym-repair-order",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the RepairOrder model file. N = 18 named symbols at the base SHA: PartLine + 4 fields, LogEntry + 3 fields, RepairOrder + 8 members (__init__, transition_to, complete, parts_subtotal, total, add_part, is_open, seed). min_symbols = floor(0.75 * 18) = 13.",
+            "from": {"file": "atelier_core/models/repair_order.py", "needle": "class RepairOrder:"},
+            "expect": {
+                "min_symbols": 13,
+                "must_include": ["transition_to", "complete", "parts_subtotal", "add_part", "is_open", "seed"]
+            }
+        },
+        {
+            "id": "docsym-report-registry",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the breadth-subsystem registry module that holds the 24-report registry. N = 8 named symbols at the base SHA: REPORTS, REPORT_SLUGS, METRICS, report, metric, load_report, __getattr__, __all__; the rest of the module is imports, which declare no symbol of their own. min_symbols = floor(0.75 * 8) = 6.",
+            "from": {"file": "atelier_bench/__init__.py", "needle": "REPORTS: list[AbstractReport] = [report_class() for report_class in REPORT_CLASSES.values()]"},
+            "expect": {
+                "min_symbols": 6,
+                "must_include": ["REPORTS", "REPORT_SLUGS", "METRICS", "report", "metric", "load_report"]
+            }
+        },
+        {
+            "id": "hierarchy-complete-chain",
+            "surface": "call_hierarchy",
+            "note": "Outgoing edge inside the aggregate: complete() delegates to transition_to() in the same file.",
+            "from": {"file": "atelier_core/models/repair_order.py", "needle": "def complete(self, changed_by: str) -> None:"},
+            "expect": {
+                "outgoing_includes": [
+                    {"file": "atelier_core/models/repair_order.py", "needle": "def transition_to(self, next_status: RepairStatus, changed_by: str) -> bool:"}
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-incoming-transition",
+            "surface": "call_hierarchy",
+            "note": "Incoming edges on the lifecycle hub: at least three callers of transition_to, spread over the core package, the bench package and the test suite.",
+            "from": {"file": "atelier_core/models/repair_order.py", "needle": "def transition_to(self, next_status: RepairStatus, changed_by: str) -> bool:"},
+            "expect": {
+                "min_incoming": 3,
+                "incoming_includes": [
+                    {"file": "atelier_core/models/repair_order.py", "needle": "if not self.transition_to(RepairStatus.COMPLETED, changed_by):"},
+                    {"file": "atelier_bench/dataset.py", "needle": "orders[0].transition_to(RepairStatus.DIAGNOSING, \"seeder\")"},
+                    {"file": "tests/test_lifecycle.py", "needle": "self.assertTrue(order.transition_to(RepairStatus.DIAGNOSING, \"test\"))"}
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-cross-package",
+            "surface": "call_hierarchy",
+            "note": "Package-boundary edge: the app package's recalculate command calls SendCompletionNotice.subscribe, which is declared in the core package. The outgoing edge must cross atelier_app -> atelier_core.",
+            "from": {"file": "atelier_app/commands/recalculate_inventory.py", "needle": "def recalculate_inventory(state: AppState) -> str:"},
+            "expect": {
+                "outgoing_includes": [
+                    {"file": "atelier_core/events.py", "needle": "def subscribe(self, dispatcher: Dispatcher) -> \"SendCompletionNotice\":"}
                 ]
             }
         }
