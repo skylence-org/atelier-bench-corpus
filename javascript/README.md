@@ -64,6 +64,8 @@ on a bench machine if you need bit-stable ground truth.
 | Three parents / one extends + two mixins | `packages/bench/src/contracts/compositeContract.cjs`, `packages/bench/src/support/abstractCompositeReport.cjs` |
 | One contract, 48 implementors | `packages/bench/src/rules/`: 24 classes + 24 object literals in `structural.cjs`, registered in `RuleRegistry.RULES` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
+| Enum as a frozen object | `packages/core/src/support/status.js`, `packages/core/src/support/priority.js`: the members (`RepairStatus.Completed`, `Priority.Rush`) and the behaviour over them (`label`, `transitionsTo`, `surchargeBp`) are sibling properties of one `Object.freeze({ ... })` declaration |
+| Contract with no `implements` keyword | `packages/core/src/contracts/invoiceCalculator.js`, `packages/bench/src/contracts/reportContract.cjs`, `packages/bench/src/contracts/notifierContract.cjs`: each contract is a JSDoc `@typedef` with no runtime declaration, so its 2 / 24 / 8 implementors satisfy it structurally through the prototype chain |
 | Deterministic seed | `packages/bench/src/dataset.cjs`: revenue `58325`c, part cost `46300`c, gross profit `12025`c |
 | Tests (incl. request-level) | 70 tests: domain lifecycle, prototypes, Proxy forwarding, shadow pair, breadth registry, rules, CJS/ESM interop, express routes, console commands, the three job styles |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; nothing imports them) |
@@ -79,7 +81,7 @@ Local use:
 ```bash
 npm ci
 npm test                             # node --test, 70 tests
-npm run verify                       # 62 ground-truth tasks
+npm run verify                       # 73 ground-truth tasks
 npm run verify:lint                  # node --check over packages/ + broken-fixture guard
 node packages/app/src/main.js serve 8080
 node packages/app/src/main.js seed
@@ -114,7 +116,7 @@ specifier in the lane, so that class of defect fails a test as well as the gate.
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 62 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 53 original + 9 (EventEmitter subclass, callback/promise/async trio, same-name command vs job, createRequire, @template, dynamic import(), aligned def-container-binding) |
+| `bench/tasks.json` | 73 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 53 original + 9 (EventEmitter subclass, callback/promise/async trio, same-name command vs job, createRequire, @template, dynamic import(), aligned def-container-binding) + 11 shared canonical ids that opened the `implementation` surface in this lane (`impl-invoice-calculator`, `impl-notifier-contract`, `impl-report-contract`, `def-enum-method`, `def-enum-variant`, `def-shadow-alias-billing`, `def-shadow-alias-reporting`, `def-trait-method-through-binding`, `hover-free-function`, `resolution-shadow-type-billing`, `resolution-shadow-type-reporting`) |
 | `bench/checkjs-allowlist.txt` | The exact `tsc -p jsconfig.json` diagnostics the gate accepts (60 at the pinned versions); regenerate with `--lint --write-allowlist` |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 

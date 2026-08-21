@@ -17,6 +17,7 @@ const {
     makeTechnician,
     Money,
     Part,
+    Priority,
     RepairOrder,
     RepairStatus,
 } = require("@atelier/core");
@@ -81,7 +82,7 @@ class Dataset {
         orders[0].transitionTo(RepairStatus.Completed, "seeder");
 
         orders[1].laborMinutes = 45;
-        orders[1].priority = "rush";
+        orders[1].priority = Priority.Rush;
         orders[1].addPart(parts[1], 2);
         orders[1].transitionTo(RepairStatus.Diagnosing, "seeder");
         orders[1].transitionTo(RepairStatus.AwaitingParts, "seeder");

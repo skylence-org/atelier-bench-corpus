@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "javascript",
-    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). IDs shared with the php, rust and typescript lanes ask the same question in each language.",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. On the implementation surface min_implementations counts concrete classes only: JavaScript has no implements keyword, so satisfaction is structural and reached through the prototype chain, and the abstract bases (AbstractReport, AbstractPeriodicReport, AbstractCompositeReport, AbstractNotifier) are excluded from every count. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). Kind added by the implementation surface: structural (the implementor never names the contract, which is a JSDoc @typedef with no runtime declaration). IDs shared with the php, rust, typescript and python lanes ask the same question in each language.",
     "tasks": [
         {
             "id": "def-through-require",
@@ -1277,6 +1277,297 @@
                 "must_not_include": [
                     "packages/core/src/billing/formatter.js"
                 ]
+            }
+        },
+        {
+            "id": "def-enum-method",
+            "surface": "definition",
+            "note": "There is no enum keyword: RepairStatus is one frozen object where the states and the behaviour over them are sibling properties, so RepairStatus.label is a method on the same declaration that carries RepairStatus.Completed.",
+            "from": {
+                "file": "packages/core/src/reporting/formatter.js",
+                "needle": "const label = RepairStatus.label(status);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/status.js",
+                "needle": "    label(status) {"
+            }
+        },
+        {
+            "id": "def-enum-variant",
+            "surface": "definition",
+            "note": "Enum member: Priority.Rush is a property of the frozen Priority object whose value is cast to PriorityValue by an inline JSDoc annotation, not a declaration keyword.",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "orders[1].priority = Priority.Rush;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/priority.js",
+                "needle": "    Rush: /** @type {PriorityValue} */ (\"rush\"),"
+            }
+        },
+        {
+            "id": "def-shadow-alias-billing",
+            "surface": "definition",
+            "note": "Same-name pair: state.money is the billing Formatter (aliased MoneyFormatter in state.js), never the reporting one, which declares no money().",
+            "from": {
+                "file": "packages/app/src/http/report.js",
+                "needle": "total: state.money.money(order.total(state.container), \"EUR\"),"
+            },
+            "expect": {
+                "file": "packages/core/src/billing/formatter.js",
+                "needle": "    money(amount, currency = \"\") {"
+            }
+        },
+        {
+            "id": "def-shadow-alias-reporting",
+            "surface": "definition",
+            "note": "The other half: state.status is the reporting Formatter (aliased StatusFormatter in state.js), the only one that declares statusLine().",
+            "from": {
+                "file": "packages/app/src/http/report.js",
+                "needle": "status: state.status.statusLine(order.status, \"intake\"),"
+            },
+            "expect": {
+                "file": "packages/core/src/reporting/formatter.js",
+                "needle": "    statusLine(status, since) {"
+            }
+        },
+        {
+            "id": "def-trait-method-through-binding",
+            "surface": "definition",
+            "note": "The call site sees only the container, and the contract has no interface keyword behind it: the declaration is the calculate property of the InvoiceCalculator @typedef, which no implementor names (two implementations, see impl-invoice-calculator).",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "return container.invoiceCalculator().calculate(this);"
+            },
+            "expect": {
+                "file": "packages/core/src/contracts/invoiceCalculator.js",
+                "needle": " * @property {(order: import(\"../models/repairOrder.js\").RepairOrder) => import(\"../money.js\").Money} calculate"
+            }
+        },
+        {
+            "id": "hover-free-function",
+            "surface": "hover",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "return atelierFormatReference(this.referencePrefix, this.referenceNumber);"
+            },
+            "expect": {
+                "contains": "zero-padded width"
+            }
+        },
+        {
+            "id": "impl-invoice-calculator",
+            "surface": "implementation",
+            "note": "The contract is a JSDoc @typedef and nothing else; the two implementors never name it, so satisfaction is structural on name, appliesSurcharge and calculate(order).",
+            "from": {
+                "file": "packages/core/src/contracts/invoiceCalculator.js",
+                "needle": " * @typedef {object} InvoiceCalculator"
+            },
+            "expect": {
+                "kind": "structural",
+                "min_implementations": 2,
+                "implementations": [
+                    {
+                        "file": "packages/core/src/services/standardInvoiceCalculator.js",
+                        "needle": "export class StandardInvoiceCalculator {"
+                    },
+                    {
+                        "file": "packages/core/src/services/rushInvoiceCalculator.js",
+                        "needle": "export class RushInvoiceCalculator {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-notifier-contract",
+            "surface": "implementation",
+            "note": "No transport names NotifierContract: the contract is a JSDoc @typedef with no runtime declaration, and the 8 transports satisfy it through one extends edge to AbstractNotifier, which supplies channel, maxBytes and guard() while each transport writes its own send(). AbstractNotifier is a base and is not counted.",
+            "from": {
+                "file": "packages/bench/src/contracts/notifierContract.cjs",
+                "needle": " * @typedef {object} NotifierContract"
+            },
+            "expect": {
+                "kind": "structural",
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/notifiers/discordNotifier.cjs",
+                        "needle": "class DiscordNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/emailNotifier.cjs",
+                        "needle": "class EmailNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/pagerNotifier.cjs",
+                        "needle": "class PagerNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/pushNotifier.cjs",
+                        "needle": "class PushNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/slackNotifier.cjs",
+                        "needle": "class SlackNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/smsNotifier.cjs",
+                        "needle": "class SmsNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/teamsNotifier.cjs",
+                        "needle": "class TeamsNotifier extends AbstractNotifier {"
+                    },
+                    {
+                        "file": "packages/bench/src/notifiers/webhookNotifier.cjs",
+                        "needle": "class WebhookNotifier extends AbstractNotifier {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-report-contract",
+            "surface": "implementation",
+            "note": "Widest fan-out in the lane, and no textual edge anywhere: ReportContract is a JSDoc @typedef, so the 24 concrete reports satisfy it structurally through the prototype chain that ends on AbstractReport (slug, title, rows, total, isEmpty). 21 extend AbstractReport directly, 2 extend AbstractPeriodicReport (daily-revenue, weekly-revenue) and 1 extends AbstractCompositeReport (monthly-revenue), which itself extends AbstractPeriodicReport. All 24 must be reported; the 3 abstract bases are not counted.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": " * @typedef {object} ReportContract"
+            },
+            "expect": {
+                "kind": "structural",
+                "min_implementations": 24,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/reports/cash-flow.cjs",
+                        "needle": "module.exports = class CashFlowReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/churn-risk.cjs",
+                        "needle": "module.exports = class ChurnRiskReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-lifetime.cjs",
+                        "needle": "module.exports = class CustomerLifetimeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/customer-retention.cjs",
+                        "needle": "module.exports = class CustomerRetentionReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/daily-revenue.cjs",
+                        "needle": "module.exports = class DailyRevenueReport extends AbstractPeriodicReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/gross-profit.cjs",
+                        "needle": "module.exports = class GrossProfitReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/inventory-turnover.cjs",
+                        "needle": "module.exports = class InventoryTurnoverReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/monthly-revenue.cjs",
+                        "needle": "module.exports = class MonthlyRevenueReport extends AbstractCompositeReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/net-margin.cjs",
+                        "needle": "module.exports = class NetMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-backlog.cjs",
+                        "needle": "module.exports = class OrderBacklogReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-throughput.cjs",
+                        "needle": "module.exports = class OrderThroughputReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-volume.cjs",
+                        "needle": "module.exports = class OrderVolumeReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-shortage.cjs",
+                        "needle": "module.exports = class PartShortageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/part-usage.cjs",
+                        "needle": "module.exports = class PartUsageReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-default.cjs",
+                        "needle": "module.exports = class PaymentDefaultReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/payment-latency.cjs",
+                        "needle": "module.exports = class PaymentLatencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/profit-margin.cjs",
+                        "needle": "module.exports = class ProfitMarginReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-efficiency.cjs",
+                        "needle": "module.exports = class TechnicianEfficiencyReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-load.cjs",
+                        "needle": "module.exports = class TechnicianLoadReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/technician-payroll.cjs",
+                        "needle": "module.exports = class TechnicianPayrollReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-claim.cjs",
+                        "needle": "module.exports = class WarrantyClaimReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-cost.cjs",
+                        "needle": "module.exports = class WarrantyCostReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/warranty-trend.cjs",
+                        "needle": "module.exports = class WarrantyTrendReport extends AbstractReport {"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/weekly-revenue.cjs",
+                        "needle": "module.exports = class WeeklyRevenueReport extends AbstractPeriodicReport {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "note": "Two `export class Formatter` declarations exist; this JSDoc property type, written against the import alias, must land on the billing one.",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": " * @property {MoneyFormatter} money"
+            },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "@atelier/core/billing#Formatter",
+                "candidate": {
+                    "file": "packages/core/src/billing/formatter.js",
+                    "needle": "export class Formatter {"
+                }
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "note": "Same shape, other half: the JSDoc property type written against the StatusFormatter alias must land on the reporting Formatter.",
+            "from": {
+                "file": "packages/app/src/state.js",
+                "needle": " * @property {StatusFormatter} status"
+            },
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "@atelier/core/reporting#Formatter",
+                "candidate": {
+                    "file": "packages/core/src/reporting/formatter.js",
+                    "needle": "export class Formatter {"
+                }
             }
         }
     ]
