@@ -249,11 +249,48 @@ jobs:
           path: python/python-verify.txt
           if-no-files-found: ignore
 
+  go:
+    name: go
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: go
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Go 1.23.4 (matches the toolchain line in go/go.mod)
+        uses: actions/setup-go@v7.0.0
+        with:
+          go-version: "1.23.4"
+          cache: false
+
+      - name: build
+        run: go build ./...
+
+      - name: test
+        run: go test ./...
+
+      - name: Verify ground truth
+        run: go run ./bench/verify | tee go-verify.txt
+
+      - name: Verify lint
+        run: go run ./bench/verify --lint
+
+      - name: Upload verifier output
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: go-verify
+          path: go/go-verify.txt
+          if-no-files-found: ignore
+
   matrix:
     name: matrix
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    needs: [php, rust, typescript, javascript, python]
+    needs: [php, rust, typescript, javascript, python, go]
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -324,6 +361,13 @@ jobs:
         uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
+
+      - name: Go 1.23.4 (the go lane verifier runs under check-matrix)
+        if: hashFiles('bench/check-matrix.mjs') != ''
+        uses: actions/setup-go@v7.0.0
+        with:
+          go-version: "1.23.4"
+          cache: false
 
       - name: Corpus-wide matrix check
         if: hashFiles('bench/check-matrix.mjs') != ''
