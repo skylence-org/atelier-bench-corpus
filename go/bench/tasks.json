@@ -1,0 +1,674 @@
+{
+    "version": 1,
+    "corpus": "atelier-bench-corpus",
+    "lane": "go",
+    "notes": "Known-answer navigation tasks for the go lane. Needle-based, not line-based: bench/verify resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (go/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through EMBEDDING (Go's promotion); interfaces, embeddable bases and build-tag-gated types are excluded. Go has no implements keyword: the only textual evidence of satisfaction is a `var _ Contract = (*Type)(nil)` assertion, and the structural rules carry none at all. Lane-specific kind strings are listed in README.md (Ground truth). IDs shared with the other lanes ask the same question in each language.",
+    "tasks": [
+        {
+            "id": "def-free-function",
+            "surface": "definition",
+            "note": "Package-level function, no receiver.",
+            "from": {"file": "tests/structure_test.go", "needle": "sum := money.Sum([]money.Money{money.FromCents(100), money.FromCents(250)})"},
+            "expect": {"file": "core/money/money.go", "needle": "func Sum(amounts []Money) Money {"}
+        },
+        {
+            "id": "def-static-factory",
+            "surface": "definition",
+            "note": "Constructor function standing in for a static factory: Go has no static methods.",
+            "from": {"file": "atelier/dataset/dataset.go", "needle": "models.SeedCustomer(1, \"Ada Byron\", \"ada@example.test\", \"+32 470 00 00 01\"),"},
+            "expect": {"file": "core/models/customer.go", "needle": "func SeedCustomer(id int, name string, email string, phone string) *Customer {"}
+        },
+        {
+            "id": "def-enum-variant",
+            "surface": "definition",
+            "note": "iota enum member: the constant carries no string, the table does.",
+            "from": {"file": "atelier/dataset/dataset.go", "needle": "orders[1].Priority = support.PriorityRush"},
+            "expect": {"file": "core/support/priority.go", "needle": "\tPriorityRush                     // billed with the surcharge from the table below"}
+        },
+        {
+            "id": "def-enum-method",
+            "surface": "definition",
+            "note": "Method on a named integer type, called on an enum constant.",
+            "from": {"file": "core/services/rush.go", "needle": "return base.WithSurchargeBp(order.Priority.SurchargeBp())"},
+            "expect": {"file": "core/support/priority.go", "needle": "func (p Priority) SurchargeBp() int64 {"}
+        },
+        {
+            "id": "def-assoc-const",
+            "surface": "definition",
+            "note": "Package-level const tied to the type that uses it; Go has no associated consts.",
+            "from": {"file": "core/services/standard.go", "needle": "return &StandardInvoiceCalculator{LabourRateCentsPerHour: DefaultRateCents}"},
+            "expect": {"file": "core/services/standard.go", "needle": "const DefaultRateCents = 7500"}
+        },
+        {
+            "id": "def-module-const",
+            "surface": "definition",
+            "note": "Const inside a grouped const block, which the enum consts also use.",
+            "from": {"file": "core/events/events.go", "needle": "\tRepairCompleted = \"repair.completed\""},
+            "expect": {"file": "core/events/events.go", "needle": "\tRepairCompleted = \"repair.completed\""}
+        },
+        {
+            "id": "def-package-var-block",
+            "surface": "definition",
+            "note": "Package-level var declared inside a grouped var block.",
+            "from": {"file": "core/support/priority.go", "needle": "return surchargeBasisPoints[p]"},
+            "expect": {"file": "core/support/priority.go", "needle": "\tsurchargeBasisPoints = map[Priority]int64{"}
+        },
+        {
+            "id": "def-container-binding",
+            "surface": "definition",
+            "note": "The binding chosen at run time decides which calculator Total() reaches.",
+            "from": {"file": "app/state.go", "needle": "Container: container.BindDefault(),"},
+            "expect": {"file": "core/container/container.go", "needle": "func BindDefault() *Container {"}
+        },
+        {
+            "id": "def-trait-method-through-binding",
+            "surface": "definition",
+            "note": "Interface call: the concrete method depends on the container binding, not on the call site.",
+            "from": {"file": "app/http/report.go", "needle": "Total:      state.Money.Money(order.Total(state.Container.InvoiceCalculator())),"},
+            "expect": {
+                "file": "core/services/standard.go",
+                "needle": "func (c *StandardInvoiceCalculator) Calculate(order *models.RepairOrder) money.Money {",
+                "known_sites": [
+                    {"file": "core/services/rush.go", "needle": "func (c *RushInvoiceCalculator) Calculate(order *models.RepairOrder) money.Money {"}
+                ]
+            }
+        },
+        {
+            "id": "def-route-to-handler",
+            "surface": "definition",
+            "note": "Go 1.22 method-prefixed ServeMux pattern: the verb lives inside the pattern string.",
+            "from": {"file": "app/http/router.go", "needle": "mux.Handle(\"GET /report/{reference}\", ShowReport(state))"},
+            "expect": {"file": "app/http/report.go", "needle": "func ShowReport(state *app.State) Handler {"}
+        },
+        {
+            "id": "def-route-default-mux",
+            "surface": "definition",
+            "note": "The other registration shape: package-level HandleFunc on the default mux.",
+            "from": {"file": "app/http/router.go", "needle": "http.HandleFunc(\"/health\", Health(state))"},
+            "expect": {"file": "app/http/router.go", "needle": "func Health(state *app.State) Handler {"}
+        },
+        {
+            "id": "def-shadow-alias-billing",
+            "surface": "definition",
+            "note": "Two packages export a type named Formatter; the alias at the import site is the only clue.",
+            "from": {"file": "app/state.go", "needle": "\tMoney     *moneyfmt.Formatter"},
+            "expect": {"file": "core/billing/formatter.go", "needle": "type Formatter struct {"}
+        },
+        {
+            "id": "def-shadow-alias-reporting",
+            "surface": "definition",
+            "note": "The other half of the shadow pair.",
+            "from": {"file": "app/state.go", "needle": "\tStatus    *statusfmt.Formatter"},
+            "expect": {"file": "core/reporting/formatter.go", "needle": "type Formatter struct {"}
+        },
+        {
+            "id": "def-import-alias",
+            "surface": "definition",
+            "note": "Aliased import: the local identifier is nothing like the package name.",
+            "from": {"file": "app/state.go", "needle": "\tmoneyfmt \"atelier.example/lane/core/billing\""},
+            "expect": {"file": "core/billing/formatter.go", "needle": "func NewFormatter(currency string) *Formatter {"}
+        },
+        {
+            "id": "def-mixin-method",
+            "surface": "definition",
+            "note": "Go's mixin is embedding: the method is promoted, never redeclared.",
+            "from": {"file": "tests/promotion_test.go", "needle": "if got := technician.ShortReference(); got != \"TE7\" {"},
+            "expect": {"file": "core/concerns/reference.go", "needle": "func (h HasReference) ShortReference() string {"}
+        },
+        {
+            "id": "def-embedded-promotion-one-level",
+            "surface": "definition",
+            "note": "One level of promotion through an embedded POINTER field; technician.go never names BookSlot.",
+            "from": {"file": "tests/promotion_test.go", "needle": "if !technician.BookSlot(0) {"},
+            "expect": {
+                "file": "core/support/schedule.go",
+                "needle": "func (s *Schedule) BookSlot(slot int) bool {",
+                "known_sites": [
+                    {"file": "core/models/technician.go", "needle": "\t*support.Schedule"}
+                ]
+            }
+        },
+        {
+            "id": "def-embedded-promotion-two-levels",
+            "surface": "definition",
+            "note": "Two levels: Technician embeds Staff, Staff embeds HasReference. Neither hop is written on Technician.",
+            "from": {"file": "tests/promotion_test.go", "needle": "if got := technician.Reference(); got != \"TE-2026-000007\" {"},
+            "expect": {
+                "file": "core/concerns/reference.go",
+                "needle": "func (h HasReference) Reference() string {",
+                "known_sites": [
+                    {"file": "core/models/technician.go", "needle": "type Staff struct {"},
+                    {"file": "core/models/technician.go", "needle": "\t\tStaff:    Staff{HasReference: concerns.NewHasReference(\"TE\", id), Name: name},"}
+                ]
+            }
+        },
+        {
+            "id": "def-embedded-promotion-four-levels",
+            "surface": "definition",
+            "note": "CashFlowReport reaches CacheKey through CompositeReport, PeriodicReport, BaseReport, HasCache.",
+            "from": {"file": "tests/promotion_test.go", "needle": "if cacheable.CacheKey() != \"cash-flow:cache\" {"},
+            "expect": {
+                "file": "atelier/concerns/cache.go",
+                "needle": "func (h HasCache) CacheKey() string {",
+                "known_sites": [
+                    {"file": "atelier/reports/cash_flow.go", "needle": "\tsupport.CompositeReport"},
+                    {"file": "atelier/support/composite.go", "needle": "\tPeriodicReport"},
+                    {"file": "atelier/support/periodic.go", "needle": "\tBaseReport"},
+                    {"file": "atelier/support/report.go", "needle": "\tconcerns.HasCache"}
+                ]
+            }
+        },
+        {
+            "id": "def-proxy-forwarded-method",
+            "surface": "definition",
+            "note": "Forwarding without a forwarder: the call inside the outer type resolves to the embedded one.",
+            "from": {"file": "core/models/technician.go", "needle": "return t.BookedCount() == 0"},
+            "expect": {"file": "core/support/schedule.go", "needle": "func (s *Schedule) BookedCount() int {"}
+        },
+        {
+            "id": "def-shadowing-promoted-method",
+            "surface": "definition",
+            "note": "The outer Calculate SHADOWS the promoted one and calls it back through the explicit field path.",
+            "from": {"file": "core/services/rush.go", "needle": "base := c.StandardInvoiceCalculator.Calculate(order)"},
+            "expect": {
+                "file": "core/services/standard.go",
+                "needle": "func (c *StandardInvoiceCalculator) Calculate(order *models.RepairOrder) money.Money {",
+                "known_sites": [
+                    {"file": "core/services/rush.go", "needle": "func (c *RushInvoiceCalculator) Calculate(order *models.RepairOrder) money.Money {"}
+                ]
+            }
+        },
+        {
+            "id": "def-method-value",
+            "surface": "definition",
+            "note": "Method value: the receiver is bound, the result is a func(int) bool.",
+            "from": {"file": "core/support/schedule.go", "needle": "\tbook := s.BookSlot"},
+            "expect": {"file": "core/support/schedule.go", "needle": "func (s *Schedule) BookSlot(slot int) bool {"}
+        },
+        {
+            "id": "def-method-expression",
+            "surface": "definition",
+            "note": "Method expression: the receiver becomes the first parameter, func(*Schedule, int) bool.",
+            "from": {"file": "core/support/schedule.go", "needle": "\tbooker := (*Schedule).BookSlot"},
+            "expect": {"file": "core/support/schedule.go", "needle": "func (s *Schedule) BookSlot(slot int) bool {"}
+        },
+        {
+            "id": "def-func-type-implements-interface",
+            "surface": "definition",
+            "note": "The http.HandlerFunc pattern: the method set hangs off a named FUNCTION type.",
+            "from": {"file": "app/http/router.go", "needle": "var _ http.Handler = Handler(nil)"},
+            "expect": {"file": "app/http/router.go", "needle": "func (h Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {"}
+        },
+        {
+            "id": "def-named-func-type-adapter",
+            "surface": "definition",
+            "note": "A func type adapting a plain closure to a three-method interface.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "var adapted corecontracts.InvoiceCalculator = corecontracts.CalculatorFunc(func(order *models.RepairOrder) money.Money {"},
+            "expect": {"file": "core/contracts/invoicecalculator.go", "needle": "type CalculatorFunc func(order *models.RepairOrder) money.Money"}
+        },
+        {
+            "id": "def-generic-constraint-union",
+            "surface": "definition",
+            "note": "One type parameter constrained by a union of approximated types.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "if support.SumOf([]float64{1.5, 2.5}) != 4 {"},
+            "expect": {
+                "file": "core/support/helpers.go",
+                "needle": "func SumOf[T Number](values []T) T {",
+                "known_sites": [
+                    {"file": "core/support/helpers.go", "needle": "\t~int | ~int64 | ~float64"}
+                ]
+            }
+        },
+        {
+            "id": "def-generic-two-params",
+            "surface": "definition",
+            "note": "Two type parameters, both inferred at the call site.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "lengths := support.MapSlice([]string{\"a\", \"bb\"}, func(value string) int { return len(value) })"},
+            "expect": {"file": "core/support/helpers.go", "needle": "func MapSlice[T any, R any](values []T, convert func(T) R) []R {"}
+        },
+        {
+            "id": "def-generic-struct-method",
+            "surface": "definition",
+            "note": "Method on a generic struct: the receiver carries the type parameters, the method adds none.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "if swapped := pair.Swap(); swapped.Left != 4 {"},
+            "expect": {"file": "core/support/pair.go", "needle": "func (p Pair[L, R]) Swap() Pair[R, L] {"}
+        },
+        {
+            "id": "def-generic-free-function-extra-param",
+            "surface": "definition",
+            "note": "A Go method may not add a type parameter, so the third one lives on a free function.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "doubled := support.MapRight(pair, func(value int) int { return value * 2 })"},
+            "expect": {"file": "core/support/pair.go", "needle": "func MapRight[L any, R any, T any](pair Pair[L, R], convert func(R) T) Pair[L, T] {"}
+        },
+        {
+            "id": "def-generic-registry-instantiation",
+            "surface": "definition",
+            "note": "The same generic container instantiated for reports, metrics, exporters, notifiers and rules.",
+            "from": {"file": "atelier/reports/registry.go", "needle": "var registry = support.NewRegistry[contracts.ReportContract]()"},
+            "expect": {"file": "atelier/support/registry.go", "needle": "func NewRegistry[T any]() *Registry[T] {"}
+        },
+        {
+            "id": "def-init-registration",
+            "surface": "definition",
+            "note": "Registration happens in init(), so no call site outside the package mentions the report.",
+            "from": {"file": "atelier/reports/gross_profit.go", "needle": "\tRegister(NewGrossProfitReport())"},
+            "expect": {"file": "atelier/reports/registry.go", "needle": "func Register(report contracts.ReportContract) {"}
+        },
+        {
+            "id": "def-generated-file",
+            "surface": "definition",
+            "note": "Label() exists only in the committed generated file; the generator that writes it is in tools/.",
+            "from": {"file": "core/support/status.go", "needle": "//go:generate go run atelier.example/lane/tools/statusgen -out status_labels_gen.go"},
+            "expect": {
+                "file": "core/support/status_labels_gen.go",
+                "needle": "func (s RepairStatus) Label() string {",
+                "known_sites": [
+                    {"file": "core/support/status_labels_gen.go", "needle": "// Code generated by tools/statusgen. DO NOT EDIT."},
+                    {"file": "tools/statusgen/main.go", "needle": "\tbuilder.WriteString(\"func (s RepairStatus) Label() string {\\n\")"}
+                ]
+            }
+        },
+        {
+            "id": "def-embedded-asset",
+            "surface": "definition",
+            "note": "go:embed binds a file to a package variable at build time; no file is read at run time.",
+            "from": {"file": "internal/audit/audit.go", "needle": "//go:embed banner.txt"},
+            "expect": {"file": "internal/audit/audit.go", "needle": "var banner string"}
+        },
+        {
+            "id": "def-build-tag-gated",
+            "surface": "definition",
+            "note": "Two files declare platformLabel; exactly one compiles, chosen by GOOS. CI (linux) takes the !darwin half.",
+            "from": {"file": "internal/audit/audit.go", "needle": "s.trail = append(s.trail, fmt.Sprintf(\"%s/%s\", platformLabel(), event))"},
+            "expect": {
+                "file": "internal/audit/platform_other.go",
+                "needle": "func platformLabel() string {",
+                "known_sites": [
+                    {"file": "internal/audit/platform_darwin.go", "needle": "//go:build darwin"},
+                    {"file": "internal/audit/platform_other.go", "needle": "//go:build !darwin"}
+                ]
+            }
+        },
+        {
+            "id": "def-closure-handler",
+            "surface": "definition",
+            "note": "Every handler is an anonymous function returned by a factory; the route table holds closures.",
+            "from": {"file": "app/http/router.go", "needle": "mux.Handle(\"GET /api/orders\", ListOrders(state))"},
+            "expect": {
+                "file": "app/http/api.go",
+                "needle": "func ListOrders(state *app.State) Handler {",
+                "known_sites": [
+                    {"file": "app/http/report.go", "needle": "\treturn func(writer http.ResponseWriter, request *http.Request) {"}
+                ]
+            }
+        },
+        {
+            "id": "def-defer-recover",
+            "surface": "definition",
+            "note": "A deferred closure turns a panic into a named return value.",
+            "from": {"file": "tests/jobs_test.go", "needle": "result, err := app.SafeRun(func() app.JobResult {"},
+            "expect": {
+                "file": "app/jobs.go",
+                "needle": "func SafeRun(job func() JobResult) (result JobResult, err error) {",
+                "known_sites": [
+                    {"file": "app/jobs.go", "needle": "\t\tif recovered := recover(); recovered != nil {"}
+                ]
+            }
+        },
+        {
+            "id": "def-callback-style",
+            "surface": "definition",
+            "note": "First of the job trio: the continuation is a parameter.",
+            "from": {"file": "tests/jobs_test.go", "needle": "\tapp.RunWithCallback(data, func(result app.JobResult) {"},
+            "expect": {"file": "app/jobs.go", "needle": "func RunWithCallback(data *dataset.Dataset, done func(result JobResult)) {"}
+        },
+        {
+            "id": "def-channel-job",
+            "surface": "definition",
+            "note": "Second of the trio: the result arrives on a receive-only channel closed by a goroutine.",
+            "from": {"file": "tests/jobs_test.go", "needle": "\tfromChannel := <-app.RunWithChannel(data)"},
+            "expect": {"file": "app/jobs.go", "needle": "func RunWithChannel(data *dataset.Dataset) <-chan JobResult {"}
+        },
+        {
+            "id": "def-goroutine-select",
+            "surface": "definition",
+            "note": "Third of the trio: three goroutines, a WaitGroup and a select with a timeout arm.",
+            "from": {"file": "tests/jobs_test.go", "needle": "\tfromGoroutines := app.RunWithGoroutines(data)"},
+            "expect": {
+                "file": "app/jobs.go",
+                "needle": "func RunWithGoroutines(data *dataset.Dataset) []JobResult {",
+                "known_sites": [
+                    {"file": "app/jobs.go", "needle": "\t\tcase result, open := <-results:"},
+                    {"file": "app/jobs.go", "needle": "\t\tcase <-timeout:"}
+                ]
+            }
+        },
+        {
+            "id": "def-generator-function",
+            "surface": "definition",
+            "note": "Go 1.23 range-over-func: the loop drives a closure that yields, which is Go's generator.",
+            "from": {"file": "atelier/services/backlog_service.go", "needle": "\tfor order := range data.Iterate() {"},
+            "expect": {"file": "atelier/dataset/dataset.go", "needle": "func (d *Dataset) Iterate() iter.Seq[*models.RepairOrder] {"}
+        },
+        {
+            "id": "def-type-switch",
+            "surface": "definition",
+            "note": "Type switch narrowing an interface to its two concrete types plus a default arm.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "if got := support.DescribeChoice(support.RightOf(7)); got != \"right:7\" {"},
+            "expect": {
+                "file": "core/support/pick.go",
+                "needle": "\tswitch narrowed := choice.(type) {",
+                "known_sites": [
+                    {"file": "core/support/pick.go", "needle": "\tcase Right:"}
+                ]
+            }
+        },
+        {
+            "id": "def-anonymous-struct",
+            "surface": "definition",
+            "note": "The return type has no name anywhere in the tree.",
+            "from": {"file": "tests/interfaces_test.go", "needle": "summary := support.AnonymousSummary(support.LeftOf(\"\", \"fallback\"))"},
+            "expect": {"file": "core/support/pick.go", "needle": "func AnonymousSummary(choice Choice) struct {"}
+        },
+        {
+            "id": "def-error-subclass",
+            "surface": "definition",
+            "note": "Go's error subclass is a type with Error() plus Unwrap() pointing at a sentinel.",
+            "from": {"file": "app/http/errors.go", "needle": "\tkey, _ := failure.MissingKey(err)"},
+            "expect": {
+                "file": "core/failure/errors.go",
+                "needle": "type NotFoundError struct {",
+                "known_sites": [
+                    {"file": "core/failure/errors.go", "needle": "func (e *NotFoundError) Unwrap() error {"}
+                ]
+            }
+        },
+        {
+            "id": "def-error-sentinel",
+            "surface": "definition",
+            "note": "The sentinel is a package-level var compared with errors.Is, never by message.",
+            "from": {"file": "tests/errors_test.go", "needle": "\tif !errors.Is(wrapped, failure.ErrNotFound) {"},
+            "expect": {"file": "core/failure/errors.go", "needle": "var ErrNotFound = errors.New(\"not found\")"}
+        },
+        {
+            "id": "def-struct-tag",
+            "surface": "definition",
+            "note": "The wire name lives in a struct tag, not in the field name.",
+            "from": {"file": "tests/http_test.go", "needle": "\tif body[\"reference\"] != \"AT-2026-000001\" {"},
+            "expect": {"file": "app/http/report.go", "needle": "\tReference  string `json:\"reference\"`"}
+        },
+        {
+            "id": "def-internal-package",
+            "surface": "definition",
+            "note": "internal/ limits importers to this module; the blank import runs init and nothing else.",
+            "from": {"file": "cmd/atelier/main.go", "needle": "\t_ \"atelier.example/lane/internal/audit\""},
+            "expect": {"file": "internal/audit/audit.go", "needle": "func init() {"}
+        },
+        {
+            "id": "def-vendored-package-name",
+            "surface": "definition",
+            "note": "Import path ends in yamlish.v2, declared package is yamlish: the call qualifier is the package name.",
+            "from": {"file": "app/commands/export_report.go", "needle": "\treturn yamlish.Marshal(map[string]string{"},
+            "expect": {
+                "file": "third_party/yamlish.v2/yamlish.go",
+                "needle": "func Marshal(values map[string]string) string {",
+                "known_sites": [
+                    {"file": "app/commands/export_report.go", "needle": "\t\"atelier.example/yamlish.v2\""},
+                    {"file": "third_party/yamlish.v2/yamlish.go", "needle": "package yamlish"}
+                ]
+            }
+        },
+        {
+            "id": "impl-report-contract",
+            "surface": "implementation",
+            "note": "24 concrete reports satisfy it structurally; each declares only Rows and inherits Slug/Title by embedding.",
+            "from": {"file": "atelier/contracts/report.go", "needle": "type ReportContract interface {"},
+            "expect": {
+                "exact_count": 24,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/reports/cash_flow.go", "needle": "var _ contracts.ReportContract = (*CashFlowReport)(nil)"},
+                    {"file": "atelier/reports/gross_profit.go", "needle": "var _ contracts.ReportContract = (*GrossProfitReport)(nil)"},
+                    {"file": "atelier/reports/monthly_revenue.go", "needle": "var _ contracts.ReportContract = (*MonthlyRevenueReport)(nil)"},
+                    {"file": "atelier/reports/weekly_revenue.go", "needle": "var _ contracts.ReportContract = (*WeeklyRevenueReport)(nil)"}
+                ]
+            }
+        },
+        {
+            "id": "impl-notifier-contract",
+            "surface": "implementation",
+            "note": "8 notifiers, each embedding support.BaseNotifier for the promoted Channel method.",
+            "from": {"file": "atelier/contracts/notifier.go", "needle": "type NotifierContract interface {"},
+            "expect": {
+                "exact_count": 8,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/notifiers/discord_notifier.go", "needle": "var _ contracts.NotifierContract = (*DiscordNotifier)(nil)"},
+                    {"file": "atelier/notifiers/webhook_notifier.go", "needle": "var _ contracts.NotifierContract = (*WebhookNotifier)(nil)"}
+                ]
+            }
+        },
+        {
+            "id": "impl-invoice-calculator",
+            "surface": "implementation",
+            "note": "Two structs plus one named func type; the func type satisfies all three methods.",
+            "from": {"file": "core/contracts/invoicecalculator.go", "needle": "type InvoiceCalculator interface {"},
+            "expect": {
+                "exact_count": 3,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "core/services/standard.go", "needle": "var _ contracts.InvoiceCalculator = (*StandardInvoiceCalculator)(nil)"},
+                    {"file": "core/services/rush.go", "needle": "var _ contracts.InvoiceCalculator = (*RushInvoiceCalculator)(nil)"},
+                    {"file": "core/contracts/invoicecalculator.go", "needle": "type CalculatorFunc func(order *models.RepairOrder) money.Money"}
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-generic",
+            "surface": "implementation",
+            "note": "One generic interface, eight instantiations: five over models types, three over package-local record types.",
+            "from": {"file": "core/contracts/repository.go", "needle": "type Repository[T any] interface {"},
+            "expect": {
+                "exact_count": 8,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/repositories/customer_repository.go", "needle": "var _ contracts.Repository[*models.Customer] = (*CustomerRepository)(nil)"},
+                    {"file": "atelier/repositories/payment_repository.go", "needle": "var _ contracts.Repository[Payment] = (*PaymentRepository)(nil)"},
+                    {"file": "atelier/repositories/warranty_repository.go", "needle": "var _ contracts.Repository[Claim] = (*WarrantyRepository)(nil)"}
+                ]
+            }
+        },
+        {
+            "id": "impl-structural-no-assertion",
+            "surface": "implementation",
+            "note": "The 24 ad-hoc rule VALUES satisfy RuleLike by shape; the adhoc package names no contract and asserts nothing.",
+            "from": {"file": "atelier/contracts/rule.go", "needle": "type RuleLike interface {"},
+            "expect": {
+                "exact_count": 24,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/rules/adhoc/adhoc.go", "needle": "type AdHocRule struct {"},
+                    {"file": "atelier/rules/adhoc/adhoc.go", "needle": "var Rules = []AdHocRule{"}
+                ],
+                "must_not_include": ["var _ contracts.RuleLike"]
+            }
+        },
+        {
+            "id": "impl-service-contract",
+            "surface": "implementation",
+            "note": "12 services, each embedding support.BaseService for the promoted Name method.",
+            "from": {"file": "atelier/contracts/service.go", "needle": "type ServiceContract interface {"},
+            "expect": {
+                "exact_count": 12,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/services/backlog_service.go", "needle": "var _ contracts.ServiceContract = (*BacklogService)(nil)"},
+                    {"file": "atelier/services/revenue_service.go", "needle": "var _ contracts.ServiceContract = (*RevenueService)(nil)"}
+                ]
+            }
+        },
+        {
+            "id": "impl-exporter-contract",
+            "surface": "implementation",
+            "note": "8 exporters reachable only through the string-keyed registry.",
+            "from": {"file": "atelier/contracts/exporter.go", "needle": "type ExporterContract interface {"},
+            "expect": {
+                "exact_count": 8,
+                "kind": "structural",
+                "implementations": [
+                    {"file": "atelier/exporters/csv_exporter.go", "needle": "var _ contracts.ExporterContract = (*CsvExporter)(nil)"},
+                    {"file": "atelier/exporters/yaml_exporter.go", "needle": "var _ contracts.ExporterContract = (*YamlExporter)(nil)"}
+                ]
+            }
+        },
+        {
+            "id": "refs-consumed-quantity",
+            "surface": "references",
+            "from": {"file": "core/models/part.go", "needle": "func (p *Part) ConsumedQuantity() int {"},
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {"file": "atelier/reports/part_usage.go", "needle": "rows = append(rows, contracts.Row(part.Name, float64(part.ConsumedQuantity())))"},
+                    {"file": "atelier/reports/inventory_turnover.go", "needle": "turnover = float64(part.ConsumedQuantity()) / float64(part.Stock)"},
+                    {"file": "atelier/services/part_usage_service.go", "needle": "\t\tunits += part.ConsumedQuantity()"}
+                ]
+            }
+        },
+        {
+            "id": "refs-transition-to",
+            "surface": "references",
+            "from": {"file": "core/models/repairorder.go", "needle": "func (o *RepairOrder) TransitionTo(next support.RepairStatus, changedBy string) bool {"},
+            "expect": {
+                "min_references": 5,
+                "known_sites": [
+                    {"file": "core/models/repairorder.go", "needle": "\tif !o.TransitionTo(support.StatusCompleted, changedBy) {"},
+                    {"file": "atelier/dataset/dataset.go", "needle": "\torders[0].TransitionTo(support.StatusCompleted, \"seeder\")"},
+                    {"file": "tests/promotion_test.go", "needle": "\tif !order.TransitionTo(support.StatusDiagnosing, \"tester\") {"}
+                ]
+            }
+        },
+        {
+            "id": "refs-dataset-seeded",
+            "surface": "references",
+            "from": {"file": "atelier/dataset/dataset.go", "needle": "func Seeded() *Dataset {"},
+            "expect": {
+                "min_references": 3,
+                "known_sites": [
+                    {"file": "app/state.go", "needle": "\t\tData:      dataset.Seeded(),"},
+                    {"file": "tests/promotion_test.go", "needle": "\treturn dataset.Seeded()"}
+                ]
+            }
+        },
+        {
+            "id": "refs-money-type",
+            "surface": "references",
+            "from": {"file": "core/money/money.go", "needle": "type Money struct {"},
+            "expect": {
+                "min_references": 6,
+                "known_sites": [
+                    {"file": "core/models/invoice.go", "needle": "\tTotal         money.Money"},
+                    {"file": "core/models/part.go", "needle": "\tUnitPrice    money.Money"},
+                    {"file": "core/contracts/invoicecalculator.go", "needle": "\tCalculate(order *models.RepairOrder) money.Money"}
+                ]
+            }
+        },
+        {
+            "id": "refs-row-from-cents",
+            "surface": "references",
+            "from": {"file": "atelier/contracts/report.go", "needle": "func RowFromCents(label string, cents int64) ReportRow {"},
+            "expect": {
+                "min_references": 8,
+                "known_sites": [
+                    {"file": "atelier/reports/gross_profit.go", "needle": "\t\tcontracts.RowFromCents(\"gross profit\", revenue-cost),"},
+                    {"file": "atelier/reports/weekly_revenue.go", "needle": "\treturn []contracts.ReportRow{contracts.RowFromCents(\"week to date\", data.RevenueCents())}"}
+                ]
+            }
+        },
+        {
+            "id": "refs-report-registry",
+            "surface": "references",
+            "from": {"file": "atelier/reports/registry.go", "needle": "var registry = support.NewRegistry[contracts.ReportContract]()"},
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {"file": "atelier/reports/registry.go", "needle": "\tregistry.Add(report.Slug(), report)"},
+                    {"file": "atelier/reports/registry.go", "needle": "\treturn registry.All()"},
+                    {"file": "tests/breadth_test.go", "needle": "\t\t{\"reports\", reports.Count(), 24},"}
+                ]
+            }
+        },
+        {
+            "id": "refs-rule-registry",
+            "surface": "references",
+            "note": "Both rule families fan into one Register: 24 init calls plus one loop over the structural values.",
+            "from": {"file": "atelier/rules/registry.go", "needle": "func Register(rule contracts.RuleContract) {"},
+            "expect": {
+                "min_references": 5,
+                "known_sites": [
+                    {"file": "atelier/rules/registry.go", "needle": "\t\tRegister(rule)"},
+                    {"file": "atelier/rules/minimum_stock.go", "needle": "\tRegister(MinimumStockRule{})"},
+                    {"file": "atelier/rules/warranty_window.go", "needle": "\tRegister(WarrantyWindowRule{})"}
+                ]
+            }
+        },
+        {
+            "id": "refs-string-event-name",
+            "surface": "references",
+            "from": {"file": "core/events/events.go", "needle": "\tRepairCompleted = \"repair.completed\""},
+            "expect": {
+                "min_references": 3,
+                "known_sites": [
+                    {"file": "core/events/events.go", "needle": "\tdispatcher.Listen(RepairCompleted, n)"},
+                    {"file": "tests/events_test.go", "needle": "\tif !dispatcher.Dispatch(events.RepairCompleted, events.Payload{\"reference\": \"AT-2026-000001\"}) {"}
+                ]
+            }
+        },
+        {
+            "id": "refs-promoted-method-call",
+            "surface": "references",
+            "note": "Two of the call sites reach it through embedding, on a *models.Technician receiver.",
+            "from": {"file": "core/support/schedule.go", "needle": "func (s *Schedule) NextSlot() int {"},
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {"file": "core/support/schedule.go", "needle": "\tnext := s.NextSlot()"},
+                    {"file": "atelier/repositories/technician_repository.go", "needle": "\t\tif record.NextSlot() >= 0 {"},
+                    {"file": "atelier/rules/schedule_gap.go", "needle": "\t\tif technician.NextSlot() < 0 {"}
+                ]
+            }
+        },
+        {
+            "id": "hover-free-function",
+            "surface": "hover",
+            "from": {"file": "core/money/money.go", "needle": "func Sum(amounts []Money) Money {"},
+            "expect": {
+                "contains": "Sum folds any sequence of amounts into one."
+            }
+        },
+        {
+            "id": "hover-frozen-seed",
+            "surface": "hover",
+            "from": {"file": "atelier/dataset/dataset.go", "needle": "func Seeded() *Dataset {"},
+            "expect": {
+                "contains": "Every number below is ground truth."
+            }
+        },
+        {
+            "id": "hover-proxy-forwarding",
+            "surface": "hover",
+            "from": {"file": "core/models/technician.go", "needle": "type Technician struct {"},
+            "expect": {
+                "contains": "Neither promoted method is declared anywhere in this file."
+            }
+        },
+        {
+            "id": "hover-generated-marker",
+            "surface": "hover",
+            "note": "The generated-file marker a tool must respect before offering an edit.",
+            "from": {"file": "core/support/status_labels_gen.go", "needle": "// Code generated by tools/statusgen. DO NOT EDIT."},
+            "expect": {
+                "contains": "DO NOT EDIT"
+            }
+        }
+    ]
+}
