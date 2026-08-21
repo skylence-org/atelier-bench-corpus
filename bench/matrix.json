@@ -1006,6 +1006,7 @@
     "docsym-report-registry": {
       "surface": "document_symbol",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1025,6 +1026,7 @@
     "hierarchy-cross-package": {
       "surface": "call_hierarchy",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1034,6 +1036,7 @@
     "hierarchy-incoming-transition": {
       "surface": "call_hierarchy",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
