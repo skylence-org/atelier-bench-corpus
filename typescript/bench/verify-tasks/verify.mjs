@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
 
-const NESTED_KEYS = ["known_sites", "implementations", "known_callers", "outgoing_includes"];
+const NESTED_KEYS = ["known_sites", "implementations", "known_callers", "outgoing_includes", "incoming_includes"];
 
 const args = process.argv.slice(2);
 const laneRoot = resolveRoot(args);

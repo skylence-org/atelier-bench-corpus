@@ -987,13 +987,33 @@
     "docsym-repair-order": {
       "surface": "document_symbol",
       "lanes": [
-        "php"
+        "php",
+        "rust"
+      ]
+    },
+    "docsym-report-registry": {
+      "surface": "document_symbol",
+      "lanes": [
+        "rust"
       ]
     },
     "hierarchy-complete-chain": {
       "surface": "call_hierarchy",
       "lanes": [
-        "php"
+        "php",
+        "rust"
+      ]
+    },
+    "hierarchy-cross-package": {
+      "surface": "call_hierarchy",
+      "lanes": [
+        "rust"
+      ]
+    },
+    "hierarchy-incoming-transition": {
+      "surface": "call_hierarchy",
+      "lanes": [
+        "rust"
       ]
     },
     "hover-free-function": {

@@ -21,7 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-NESTED_KEYS = ("known_sites", "implementations", "known_callers", "outgoing_includes")
+NESTED_KEYS = ("known_sites", "implementations", "known_callers", "outgoing_includes", "incoming_includes")
 SPLIT = re.compile(r"\r\n|\n|\r")
 PACKAGES = ("atelier_core", "atelier_bench", "atelier_app")
 

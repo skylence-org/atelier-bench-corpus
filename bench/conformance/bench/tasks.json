@@ -32,13 +32,14 @@
         {
             "id": "c-nested",
             "surface": "direction",
-            "note": "conformance: known_sites, implementations, known_callers, outgoing_includes and candidate all resolved and counted.",
+            "note": "conformance: known_sites, implementations, known_callers, outgoing_includes, incoming_includes and candidate all resolved and counted.",
             "from": { "file": "src/nested.txt", "needle": "c-nested anchor" },
             "expect": {
                 "known_sites": [ { "file": "src/nested.txt", "needle": "site alpha" } ],
                 "implementations": [ { "file": "src/nested.txt", "needle": "impl alpha" } ],
                 "known_callers": [ { "file": "src/nested.txt", "needle": "caller alpha" } ],
                 "outgoing_includes": [ { "file": "src/nested.txt", "needle": "include alpha" } ],
+                "incoming_includes": [ { "file": "src/nested.txt", "needle": "incoming alpha" } ],
                 "candidate": { "file": "src/nested.txt", "needle": "candidate alpha" }
             }
         },

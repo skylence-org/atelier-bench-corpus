@@ -65,6 +65,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Multi-parent: one impl line, two inherited supertraits | `contracts/digest_contract.rs` (`DigestContract: HasAudit + HasMetadata`) implemented by `support/audit_digest.rs`'s `AuditDigest` |
 | Structural look-alike that is NOT an implementor | `support/plain_row_formatter.rs`: `HasFormatting`'s method set declared inherently, no `impl HasFormatting`, and the `T: ReportContract` blanket does not reach it |
 | Import-precision: barrel, type-position-only | `repositories/customer_repository.rs` (`use atelier_core::Customer;` through the crate-root `pub use`), `models/repair_order.rs` (`Container` named only in a signature) |
+| Document-symbol + call-hierarchy | `crates/atelier-core/src/models/repair_order.rs` (31 named symbols) and `crates/atelier-bench/src/lib.rs` (16) for the symbol listing; `complete` → `transition_to`, three callers of `transition_to`, and `atelier-app` `commands::recalculate_inventory::run` → `atelier-core` `Dispatcher::register` for the call graph |
 
 ## Consumption (runner)
 
@@ -89,7 +90,7 @@ HTTP surface: `GET /report/{reference}` (e.g. `AT-2026-000001`), `GET /api/order
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 91 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges + 12 shared canonical ids |
+| `bench/tasks.json` | 96 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges + 12 shared canonical ids + 5 document-symbol/call-hierarchy surfaces |
 | `bench/verify-tasks` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
