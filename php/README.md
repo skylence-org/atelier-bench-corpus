@@ -76,6 +76,7 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Canonical shared ids: row fan-in | `app/Support/Canonical/Reporting/ReportRow::rowFromCents`, called once by each of the 8 `Reporting/Summaries/*` |
 | Report fan-in registry | `app/Bench/Reports/ReportRegistry::REPORTS`, the 24 `ReportContract` implementors in one constant, mirroring `RuleRegistry::RULES` |
 | Delegating seeder | `database/seeders/CanonicalSeeder` calls `DatabaseSeeder::class`, giving the frozen dataset an in-code reference instead of only an artisan string |
+| Document-symbol + call-hierarchy | `app/Bench/Reports/ReportRegistry` (4 named symbols) for the symbol listing; `complete` → `transitionTo`, three callers of `transitionTo` (model, seeder, feature test), and `ReportController::show` → both aliased `Formatter` halves for the call graph |
 | Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
 
 ## Consumption (runner)
@@ -101,7 +102,7 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 103 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges + 24 shared canonical ids carried by the other lanes |
+| `bench/tasks.json` | 106 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges + 24 shared canonical ids carried by the other lanes + 3 document-symbol/call-hierarchy surfaces |
 | `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

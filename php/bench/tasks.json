@@ -1,7 +1,7 @@
 {
     "version": 1,
     "corpus": "atelier-bench-corpus",
-    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding. Canonical-id kinds added by the parity wave: dynamic_method (magic __call forwarding: the receiver declares no such method), barrel (an import routed through a declaration-free re-export file), type_only (a `use` consumed only by a docblock, no runtime edge), structural (shape matches a contract the class never names), shadow_alias (a type position written through an alias of a same-name class). min_implementations counts exactly the way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded.",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding. Canonical-id kinds added by the parity wave: dynamic_method (magic __call forwarding: the receiver declares no such method), barrel (an import routed through a declaration-free re-export file), type_only (a `use` consumed only by a docblock, no runtime edge), structural (shape matches a contract the class never names), shadow_alias (a type position written through an alias of a same-name class). min_implementations counts exactly the way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, constants, properties, methods); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -971,6 +971,42 @@
                 "must_not_include": [
                     "app/Support/Canonical/Exports/barrel.php",
                     "app/Support/Canonical/DuckFormatter.php"
+                ]
+            }
+        },
+        {
+            "id": "docsym-report-registry",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the class that holds the 24-report registry. N = 4 named symbols at the base SHA: the ReportRegistry class, the REPORTS class constant and the two static methods. The 24 entries inside REPORTS are class references, not declarations, and add no symbol of their own. min_symbols = floor(0.75 * 4) = 3, the margin absorbing a listing that folds the container class.",
+            "from": { "file": "app/Bench/Reports/ReportRegistry.php", "needle": "public const array REPORTS = [" },
+            "expect": {
+                "min_symbols": 3,
+                "must_include": ["REPORTS", "all", "count"]
+            }
+        },
+        {
+            "id": "hierarchy-incoming-transition",
+            "surface": "call_hierarchy",
+            "note": "Incoming edges on the lifecycle hub: at least three callers of transitionTo, spread over the model itself, the seeder and the feature suite.",
+            "from": { "file": "app/Models/RepairOrder.php", "needle": "public function transitionTo(RepairStatus $next, string $changedBy): bool" },
+            "expect": {
+                "min_incoming": 3,
+                "incoming_includes": [
+                    { "file": "app/Models/RepairOrder.php", "needle": "if (! $this->transitionTo(RepairStatus::Completed, $changedBy)) {" },
+                    { "file": "database/seeders/DatabaseSeeder.php", "needle": "$order->transitionTo(RepairStatus::Diagnosing, 'seeder');" },
+                    { "file": "tests/Feature/RepairLifecycleTest.php", "needle": "$this->assertTrue($order->transitionTo(RepairStatus::Diagnosing, 'tester'));" }
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-cross-package",
+            "surface": "call_hierarchy",
+            "note": "Layer-boundary edges: the HTTP action reaches both halves of the shadow pair through constructor-promoted properties typed by ALIASED imports, so each outgoing edge crosses App\\Http\\Controllers into a different namespace and a bare-name matcher conflates the two Formatter classes.",
+            "from": { "file": "app/Http/Controllers/ReportController.php", "needle": "public function show(RepairOrder $repairOrder): View" },
+            "expect": {
+                "outgoing_includes": [
+                    { "file": "app/Billing/Formatter.php", "needle": "public function money(string $decimal, string $currency = 'EUR'): string" },
+                    { "file": "app/Reporting/Formatter.php", "needle": "public function statusLine(RepairStatus $status, ?string $since): string" }
                 ]
             }
         }
