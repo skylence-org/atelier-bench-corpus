@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "typescript",
-        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: jsx_element, jsx_factory, ambient (global namespace in a .d.ts), ambient_module (declare module), paths_alias.",
+        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: jsx_element, jsx_factory, ambient (global namespace in a .d.ts), ambient_module (declare module), paths_alias. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (types, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1728,6 +1728,92 @@
                     {
                         "file": "packages/app/tests/views.test.ts",
                         "needle": "const html = String(ReportCard({ reference: \"AT-2026-000001\", total: \"349.00 EUR\", status: \"Completed\" }));"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "docsym-repair-order",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the RepairOrder model file. N = 24 named symbols at the base SHA: OrderPart + 4 properties, StatusChange + 3 properties, RepairOrderBase + 5 properties + constructor, RepairOrder + 7 members. min_symbols = floor(0.75 * 24) = 18.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "export class RepairOrder extends withReference(RepairOrderBase) {"
+            },
+            "expect": {
+                "min_symbols": 18,
+                "must_include": ["transitionTo", "complete", "partsSubtotal", "addPart", "isOpen", "seed"]
+            }
+        },
+        {
+            "id": "docsym-report-registry",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the breadth-subsystem registry module that holds the 24-report registry. N = 4 named symbols at the base SHA: REPORTS, METRICS, report, metric; the rest of the module is imports and re-exports, which declare no symbol of their own. min_symbols = floor(0.75 * 4) = 3.",
+            "from": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export const REPORTS: readonly ReportContract[] = ["
+            },
+            "expect": {
+                "min_symbols": 3,
+                "must_include": ["REPORTS", "METRICS", "report", "metric"]
+            }
+        },
+        {
+            "id": "hierarchy-complete-chain",
+            "surface": "call_hierarchy",
+            "note": "Outgoing edge inside the aggregate: complete() delegates to transitionTo() in the same file.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "complete(changedBy: string): void {"
+            },
+            "expect": {
+                "outgoing_includes": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.ts",
+                        "needle": "transitionTo(next: RepairStatus, changedBy: string): boolean {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-incoming-transition",
+            "surface": "call_hierarchy",
+            "note": "Incoming edges on the lifecycle hub: at least three callers of transitionTo, spread over the core package, the bench package and the core test suite.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.ts",
+                "needle": "transitionTo(next: RepairStatus, changedBy: string): boolean {"
+            },
+            "expect": {
+                "min_incoming": 3,
+                "incoming_includes": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.ts",
+                        "needle": "if (!this.transitionTo(RepairStatus.Completed, changedBy)) {"
+                    },
+                    {
+                        "file": "packages/bench/src/dataset.ts",
+                        "needle": "orders[1]!.transitionTo(RepairStatus.AwaitingParts, \"seeder\");"
+                    },
+                    {
+                        "file": "packages/core/tests/lifecycle.test.ts",
+                        "needle": "expect(order.transitionTo(RepairStatus.Collected, \"seeder\")).toBe(false);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-cross-package",
+            "surface": "call_hierarchy",
+            "note": "Package-boundary edge: the app package's recalculate command calls Dispatcher.register, which is declared in the core package. The outgoing edge must cross @atelier/app -> @atelier/core.",
+            "from": {
+                "file": "packages/app/src/commands/recalculateInventory.ts",
+                "needle": "export function recalculateInventory(state: AppState): number {"
+            },
+            "expect": {
+                "outgoing_includes": [
+                    {
+                        "file": "packages/core/src/events.ts",
+                        "needle": "register(listener: Listener): void {"
                     }
                 ]
             }

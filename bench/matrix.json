@@ -988,32 +988,37 @@
       "surface": "document_symbol",
       "lanes": [
         "php",
-        "rust"
+        "rust",
+        "typescript"
       ]
     },
     "docsym-report-registry": {
       "surface": "document_symbol",
       "lanes": [
-        "rust"
+        "rust",
+        "typescript"
       ]
     },
     "hierarchy-complete-chain": {
       "surface": "call_hierarchy",
       "lanes": [
         "php",
-        "rust"
+        "rust",
+        "typescript"
       ]
     },
     "hierarchy-cross-package": {
       "surface": "call_hierarchy",
       "lanes": [
-        "rust"
+        "rust",
+        "typescript"
       ]
     },
     "hierarchy-incoming-transition": {
       "surface": "call_hierarchy",
       "lanes": [
-        "rust"
+        "rust",
+        "typescript"
       ]
     },
     "hover-free-function": {
