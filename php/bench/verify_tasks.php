@@ -149,7 +149,7 @@ function collectNeedlePairs(array $task): array
     }
 
     // Nested arrays of file+needle objects
-    foreach (['known_sites', 'implementations', 'known_callers', 'outgoing_includes'] as $key) {
+    foreach (['known_sites', 'implementations', 'known_callers', 'outgoing_includes', 'incoming_includes'] as $key) {
         if (! isset($expect[$key]) || ! is_array($expect[$key])) {
             continue;
         }

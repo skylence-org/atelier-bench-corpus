@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
 
-const NESTED_KEYS = ["known_sites", "implementations", "known_callers", "outgoing_includes"];
+const NESTED_KEYS = ["known_sites", "implementations", "known_callers", "outgoing_includes", "incoming_includes"];
 
 /** Extensions the lint pass parses with `node --check`. */
 const SOURCE_EXTENSIONS = new Set([".js", ".mjs", ".cjs"]);

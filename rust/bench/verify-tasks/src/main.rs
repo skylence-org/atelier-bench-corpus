@@ -30,11 +30,12 @@ struct NeedlePair {
 }
 
 /// Nested expect keys that hold arrays of {file, needle} objects.
-const NESTED_KEYS: [&str; 4] = [
+const NESTED_KEYS: [&str; 5] = [
     "known_sites",
     "implementations",
     "known_callers",
     "outgoing_includes",
+    "incoming_includes",
 ];
 
 fn main() -> ExitCode {

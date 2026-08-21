@@ -3,4 +3,5 @@ site alpha
 impl alpha
 caller alpha
 include alpha
+incoming alpha
 candidate alpha
