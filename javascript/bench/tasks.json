@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "javascript",
-    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. On the implementation surface min_implementations counts concrete classes only: JavaScript has no implements keyword, so satisfaction is structural and reached through the prototype chain, and the abstract bases (AbstractReport, AbstractPeriodicReport, AbstractCompositeReport, AbstractNotifier) are excluded from every count. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). Kind added by the implementation surface: structural (the implementor never names the contract, which is a JSDoc @typedef with no runtime declaration). IDs shared with the php, rust, typescript and python lanes ask the same question in each language.",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. On the implementation surface min_implementations counts concrete classes only: JavaScript has no implements keyword, so satisfaction is structural and reached through the prototype chain, and the abstract bases (AbstractReport, AbstractPeriodicReport, AbstractCompositeReport, AbstractNotifier) are excluded from every count. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). Kind added by the implementation surface: structural (the implementor never names the contract, which is a JSDoc @typedef with no runtime declaration). IDs shared with the php, rust, typescript and python lanes ask the same question in each language. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
     "tasks": [
         {
             "id": "def-through-require",
@@ -1568,6 +1568,92 @@
                     "file": "packages/core/src/reporting/formatter.js",
                     "needle": "export class Formatter {"
                 }
+            }
+        },
+        {
+            "id": "docsym-repair-order",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the RepairOrder model file. N = 9 named symbols at the base SHA: the RepairOrder class, its constructor and its 7 members (transitionTo, complete, partsSubtotal, total, addPart, isOpen, seed). The two JSDoc typedefs are documentation, not declarations, and are not counted. min_symbols = floor(0.75 * 9) = 6.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "export class RepairOrder {"
+            },
+            "expect": {
+                "min_symbols": 6,
+                "must_include": ["transitionTo", "complete", "partsSubtotal", "addPart", "isOpen", "seed"]
+            }
+        },
+        {
+            "id": "docsym-report-registry",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the breadth-subsystem registry module that holds the 24-report registry. N = 6 named symbols at the base SHA: REPORTS, METRICS, REPORT_SLUGS, loadReport, report, metric; the rest of the module is require bindings and one module.exports object, which declare no symbol of their own. min_symbols = floor(0.75 * 6) = 4.",
+            "from": {
+                "file": "packages/bench/src/index.cjs",
+                "needle": "const REPORTS = ["
+            },
+            "expect": {
+                "min_symbols": 4,
+                "must_include": ["REPORTS", "METRICS", "REPORT_SLUGS", "loadReport", "report", "metric"]
+            }
+        },
+        {
+            "id": "hierarchy-complete-chain",
+            "surface": "call_hierarchy",
+            "note": "Outgoing edge inside the aggregate: complete() delegates to transitionTo() in the same file.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "    complete(changedBy) {"
+            },
+            "expect": {
+                "outgoing_includes": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.js",
+                        "needle": "    transitionTo(next, changedBy) {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-incoming-transition",
+            "surface": "call_hierarchy",
+            "note": "Incoming edges on the lifecycle hub: at least three callers of transitionTo, spread over the core package, the bench package and the core test suite.",
+            "from": {
+                "file": "packages/core/src/models/repairOrder.js",
+                "needle": "    transitionTo(next, changedBy) {"
+            },
+            "expect": {
+                "min_incoming": 3,
+                "incoming_includes": [
+                    {
+                        "file": "packages/core/src/models/repairOrder.js",
+                        "needle": "if (!this.transitionTo(RepairStatus.Completed, changedBy)) {"
+                    },
+                    {
+                        "file": "packages/bench/src/dataset.cjs",
+                        "needle": "orders[1].transitionTo(RepairStatus.AwaitingParts, \"seeder\");"
+                    },
+                    {
+                        "file": "packages/core/tests/lifecycle.test.js",
+                        "needle": "assert.ok(!order.transitionTo(RepairStatus.Collected, \"seeder\"));"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-cross-package",
+            "surface": "call_hierarchy",
+            "note": "Package-boundary edge: the app package's recalculate command calls SendCompletionNotice.subscribe, which is declared in the core package. The outgoing edge must cross @atelier/app -> @atelier/core.",
+            "from": {
+                "file": "packages/app/src/commands/recalculateInventory.js",
+                "needle": "export async function recalculateInventory(state) {"
+            },
+            "expect": {
+                "outgoing_includes": [
+                    {
+                        "file": "packages/core/src/events.js",
+                        "needle": "    subscribe(dispatcher) {"
+                    }
+                ]
             }
         }
     ]

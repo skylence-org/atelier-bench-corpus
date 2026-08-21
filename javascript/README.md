@@ -69,6 +69,7 @@ on a bench machine if you need bit-stable ground truth.
 | Deterministic seed | `packages/bench/src/dataset.cjs`: revenue `58325`c, part cost `46300`c, gross profit `12025`c |
 | Tests (incl. request-level) | 70 tests: domain lifecycle, prototypes, Proxy forwarding, shadow pair, breadth registry, rules, CJS/ESM interop, express routes, console commands, the three job styles |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (negative cases; nothing imports them) |
+| Document-symbol + call-hierarchy | `packages/core/src/models/repairOrder.js` (9 named symbols) and `packages/bench/src/index.cjs` (6) for the symbol listing; `complete` → `transitionTo`, three callers of `transitionTo`, and `@atelier/app` `recalculateInventory` → `@atelier/core` `SendCompletionNotice.subscribe` for the call graph |
 
 ## Consumption (runner)
 
@@ -116,7 +117,7 @@ specifier in the lane, so that class of defect fails a test as well as the gate.
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 73 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 53 original + 9 (EventEmitter subclass, callback/promise/async trio, same-name command vs job, createRequire, @template, dynamic import(), aligned def-container-binding) + 11 shared canonical ids that opened the `implementation` surface in this lane (`impl-invoice-calculator`, `impl-notifier-contract`, `impl-report-contract`, `def-enum-method`, `def-enum-variant`, `def-shadow-alias-billing`, `def-shadow-alias-reporting`, `def-trait-method-through-binding`, `hover-free-function`, `resolution-shadow-type-billing`, `resolution-shadow-type-reporting`) |
+| `bench/tasks.json` | 78 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 53 original + 9 (EventEmitter subclass, callback/promise/async trio, same-name command vs job, createRequire, @template, dynamic import(), aligned def-container-binding) + 11 shared canonical ids that opened the `implementation` surface in this lane (`impl-invoice-calculator`, `impl-notifier-contract`, `impl-report-contract`, `def-enum-method`, `def-enum-variant`, `def-shadow-alias-billing`, `def-shadow-alias-reporting`, `def-trait-method-through-binding`, `hover-free-function`, `resolution-shadow-type-billing`, `resolution-shadow-type-reporting`) + 5 document-symbol/call-hierarchy surfaces |
 | `bench/checkjs-allowlist.txt` | The exact `tsc -p jsconfig.json` diagnostics the gate accepts (60 at the pinned versions); regenerate with `--lint --write-allowlist` |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 
