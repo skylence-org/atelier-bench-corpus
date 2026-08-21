@@ -1,6 +1,7 @@
 pub mod auditable_contract;
 pub mod cacheable_contract;
 pub mod composite_contract;
+pub mod digest_contract;
 pub mod exporter_contract;
 pub mod formatter_contract;
 pub mod metric_contract;

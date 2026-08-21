@@ -50,7 +50,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Parallel iteration (rayon) | `services/revenue_service.rs::metric_sweep` — also what forces `MetricContract: Send + Sync` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `atelier-bench/src/dataset.rs::seeded` — revenue `58_325c`, part cost `46_300c`, gross profit `12_025c` |
-| Tests (incl. request-level) | 59 tests: domain lifecycle, shadow pair, Deref/macro forwarding, breadth registry, axum routes, console commands, JSON parser |
+| Tests (incl. request-level) | 63 tests: domain lifecycle, shadow pair, Deref/macro forwarding, not-found conversion, breadth registry, canonical-parity constructs, axum routes, console commands, JSON parser |
 | Build-script generated item | `crates/atelier-core/build.rs` writes `generated_units()` into `OUT_DIR`; `support/generated_units.rs` splices it in with `include!` — no textual definition under `src/` |
 | `#[path]` module | `support/mod.rs`: `#[path = "pathed/tally_sheet.rs"] pub mod ledger;` — module name and file name differ |
 | Lifetimes, HRTB, GAT | `support/borrowed.rs` (`Borrowed<'a>`, `for<'x> Fn(&'x str)`), `support/lender.rs` (`type Loan<'a> where Self: 'a`) |
@@ -61,6 +61,10 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Collision: lane-local identifiers | `Money`, `Customer`, `Dataset`, `ATELIER_REF_PREFIX`, `InvoiceCalculator::calculate`, `billing::Formatter` — same names exist in the php/typescript/javascript lanes |
 | Multi-parent: three-way supertrait fan-in | `contracts/composite_contract.rs`: `CompositeContract: ReportContract + CacheableContract + ScheduleContract`, implemented by `CashFlowReport`; `&dyn CompositeContract` upcasts to `&dyn ReportContract` |
 | Breadth: const generics, closures, async traits, cfg-gating | `support/grid.rs`, `support/closure_predicate.rs`, `support/pair_map.rs`, `support/rule_summary.rs` (`#[derive(Serialize)]`), `atelier-app/src/async_check.rs`, `rules/cfg_gated.rs`, `prelude.rs` + `rules_probe.rs` (two-level re-export) |
+| Dedicated error type behind `#[from]` | `errors.rs`: `NotFoundError` is its own type; `AtelierError::NotFound(#[from] NotFoundError)` converts it, and `http/report.rs` constructs it at the lookup site |
+| Multi-parent: one impl line, two inherited supertraits | `contracts/digest_contract.rs` (`DigestContract: HasAudit + HasMetadata`) implemented by `support/audit_digest.rs`'s `AuditDigest` |
+| Structural look-alike that is NOT an implementor | `support/plain_row_formatter.rs`: `HasFormatting`'s method set declared inherently, no `impl HasFormatting`, and the `T: ReportContract` blanket does not reach it |
+| Import-precision: barrel, type-position-only | `repositories/customer_repository.rs` (`use atelier_core::Customer;` through the crate-root `pub use`), `models/repair_order.rs` (`Container` named only in a signature) |
 
 ## Consumption (runner)
 
@@ -71,7 +75,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 Local use:
 
 ```bash
-cargo test --workspace          # 59 tests
+cargo test --workspace          # 63 tests
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p atelier-app -- serve 8080
 cargo run -p atelier-app -- seed
@@ -85,7 +89,7 @@ HTTP surface: `GET /report/{reference}` (e.g. `AT-2026-000001`), `GET /api/order
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 79 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges |
+| `bench/tasks.json` | 91 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges + 12 shared canonical ids |
 | `bench/verify-tasks` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

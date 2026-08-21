@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "rust",
-    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: build_generated (item spliced in by include! from OUT_DIR), path_attribute (#[path]-declared module), gat (generic associated type).",
+    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: build_generated (item spliced in by include! from OUT_DIR), path_attribute (#[path]-declared module), gat (generic associated type). Kinds added by the canonical-parity wave: barrel (import resolved through the crate-root pub use re-export), type_only (a use consumed only in type position, carrying no value-level edge), structural (a type that carries a trait's method set inherently without implementing it), deref_forward (a method reached through a Deref impl). For parents-class-one-plus-two, extends_count is the trait named on the impl line, implements_count its supertraits, and exact_count their total.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1278,6 +1278,243 @@
                         "file": "crates/atelier-core/src/support/lender.rs",
                         "needle": "type Loan<'a> = Option<&'a str>;"
                     }
+                ]
+            }
+        },
+        {
+            "id": "def-error-subclass",
+            "surface": "definition",
+            "note": "Rust has no subclassing: NotFoundError is its own type that converts into AtelierError through #[from]. The construction site must resolve to that type, not to the enum it converts into.",
+            "from": {
+                "file": "crates/atelier-app/src/http/report.rs",
+                "needle": "NotFoundError::new(\"repair order\", reference.clone())"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/errors.rs",
+                "needle": "pub struct NotFoundError {"
+            }
+        },
+        {
+            "id": "def-import-alias",
+            "surface": "definition",
+            "note": "`use ... Formatter as MoneyFormatter`: the alias resolves to the billing Formatter type, never to reporting::Formatter.",
+            "from": {
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "use atelier_core::billing::Formatter as MoneyFormatter;"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/billing/formatter.rs",
+                "needle": "pub struct Formatter {"
+            }
+        },
+        {
+            "id": "def-proxy-forwarded-method",
+            "surface": "definition",
+            "note": "Canonical id for the rust-local def-deref-forwarded-method: Technician declares no next_slot, the call resolves through the Deref impl in concerns/forwards_to_schedule.rs into Schedule.",
+            "from": {
+                "file": "crates/atelier-bench/src/repositories/technician_repository.rs",
+                "needle": "technician.next_slot().is_some()"
+            },
+            "expect": {
+                "kind": "deref_forward",
+                "file": "crates/atelier-core/src/support/schedule.rs",
+                "needle": "pub fn next_slot(&self) -> Option<SlotIndex> {",
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/concerns/forwards_to_schedule.rs",
+                        "needle": "impl Deref for Technician {"
+                    }
+                ],
+                "must_not_include": [
+                    "crates/atelier-core/src/models/technician.rs"
+                ]
+            }
+        },
+        {
+            "id": "def-static-factory",
+            "surface": "definition",
+            "note": "Associated function used as an alternate constructor; the call site names the type, not the struct literal.",
+            "from": {
+                "file": "crates/atelier-app/src/state.rs",
+                "needle": "container: Container::bind_default(),"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/container.rs",
+                "needle": "pub fn bind_default() -> Self {"
+            }
+        },
+        {
+            "id": "hover-proxy-forwarding",
+            "surface": "hover",
+            "note": "Canonical id for the rust-local hover-macro-generated: hover on the constructor must explain the Deref forwarding, not just the schedule field.",
+            "from": {
+                "file": "crates/atelier-core/src/models/technician.rs",
+                "needle": "pub fn new(id: u32, name: impl Into<String>) -> Self {"
+            },
+            "expect": {
+                "contains": "forward to its Schedule"
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "Customer imported through the atelier_core crate-root `pub use` barrel must resolve to models/customer.rs, not fan out to every other module that barrel re-exports.",
+            "from": {
+                "file": "crates/atelier-bench/src/repositories/customer_repository.rs",
+                "needle": "use atelier_core::Customer;"
+            },
+            "expect": {
+                "kind": "barrel",
+                "candidate": {
+                    "file": "crates/atelier-core/src/models/customer.rs",
+                    "needle": "pub struct Customer {"
+                },
+                "must_not_include": [
+                    "crates/atelier-core/src/lib.rs",
+                    "crates/atelier-core/src/models/device.rs"
+                ]
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "repair_order.rs names Container only in a type position (`&Container` in a signature) and never constructs one; state.rs imports the same Container and calls Container::bind_default(). The type-position site carries no value-level edge.",
+            "from": {
+                "file": "crates/atelier-core/src/models/repair_order.rs",
+                "needle": "use crate::container::Container;"
+            },
+            "expect": {
+                "kind": "type_only",
+                "candidate": {
+                    "file": "crates/atelier-core/src/container.rs",
+                    "needle": "pub struct Container {"
+                },
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/models/repair_order.rs",
+                        "needle": "pub fn total(&self, container: &Container) -> Money {"
+                    },
+                    {
+                        "file": "crates/atelier-app/src/state.rs",
+                        "needle": "use atelier_core::container::Container;"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "note": "One trait named on the impl line (DigestContract) plus the two supertraits it drags in (HasAudit, HasMetadata): extends_count is the named trait, implements_count the inherited pair, exact_count their total. AuditDigest implements no report or rule contract, so card-report-contract stays 24 and card-rule-contract stays 48.",
+            "from": {
+                "file": "crates/atelier-bench/src/support/audit_digest.rs",
+                "needle": "impl DigestContract for AuditDigest {}"
+            },
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "exact_count": 3,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-bench/src/contracts/digest_contract.rs",
+                        "needle": "pub trait DigestContract: HasAudit + HasMetadata {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/concerns/has_audit.rs",
+                        "needle": "pub trait HasAudit {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/concerns/has_metadata.rs",
+                        "needle": "pub trait HasMetadata {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-money-class",
+            "surface": "references",
+            "note": "Canonical id for the rust-local refs-money-newtype: field types, signature types, constructor calls and `use` paths naming Money all count.",
+            "from": {
+                "file": "crates/atelier-core/src/money.rs",
+                "needle": "pub struct Money(pub i64);"
+            },
+            "expect": {
+                "min_references": 20,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/models/part.rs",
+                        "needle": "pub unit_price: Money,"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/models/invoice.rs",
+                        "needle": "pub total: Money,"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/contracts/invoice_calculator.rs",
+                        "needle": "fn calculate(&self, order: &RepairOrder) -> Money;"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-registry",
+            "surface": "references",
+            "note": "The registry itself has 4 read sites; its 24 `Box::new(XReport::new())` entries are construction sites of ReportContract implementors, not references to REPORTS. The rust-local refs-report-contract-registry counts those 24 instead.",
+            "from": {
+                "file": "crates/atelier-bench/src/lib.rs",
+                "needle": "pub static REPORTS: Lazy<Vec<Box<dyn ReportContract>>>"
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/tests/breadth.rs",
+                        "needle": "assert_eq!(atelier_bench::REPORTS.len(), 24);"
+                    },
+                    {
+                        "file": "crates/atelier-bench/tests/breadth.rs",
+                        "needle": "let mut slugs: Vec<&str> = atelier_bench::REPORTS.iter().map(|r| r.slug()).collect();"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-row-from-cents",
+            "surface": "references",
+            "note": "12 call lines across 9 report files at the pinned base; `use` lines do not count.",
+            "from": {
+                "file": "crates/atelier-bench/src/contracts/report_contract.rs",
+                "needle": "pub fn from_cents(label: impl Into<String>, cents: i64) -> Self {"
+            },
+            "expect": {
+                "min_references": 10,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/src/reports/gross_profit_report.rs",
+                        "needle": "ReportRow::from_cents(\"gross profit\", revenue - cost),"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/reports/weekly_revenue_report.rs",
+                        "needle": "vec![ReportRow::from_cents(\"week to date\", data.revenue_cents())]"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "PlainRowFormatter declares format_value and format_label inherently and never names HasFormatting. Rust has no structural conformance, so it is NOT an implementor, and the blanket impl<T: ReportContract> does not reach it either.",
+            "from": {
+                "file": "crates/atelier-bench/src/support/plain_row_formatter.rs",
+                "needle": "pub fn format_value(&self, value: f64) -> String {"
+            },
+            "expect": {
+                "kind": "structural",
+                "candidate": {
+                    "file": "crates/atelier-bench/src/concerns/has_formatting.rs",
+                    "needle": "pub trait HasFormatting {"
+                },
+                "must_not_include": [
+                    "crates/atelier-bench/src/support/plain_row_formatter.rs"
                 ]
             }
         }

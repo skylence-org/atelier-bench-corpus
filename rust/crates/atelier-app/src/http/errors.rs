@@ -1,6 +1,6 @@
 //! HTTP error mapping.
 
-use atelier_core::errors::AtelierError;
+use atelier_core::errors::{AtelierError, NotFoundError};
 use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -40,6 +40,12 @@ impl ApiError {
 impl From<AtelierError> for ApiError {
     fn from(error: AtelierError) -> Self {
         ApiError::Domain(error)
+    }
+}
+
+impl From<NotFoundError> for ApiError {
+    fn from(error: NotFoundError) -> Self {
+        ApiError::Domain(AtelierError::from(error))
     }
 }
 

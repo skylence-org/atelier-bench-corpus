@@ -358,6 +358,7 @@
     "def-error-subclass": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -490,6 +491,7 @@
     "def-import-alias": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -741,6 +743,7 @@
     "def-proxy-forwarded-method": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -833,6 +836,7 @@
     "def-static-factory": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1025,6 +1029,7 @@
     "hover-proxy-forwarding": {
       "surface": "hover",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1039,6 +1044,7 @@
     "imp-barrel-no-fanout": {
       "surface": "import-precision",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1095,6 +1101,7 @@
     "imp-type-only-no-value-edge": {
       "surface": "import-precision",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1294,6 +1301,7 @@
       "surface": "multi-parent",
       "lanes": [
         "php",
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1400,6 +1408,7 @@
     "refs-money-class": {
       "surface": "references",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1420,6 +1429,7 @@
     "refs-report-registry": {
       "surface": "references",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1434,6 +1444,7 @@
     "refs-row-from-cents": {
       "surface": "references",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
@@ -1604,6 +1615,7 @@
     "resolution-structural-concern": {
       "surface": "resolution",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python"
