@@ -669,6 +669,421 @@
             "expect": {
                 "contains": "DO NOT EDIT"
             }
+        },
+        {
+            "id": "resolution-shadow-type-billing",
+            "surface": "resolution",
+            "from": {"file": "app/state.go", "needle": "\tMoney     *moneyfmt.Formatter"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "atelier.example/lane/core/billing#Formatter",
+                "candidate": {"file": "core/billing/formatter.go", "needle": "func (f *Formatter) Money(amount money.Money) string {"}
+            }
+        },
+        {
+            "id": "resolution-shadow-type-reporting",
+            "surface": "resolution",
+            "from": {"file": "app/state.go", "needle": "\tStatus    *statusfmt.Formatter"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "atelier.example/lane/core/reporting#Formatter",
+                "candidate": {"file": "core/reporting/formatter.go", "needle": "func (f *Formatter) StatusLine(status support.RepairStatus, since string) string {"}
+            }
+        },
+        {
+            "id": "resolution-structural-concern",
+            "surface": "resolution",
+            "note": "The value satisfies RuleLike by shape; nothing in the adhoc package names any contract.",
+            "from": {"file": "atelier/rules/adhoc/adhoc.go", "needle": "func (r AdHocRule) Evaluate(data *dataset.Dataset) bool {"},
+            "expect": {
+                "kind": "structural",
+                "candidate": {"file": "atelier/contracts/rule.go", "needle": "type RuleLike interface {"},
+                "must_not_include": ["RuleContract"]
+            }
+        },
+        {
+            "id": "resolution-same-name-command-vs-job",
+            "surface": "resolution",
+            "note": "Two functions named RecalculateInventory: the command calls the job, and only the package qualifier separates them.",
+            "from": {"file": "app/commands/recalculate_inventory.go", "needle": "\tresult := app.RecalculateInventory(state.Data)"},
+            "expect": {
+                "kind": "same_name",
+                "candidate": {"file": "app/jobs.go", "needle": "func RecalculateInventory(data *dataset.Dataset) JobResult {"},
+                "must_not_include": ["app/commands/recalculate_inventory.go#RecalculateInventory"]
+            }
+        },
+        {
+            "id": "resolution-same-name-package-support",
+            "surface": "resolution",
+            "note": "Two packages are named support; the file imports the core one under an alias and the bench one not at all.",
+            "from": {"file": "atelier/services/warranty_claim_service.go", "needle": "\t\tif order.Priority == coresupport.PriorityWarranty {"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "atelier.example/lane/core/support#Priority",
+                "candidate": {"file": "core/support/priority.go", "needle": "type Priority int"},
+                "must_not_include": ["atelier/support"]
+            }
+        },
+        {
+            "id": "resolution-package-path-vs-name",
+            "surface": "resolution",
+            "note": "The import path's last segment is yamlish.v2 but the local identifier is the declared package name, yamlish.",
+            "from": {"file": "app/commands/export_report.go", "needle": "\t\t\"version\":    yamlish.Version,"},
+            "expect": {
+                "kind": "path_name_divergence",
+                "resolution": "atelier.example/yamlish.v2#Version",
+                "candidate": {"file": "third_party/yamlish.v2/yamlish.go", "needle": "const Version = \"v2\""},
+                "must_not_include": ["yamlish.v2.Version"]
+            }
+        },
+        {
+            "id": "resolution-shadowed-stdlib-package",
+            "surface": "resolution",
+            "note": "Inside a package itself named http, the identifier http is the standard library, not this package.",
+            "from": {"file": "app/http/router.go", "needle": "\tmux := http.NewServeMux()"},
+            "expect": {
+                "kind": "shadow_alias",
+                "resolution": "net/http#NewServeMux",
+                "candidate": {"file": "app/http/router.go", "needle": "package http"},
+                "must_not_include": ["app/http#NewServeMux"]
+            }
+        },
+        {
+            "id": "resolution-receiver-pointer-vs-value",
+            "surface": "resolution",
+            "note": "Money has VALUE receivers throughout, so the original is never mutated; RepairOrder has pointer receivers.",
+            "from": {"file": "tests/promotion_test.go", "needle": "\tdoubled := amount.Times(2)"},
+            "expect": {
+                "kind": "receiver",
+                "candidate": {"file": "core/money/money.go", "needle": "func (m Money) Times(factor int64) Money {"},
+                "must_not_include": ["func (m *Money)"]
+            }
+        },
+        {
+            "id": "resolution-arity-parameter-groups",
+            "surface": "resolution",
+            "note": "SIX parameters in FOUR groups: sku, name share one type and stock, reorderLevel share another.",
+            "from": {"file": "core/models/part.go", "needle": "func NewPart(id int, sku, name string, unitPrice money.Money, stock, reorderLevel int) *Part {"},
+            "expect": {
+                "kind": "arity",
+                "exact_count": 6,
+                "candidate": {"file": "core/models/part.go", "needle": "func NewPart(id int, sku, name string, unitPrice money.Money, stock, reorderLevel int) *Part {"},
+                "known_sites": [
+                    {"file": "core/models/part.go", "needle": "\treturn NewPart(id, sku, name, unitPrice, stock, 2)"}
+                ]
+            }
+        },
+        {
+            "id": "resolution-init-ordering",
+            "surface": "resolution",
+            "note": "Package-level vars initialise before any init runs, and the 24 rule inits run in file-name order.",
+            "from": {"file": "atelier/rules/registry.go", "needle": "func init() {"},
+            "expect": {
+                "kind": "init_order",
+                "candidate": {"file": "atelier/rules/registry.go", "needle": "var registry = support.NewRegistry[contracts.RuleContract]()"},
+                "known_sites": [
+                    {"file": "atelier/rules/customer_credit.go", "needle": "\tRegister(CustomerCreditRule{})"}
+                ]
+            }
+        },
+        {
+            "id": "lane-local-money",
+            "surface": "resolution",
+            "from": {"file": "core/money/money.go", "needle": "func FromCents(cents int64) Money {"},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "money.Money"
+            }
+        },
+        {
+            "id": "lane-local-customer",
+            "surface": "resolution",
+            "from": {"file": "core/models/customer.go", "needle": "type Customer struct {"},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "models.Customer"
+            }
+        },
+        {
+            "id": "lane-local-dataset",
+            "surface": "resolution",
+            "from": {"file": "atelier/dataset/dataset.go", "needle": "type Dataset struct {"},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "dataset.Dataset"
+            }
+        },
+        {
+            "id": "lane-local-ref-prefix",
+            "surface": "resolution",
+            "from": {"file": "core/support/reference.go", "needle": "\tAtelierPrefix   = \"AT\""},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "AT-2026-"
+            }
+        },
+        {
+            "id": "lane-local-calculate",
+            "surface": "resolution",
+            "from": {"file": "core/models/repairorder.go", "needle": "func (o *RepairOrder) Total(calculator Calculator) money.Money {"},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "Calculator"
+            }
+        },
+        {
+            "id": "lane-local-formatter-billing",
+            "surface": "resolution",
+            "from": {"file": "core/billing/formatter.go", "needle": "func (f *Formatter) Line(quantity int, description string, amount money.Money) string {"},
+            "expect": {
+                "kind": "lane_local",
+                "contains": "billing"
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-struct",
+            "surface": "parse-negative",
+            "note": "The struct literal is never closed; the file is excluded from the build by the brokenfixtures tag.",
+            "from": {"file": "fixtures/broken-syntax/unclosed_struct.go", "needle": "\tslots [8]bool"},
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "unclosed_struct"
+            }
+        },
+        {
+            "id": "parse-negative-bad-receiver",
+            "surface": "parse-negative",
+            "note": "Malformed receiver list and an unclosed call.",
+            "from": {"file": "fixtures/broken-syntax/bad_receiver.go", "needle": "func (t *) Total(order int money.Money {"},
+            "expect": {
+                "kind": "syntax_error",
+                "must_include": "bad_receiver"
+            }
+        },
+        {
+            "id": "broken-syntax-degradation",
+            "surface": "diagnostics",
+            "note": "Behavioral task, no needle target: tools asked about fixtures/broken-syntax/* must degrade loudly (structured error naming the parse failure), never crash and never return silent-empty.",
+            "from": {"file": "fixtures/broken-syntax/doc.go", "needle": "const Marker = \"broken-syntax fixtures; do not fix\""},
+            "expect": {
+                "behavior": "loud_degradation"
+            }
+        },
+        {
+            "id": "card-report-contract",
+            "surface": "cardinality",
+            "note": "exact_count is exact: 24 concrete reports. The three embeddable bases satisfy nothing on their own (no Rows) and are excluded.",
+            "from": {"file": "atelier/contracts/report.go", "needle": "type ReportContract interface {"},
+            "expect": {
+                "exact_count": 24,
+                "implementations": [
+                    {"file": "atelier/reports/cash_flow.go", "needle": "type CashFlowReport struct {"},
+                    {"file": "atelier/reports/churn_risk.go", "needle": "type ChurnRiskReport struct {"},
+                    {"file": "atelier/reports/gross_profit.go", "needle": "type GrossProfitReport struct {"},
+                    {"file": "atelier/reports/weekly_revenue.go", "needle": "type WeeklyRevenueReport struct {"}
+                ],
+                "must_not_include": ["support.BaseReport", "support.PeriodicReport", "support.CompositeReport"]
+            }
+        },
+        {
+            "id": "card-rule-contract",
+            "surface": "cardinality",
+            "note": "48 rules: 24 NOMINAL structs each carrying a value-type assertion, plus 24 STRUCTURAL AdHocRule values that assert nothing. structural_count counts the values, as in the typescript/javascript/python lanes. AdHocRule itself is not a rule.",
+            "from": {"file": "atelier/contracts/rule.go", "needle": "type RuleContract interface {"},
+            "expect": {
+                "exact_count": 48,
+                "nominal_count": 24,
+                "structural_count": 24,
+                "implementations": [
+                    {"file": "atelier/rules/minimum_stock.go", "needle": "var _ contracts.RuleContract = MinimumStockRule{}"},
+                    {"file": "atelier/rules/adhoc/adhoc.go", "needle": "\t{key: \"duplicate-reference\", check: func(data *dataset.Dataset) bool {"},
+                    {"file": "atelier/rules/registry.go", "needle": "\t\tRegister(rule)"}
+                ],
+                "must_not_include": ["var _ contracts.RuleContract = AdHocRule"]
+            }
+        },
+        {
+            "id": "card-embedded-promotion",
+            "surface": "cardinality",
+            "note": "Four methods are promoted onto every embedder of BaseReport; Rows is not among them, which is why each report must declare it.",
+            "from": {"file": "atelier/support/report.go", "needle": "type BaseReport struct {"},
+            "expect": {
+                "exact_count": 4,
+                "must_include": ["Slug", "Title", "CacheKey", "TTLSeconds"],
+                "must_not_include": ["Rows"]
+            }
+        },
+        {
+            "id": "dir-contract-parent",
+            "surface": "direction",
+            "from": {"file": "atelier/contracts/report.go", "needle": "type ReportContract interface {"},
+            "expect": {
+                "kind": "parent_of",
+                "candidate": {"file": "atelier/reports/cash_flow.go", "needle": "var _ contracts.ReportContract = (*CashFlowReport)(nil)"},
+                "must_not_include": ["ReportContract embeds CashFlowReport"]
+            }
+        },
+        {
+            "id": "dir-implementor-child",
+            "surface": "direction",
+            "note": "The embedded struct is the only parent a Go type has.",
+            "from": {"file": "atelier/reports/cash_flow.go", "needle": "type CashFlowReport struct {"},
+            "expect": {
+                "kind": "child_of",
+                "candidate": {"file": "atelier/support/composite.go", "needle": "type CompositeReport struct {"}
+            }
+        },
+        {
+            "id": "dir-self-reference",
+            "surface": "direction",
+            "from": {"file": "core/support/tree.go", "needle": "\tChildren []*TreeNode"},
+            "expect": {
+                "kind": "uses_self",
+                "candidate": {"file": "core/support/tree.go", "needle": "type TreeNode struct {"},
+                "must_not_include": ["TreeNode embeds TreeNode"]
+            }
+        },
+        {
+            "id": "dir-interface-embeds-interface",
+            "surface": "direction",
+            "note": "Interface embedding is a union of method sets, not inheritance.",
+            "from": {"file": "atelier/contracts/composite.go", "needle": "type CompositeContract interface {"},
+            "expect": {
+                "kind": "parent_of",
+                "candidate": {"file": "atelier/contracts/cacheable.go", "needle": "type CacheableContract interface {"}
+            }
+        },
+        {
+            "id": "imp-one-of-two-siblings",
+            "surface": "import-precision",
+            "note": "Two packages named support exist; this file imports exactly one of them, under an alias.",
+            "from": {"file": "atelier/services/warranty_claim_service.go", "needle": "\tcoresupport \"atelier.example/lane/core/support\""},
+            "expect": {
+                "kind": "one_of_two",
+                "candidate": {"file": "core/support/priority.go", "needle": "type Priority int"},
+                "must_not_include": ["atelier/support"]
+            }
+        },
+        {
+            "id": "imp-glob-import",
+            "surface": "import-precision",
+            "note": "Go's glob import is the dot import: the call sites carry no package qualifier at all.",
+            "from": {"file": "tests/dotimport_test.go", "needle": "\t. \"atelier.example/lane/core/support\""},
+            "expect": {
+                "kind": "dot_import",
+                "candidate": {"file": "core/support/reference.go", "needle": "func FormatReference(prefix string, number int) string {"},
+                "known_sites": [
+                    {"file": "tests/dotimport_test.go", "needle": "\tif got := FormatReference(AtelierPrefix, 42); got != \"AT-2026-000042\" {"}
+                ]
+            }
+        },
+        {
+            "id": "imp-blank-import-side-effect",
+            "surface": "import-precision",
+            "note": "Blank import: no identifier is bound, and the only effect is the package's init.",
+            "from": {"file": "cmd/atelier/main.go", "needle": "\t_ \"atelier.example/lane/internal/audit\""},
+            "expect": {
+                "kind": "side_effect_only",
+                "candidate": {"file": "internal/audit/audit.go", "needle": "\tevents.RegisterSink(&Sink{})"},
+                "must_not_include": ["audit.Sink", "audit.Banner"]
+            }
+        },
+        {
+            "id": "imp-internal-package",
+            "surface": "import-precision",
+            "note": "internal/ is a hard visibility boundary: only atelier.example/lane/... may import this package.",
+            "from": {"file": "internal/audit/audit.go", "needle": "package audit"},
+            "expect": {
+                "kind": "visibility_boundary",
+                "contains": "internal",
+                "known_sites": [
+                    {"file": "tests/structure_test.go", "needle": "\t\"atelier.example/lane/internal/audit\""}
+                ]
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "The import pulls one package; only *models.RepairOrder is used from it in this file.",
+            "from": {"file": "atelier/reports/order_volume.go", "needle": "\t\"atelier.example/lane/core/models\""},
+            "expect": {
+                "kind": "one_member",
+                "candidate": {"file": "core/models/repairorder.go", "needle": "type RepairOrder struct {"},
+                "must_not_include": ["models.Customer", "models.Invoice"]
+            }
+        },
+        {
+            "id": "imp-barrel-no-fanout",
+            "surface": "import-precision",
+            "note": "The adhoc package is a leaf: importing it reaches its 24 values and nothing in the parent rules package.",
+            "from": {"file": "atelier/rules/registry.go", "needle": "\t\"atelier.example/lane/atelier/rules/adhoc\""},
+            "expect": {
+                "kind": "no_fanout",
+                "candidate": {"file": "atelier/rules/adhoc/adhoc.go", "needle": "var Rules = []AdHocRule{"},
+                "must_not_include": ["atelier/rules/minimum_stock.go"]
+            }
+        },
+        {
+            "id": "parents-contract-three",
+            "surface": "multi-parent",
+            "note": "Three embedded interfaces in one declaration, and no method of its own.",
+            "from": {"file": "atelier/contracts/composite.go", "needle": "type CompositeContract interface {"},
+            "expect": {
+                "exact_count": 3,
+                "min_references": 3,
+                "implementations": [
+                    {"file": "atelier/contracts/report.go", "needle": "type ReportContract interface {"},
+                    {"file": "atelier/contracts/cacheable.go", "needle": "type CacheableContract interface {"},
+                    {"file": "atelier/contracts/schedule.go", "needle": "type ScheduleContract interface {"}
+                ]
+            }
+        },
+        {
+            "id": "parents-class-one-plus-two",
+            "surface": "multi-parent",
+            "note": "One report base plus two behaviour structs, all three embedded in the same struct.",
+            "from": {"file": "atelier/support/composite.go", "needle": "type CompositeReport struct {"},
+            "expect": {
+                "extends_count": 1,
+                "implements_count": 2,
+                "implementations": [
+                    {"file": "atelier/support/periodic.go", "needle": "type PeriodicReport struct {"},
+                    {"file": "atelier/concerns/audit.go", "needle": "type HasAudit struct {"},
+                    {"file": "atelier/concerns/metadata.go", "needle": "type HasMetadata struct {"}
+                ]
+            }
+        },
+        {
+            "id": "docsym-repair-order",
+            "surface": "document_symbol",
+            "note": "One file, three type declarations and seven functions; Reference() is NOT among them, it is promoted.",
+            "from": {"file": "core/models/repairorder.go", "needle": "type RepairOrder struct {"},
+            "expect": {
+                "min_symbols": 10,
+                "must_include": ["PartLine", "LogEntry", "Calculator", "RepairOrder", "SeedRepairOrder", "TransitionTo", "Complete", "AddPart", "PartsSubtotal", "Total", "IsOpen"]
+            }
+        },
+        {
+            "id": "hierarchy-complete-chain",
+            "surface": "call_hierarchy",
+            "from": {"file": "core/models/repairorder.go", "needle": "func (o *RepairOrder) Complete(changedBy string) error {"},
+            "expect": {
+                "outgoing_includes": [
+                    {"file": "core/models/repairorder.go", "needle": "func (o *RepairOrder) TransitionTo(next support.RepairStatus, changedBy string) bool {"},
+                    {"file": "core/failure/errors.go", "needle": "func NewTransition(from string, to string) error {"}
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-promoted-callee",
+            "surface": "call_hierarchy",
+            "note": "The only outgoing call goes to a method the type never declares, reached through the embedded pointer.",
+            "from": {"file": "core/models/technician.go", "needle": "func (t *Technician) Utilisation() float64 {"},
+            "expect": {
+                "outgoing_includes": [
+                    {"file": "core/support/schedule.go", "needle": "func (s *Schedule) BookedCount() int {"}
+                ]
+            }
         }
     ]
 }

@@ -38,6 +38,7 @@ const LANE_DEFS = [
     { name: "typescript", verify: ["node", "bench/verify-tasks/verify.mjs"] },
     { name: "javascript", verify: ["node", "bench/verify-tasks/verify.mjs"] },
     { name: "python", verify: ["python3", "bench/verify_tasks.py"] },
+    { name: "go", verify: ["go", "run", "./bench/verify"] },
 ];
 
 const write = process.argv.slice(2).includes("--write");
