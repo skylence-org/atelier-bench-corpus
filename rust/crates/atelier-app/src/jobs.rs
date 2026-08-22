@@ -34,4 +34,15 @@ impl RecalculateInventory {
 
         announced
     }
+
+    /// Callback style: the continuation is a parameter, so the caller reads
+    /// the count from `done` instead of from a return value.
+    pub fn run_with_callback(
+        &self,
+        data: &Dataset,
+        dispatcher: &Dispatcher,
+        done: impl FnOnce(usize),
+    ) {
+        done(self.run(data, dispatcher));
+    }
 }
