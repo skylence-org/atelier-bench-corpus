@@ -2,10 +2,11 @@
 
 namespace App\Bench\Repositories;
 
+use App\Bench\Contracts\RepositoryContract;
 use App\Bench\Support\AbstractComponent;
 use App\Bench\Concerns\HasCache;
 
-class WarrantyRepository extends AbstractComponent
+class WarrantyRepository extends AbstractComponent implements RepositoryContract
 {
     use HasCache;
 
