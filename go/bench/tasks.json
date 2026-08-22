@@ -1084,6 +1084,71 @@
                     {"file": "core/support/schedule.go", "needle": "func (s *Schedule) BookedCount() int {"}
                 ]
             }
+        },
+        {
+            "id": "refs-money-class",
+            "surface": "references",
+            "note": "Canonical id for the go-local refs-money-type: field types, signature types, constructor calls and package-qualified money.Money mentions all count.",
+            "from": {"file": "core/money/money.go", "needle": "type Money struct {"},
+            "expect": {
+                "min_references": 20,
+                "known_sites": [
+                    {"file": "core/models/part.go", "needle": "\tUnitPrice    money.Money"},
+                    {"file": "core/models/invoice.go", "needle": "\tTotal         money.Money"},
+                    {"file": "core/contracts/invoicecalculator.go", "needle": "\tCalculate(order *models.RepairOrder) money.Money"}
+                ]
+            }
+        },
+        {
+            "id": "imp-type-only-no-value-edge",
+            "surface": "import-precision",
+            "note": "Go has no `import type`: the type-only distinction is POSITIONAL, not syntactic. core/contracts/invoicecalculator.go imports core/models and names it only in type positions, calling no function of that package; atelier/dataset/dataset.go imports the same package and calls models.SeedCustomer. The type-position site carries no value-level edge, and an unused import would not compile, so the import itself proves nothing.",
+            "from": {"file": "core/contracts/invoicecalculator.go", "needle": "\t\"atelier.example/lane/core/models\""},
+            "expect": {
+                "kind": "type_only",
+                "candidate": {"file": "core/models/repairorder.go", "needle": "type RepairOrder struct {"},
+                "known_sites": [
+                    {"file": "core/contracts/invoicecalculator.go", "needle": "\tCalculate(order *models.RepairOrder) money.Money"},
+                    {"file": "atelier/dataset/dataset.go", "needle": "\t\tmodels.SeedCustomer(1, \"Ada Byron\", \"ada@example.test\", \"+32 470 00 00 01\"),"}
+                ]
+            }
+        },
+        {
+            "id": "docsym-report-registry",
+            "surface": "document_symbol",
+            "note": "Symbol listing for the breadth-subsystem registry file that holds the 24-report registry. N = 6 named symbols at the base SHA: registry, Register, All, BySlug, Slugs, Count; the rest of the file is the import block and comments, which declare no symbol of their own. min_symbols = floor(0.75 * 6) = 4. The 24 init functions that fill the registry live in the report files, not here.",
+            "from": {"file": "atelier/reports/registry.go", "needle": "var registry = support.NewRegistry[contracts.ReportContract]()"},
+            "expect": {
+                "min_symbols": 4,
+                "must_include": ["Register", "All", "BySlug", "Count"]
+            }
+        },
+        {
+            "id": "hierarchy-incoming-transition",
+            "surface": "call_hierarchy",
+            "note": "Incoming edges on the lifecycle hub: at least three callers of TransitionTo, spread over the core package, the bench dataset and the test suite.",
+            "from": {"file": "core/models/repairorder.go", "needle": "func (o *RepairOrder) TransitionTo(next support.RepairStatus, changedBy string) bool {"},
+            "expect": {
+                "min_incoming": 3,
+                "incoming_includes": [
+                    {"file": "core/models/repairorder.go", "needle": "\tif !o.TransitionTo(support.StatusCompleted, changedBy) {"},
+                    {"file": "atelier/dataset/dataset.go", "needle": "\torders[1].TransitionTo(support.StatusAwaitingParts, \"seeder\")"},
+                    {"file": "tests/promotion_test.go", "needle": "\tif !order.TransitionTo(support.StatusDiagnosing, \"tester\") {"}
+                ]
+            }
+        },
+        {
+            "id": "hierarchy-cross-package",
+            "surface": "call_hierarchy",
+            "note": "Package-boundary edge: the recalculate COMMAND subscribes a StockWatch on the core event bus and dispatches one event per depleted part, so the outgoing edges cross app/commands -> core/events. The same function also calls the same-named JOB in the app package, which is the edge a name-only matcher confuses this with.",
+            "from": {"file": "app/commands/recalculate_inventory.go", "needle": "func RecalculateInventory(state *app.State) string {"},
+            "expect": {
+                "outgoing_includes": [
+                    {"file": "core/events/stockwatch.go", "needle": "func (w *StockWatch) Subscribe(dispatcher *Dispatcher) *StockWatch {"},
+                    {"file": "core/events/events.go", "needle": "func (d *Dispatcher) Dispatch(event string, payload Payload) bool {"}
+                ],
+                "must_not_include": ["app/commands/recalculate_inventory.go#RecalculateInventory"]
+            }
         }
     ]
 }

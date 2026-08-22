@@ -16,20 +16,20 @@ import path disagrees with its declared name, and a package that shadows a stand
 | Go | `go 1.23.0` with `toolchain go1.23.4` in `go.mod` (CI pins the same; `iter.Seq` and method-prefixed `ServeMux` patterns are used) |
 | Layout | one module, `atelier.example/lane`, packages under `core/`, `atelier/`, `app/`, `cmd/`, `internal/`, `tools/`; run every command from the lane root (`go/`) |
 | Dependencies | none over the network: the only `require` is the in-tree module `atelier.example/yamlish.v2`, resolved by a `replace` to `./third_party/yamlish.v2`, so there is no `go.sum` |
-| Test runner | `go test ./...` (stdlib `testing`), 38 tests in `tests/` |
+| Test runner | `go test ./...` (stdlib `testing`), 39 tests in `tests/` |
 | Dataset | `dataset.Seeded()` — fixed rows, **no randomness**; revenue `58325c`, part cost `46300c`, gross profit `12025c` |
 
 ## Packages
 
 | Package | Role | .go files |
 | --- | --- | --- |
-| `core/` | Domain: models, money, iota enums, interfaces, container, events, policy, failures, both `Formatter` halves | 31 |
+| `core/` | Domain: models, money, iota enums, interfaces, container, events, policy, failures, both `Formatter` halves | 32 |
 | `atelier/` | Breadth subsystem: 10 contracts, 8 concerns, 9 embeddable bases, 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules, dataset, registries | 133 |
 | `app/` | Application surface: `net/http` routes, console commands, jobs (callback / channel / goroutine) | 9 |
 | `cmd/atelier/` | Console entry point; blank-imports `internal/audit` for its `init()` | 1 |
 | `internal/` | Internal-only audit sink, `go:embed`ded banner, a build-tag pair | 3 |
 | `tools/statusgen/` | The `go:generate` generator behind `core/support/status_labels_gen.go` | 1 |
-| `tests/` | 38 tests incl. request-level (`net/http/httptest`) | 11 |
+| `tests/` | 39 tests incl. request-level (`net/http/httptest`) | 11 |
 | `bench/` | `tasks.json` + `verify/` (stdlib only) | 2 |
 | `third_party/yamlish.v2/` | In-tree module whose import path last segment (`yamlish.v2`) differs from its package name (`yamlish`) | 1 |
 | `fixtures/broken-syntax/` | Intentionally invalid Go, **DO NOT FIX** (build-tag gated) | 3 |
@@ -64,6 +64,7 @@ import path disagrees with its declared name, and a package that shadows a stand
 | Type switch, anonymous struct | `core/support/pick.go`: `DescribeChoice` and `AnonymousSummary` |
 | String-keyed dispatch | `atelier/services/order_volume_service.go` `By(scope)`, `core/policy/policy.go` `Allows(ability)`, `core/container/container.go` `Make(key)`, `atelier/exporters` by extension |
 | Same name, command vs job | `app/commands.RecalculateInventory` (console line) vs `app.RecalculateInventory` (job) |
+| Package-boundary call edge | `app/commands/recalculate_inventory.go` subscribes `core/events.StockWatch` and dispatches one `stock.depleted` event per depleted part: the lane's one outgoing edge from `app/` into `core/events` |
 | HTTP routes | `app/http/router.go`: `GET /report/{reference}`, `GET /api/orders`, `POST /api/orders/{id}/notes`, `GET /api/reports/{slug}`, `GET /health`; `RegisterDefault` also registers `/health` on the default mux |
 | Parameter groups vs arity | `core/models/part.go` `NewPart` takes six parameters in four groups |
 | Parse negatives | `fixtures/broken-syntax/` — two invalid files behind the `brokenfixtures` build tag, **DO NOT FIX** |
@@ -74,7 +75,7 @@ import path disagrees with its declared name, and a package that shadows a stand
 cd go
 go build ./...
 go test ./...
-go run ./bench/verify          # 103 tasks, exit 0
+go run ./bench/verify          # 108 tasks, exit 0
 go run ./bench/verify --lint   # build + broken-fixture guard + go vet + gofmt
 go run ./cmd/atelier seed      # seeded: 3 customer(s), 4 order(s), 4 part(s), revenue 58325c
 ```
@@ -85,7 +86,7 @@ never contacts a module proxy. `go generate ./core/support` must reproduce
 
 ## Ground truth
 
-`bench/tasks.json` carries 103 needle-based tasks. `bench/verify` resolves every `file` + `needle`
+`bench/tasks.json` carries 108 needle-based tasks. `bench/verify` resolves every `file` + `needle`
 pair to exactly one line and prints one `<id>: OK (from <file>:<line> -> <n> expect needles
 resolved)` line per task; its stdout contract is byte-identical to the other five lanes' verifiers,
 which `node bench/check-matrix.mjs` proves against `bench/conformance/expected.txt`.
@@ -93,7 +94,7 @@ which `node bench/check-matrix.mjs` proves against `bench/conformance/expected.t
 Lane-specific `kind` strings used in `expect` blocks: `structural`, `shadow_alias`, `same_name`,
 `path_name_divergence`, `receiver`, `arity`, `init_order`, `lane_local`, `syntax_error`,
 `parent_of`, `child_of`, `uses_self`, `one_of_two`, `dot_import`, `side_effect_only`,
-`visibility_boundary`, `one_member`, `no_fanout`.
+`type_only`, `visibility_boundary`, `one_member`, `no_fanout`.
 
 Counting rule for `exact_count`: concrete, non-generic, unconditionally compiled types that satisfy
 the contract directly or through embedding. Interfaces, the embeddable bases in `atelier/support/`
