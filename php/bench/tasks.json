@@ -1,7 +1,7 @@
 {
     "version": 1,
     "corpus": "atelier-bench-corpus",
-    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding. Canonical-id kinds added by the parity wave: dynamic_method (magic __call forwarding: the receiver declares no such method), barrel (an import routed through a declaration-free re-export file), type_only (a `use` consumed only by a docblock, no runtime edge), structural (shape matches a contract the class never names), shadow_alias (a type position written through an alias of a same-name class). min_implementations counts exactly the way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, constants, properties, methods); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
+    "notes": "Known-answer navigation tasks. Needle-based, not line-based: bench/verify_tasks.php resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Framework-magic kinds: facade (static call -> manager instance method), scope (->x() -> scopeX), accessor (snake_case read -> Attribute method), string_key (container key, gate ability, middleware alias, config/lang key -> its registration line), route_model_binding. Canonical-id kinds added by the parity wave: dynamic_method (magic __call forwarding: the receiver declares no such method), barrel (an import routed through a declaration-free re-export file), type_only (a `use` consumed only by a docblock, no runtime edge), structural (shape matches a contract the class never names), shadow_alias (a type position written through an alias of a same-name class). min_implementations counts exactly the way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, constants, properties, methods); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves. Wave-2 kinds: docblock_generic (a @template interface with no runtime generics), group_use (one brace-group import binding exactly N names), namespace_prefix (an import that binds a namespace rather than a class), same_name (two classes of the same name in different namespaces, separated only by an alias), trait_conflict (two traits declaring one name, resolved with insteadof), used_by (edge orientation from a trait to the classes that use it), syntax_error (an intentionally invalid fixture that must fail to parse). min_implementations counts the same way exact_count does: concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases are excluded.",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1009,6 +1009,157 @@
                     { "file": "app/Reporting/Formatter.php", "needle": "public function statusLine(RepairStatus $status, ?string $since): string" }
                 ]
             }
+        },
+        {
+            "id": "def-module-const",
+            "surface": "definition",
+            "note": "Namespace-level constant seeded from the global one; the declaration asked for is the right-hand side in helpers.php, not this alias. Same id as the javascript, python and go lanes.",
+            "from": { "file": "app/Support/Canonical/Wave2/constants.php", "needle": "const DEFAULT_REFERENCE_PREFIX = \\ATELIER_REF_PREFIX;" },
+            "expect": { "file": "app/Support/helpers.php", "needle": "const ATELIER_REF_PREFIX = 'AT';" }
+        },
+        {
+            "id": "def-mixin-method",
+            "surface": "definition",
+            "note": "Technician declares no schedule(); the method arrives through the ForwardsToSchedule trait. php's mixin is the trait, as go's is embedding and python's is the MRO.",
+            "from": { "file": "tests/Feature/Wave2SurfaceTest.php", "needle": "$this->assertInstanceOf(Schedule::class, $technician->schedule());" },
+            "expect": { "file": "app/Concerns/ForwardsToSchedule.php", "needle": "public function schedule(): Schedule" }
+        },
+        {
+            "id": "def-generator-function",
+            "surface": "definition",
+            "note": "The foreach drives a generator: each() suspends at yield instead of returning an array.",
+            "from": { "file": "app/Support/Canonical/Wave2/StreamConsumer.php", "needle": "foreach ($stream->each() as $reference) {" },
+            "expect": { "file": "app/Support/Canonical/Wave2/OrderStream.php", "needle": "public function each(): Generator" }
+        },
+        {
+            "id": "def-callback-style",
+            "surface": "definition",
+            "note": "The continuation is a callable parameter. NOTE the console command of the same name carries no such method, so an answer pointing there is wrong.",
+            "from": { "file": "tests/Feature/Wave2SurfaceTest.php", "needle": "RecalculateInventoryJob::withCallback(3, function (?Throwable $error, int $parts) use (&$seen): void {" },
+            "expect": {
+                "file": "app/Jobs/RecalculateInventory.php",
+                "needle": "public static function withCallback(int $restockLevel, callable $done): void",
+                "must_not_include": [
+                    "app/Console/Commands/RecalculateInventory.php"
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-generic",
+            "surface": "implementation",
+            "note": "One docblock-generic interface, eight implementors. PHP has no runtime generics, so @template carries the parameter; the counting rule in notes applies unchanged.",
+            "from": { "file": "app/Bench/Contracts/RepositoryContract.php", "needle": "interface RepositoryContract" },
+            "expect": {
+                "kind": "docblock_generic",
+                "min_implementations": 8,
+                "implementations": [
+                    { "file": "app/Bench/Repositories/CustomerRepository.php", "needle": "class CustomerRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/InventoryRepository.php", "needle": "class InventoryRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/InvoiceRepository.php", "needle": "class InvoiceRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/OrderRepository.php", "needle": "class OrderRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/PartRepository.php", "needle": "class PartRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/PaymentRepository.php", "needle": "class PaymentRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/TechnicianRepository.php", "needle": "class TechnicianRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/WarrantyRepository.php", "needle": "class WarrantyRepository extends AbstractComponent implements RepositoryContract" }
+                ]
+            }
+        },
+        {
+            "id": "refs-string-event-name",
+            "surface": "references",
+            "note": "Nothing declares 'note-added' as a symbol: the listener attribute, the dispatch call and the test assertion are connected only by the literal. Distinct from the php-local lw-on-listener-edge id, which scores 'part-added'.",
+            "from": { "file": "app/Livewire/StatusBoard.php", "needle": "#[On('note-added')]" },
+            "expect": {
+                "kind": "name_only",
+                "min_references": 3,
+                "known_sites": [
+                    { "file": "app/Livewire/NoteComposer.php", "needle": "$this->dispatch('note-added', orderId: $this->order->id);" },
+                    { "file": "tests/Feature/NoteComposerTest.php", "needle": "->assertDispatched('note-added', orderId: $order->id);" }
+                ]
+            }
+        },
+        {
+            "id": "resolution-same-name-command-vs-job",
+            "surface": "resolution",
+            "note": "Two classes named RecalculateInventory in two namespaces. PHP forbids importing the job under its own name inside the command file, so the import is aliased; the alias is the only thing separating them.",
+            "from": { "file": "app/Console/Commands/RecalculateInventory.php", "needle": "use App\\Jobs\\RecalculateInventory as RecalculateInventoryJob;" },
+            "expect": {
+                "kind": "same_name",
+                "candidate": { "file": "app/Jobs/RecalculateInventory.php", "needle": "class RecalculateInventory implements ShouldQueue" },
+                "must_not_include": [
+                    "app/Console/Commands/RecalculateInventory.php"
+                ]
+            }
+        },
+        {
+            "id": "resolution-trait-conflict-insteadof",
+            "surface": "resolution",
+            "note": "php-local: both traits declare rate(); insteadof selects HasSurcharge's and the aliasing clause rebinds the excluded one as discountRate(). A bare-name matcher returns the wrong half.",
+            "from": { "file": "app/Support/Canonical/Wave2/PricingPolicy.php", "needle": "HasSurcharge::rate insteadof HasDiscount;" },
+            "expect": {
+                "kind": "trait_conflict",
+                "candidate": { "file": "app/Support/Canonical/Wave2/HasSurcharge.php", "needle": "public function rate(): int" },
+                "must_not_include": [
+                    "app/Support/Canonical/Wave2/HasDiscount.php"
+                ]
+            }
+        },
+        {
+            "id": "imp-glob-import",
+            "surface": "import-precision",
+            "note": "PHP has no wildcard import; the brace group-use is the lane's one-statement-many-names construct. It binds exactly the eight names listed and nothing else from the namespace.",
+            "from": { "file": "app/Support/Canonical/Wave2/RepositoryGlob.php", "needle": "use App\\Bench\\Repositories\\{CustomerRepository," },
+            "expect": {
+                "kind": "group_use",
+                "exact_count": 8,
+                "known_sites": [
+                    { "file": "app/Bench/Repositories/CustomerRepository.php", "needle": "class CustomerRepository extends AbstractComponent implements RepositoryContract" },
+                    { "file": "app/Bench/Repositories/WarrantyRepository.php", "needle": "class WarrantyRepository extends AbstractComponent implements RepositoryContract" }
+                ],
+                "must_not_include": [
+                    "app/Bench/Rules/RuleRegistry.php"
+                ]
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "The import binds a NAMESPACE, not a class: App\\Bench\\Rules holds 49 classes and exactly one is read through the prefix.",
+            "from": { "file": "app/Support/Canonical/Wave2/NamespaceOneMember.php", "needle": "use App\\Bench\\Rules;" },
+            "expect": {
+                "kind": "namespace_prefix",
+                "candidate": { "file": "app/Bench/Rules/RuleRegistry.php", "needle": "final class RuleRegistry" },
+                "must_not_include": [
+                    "MinimumStockRule"
+                ]
+            }
+        },
+        {
+            "id": "dir-trait-user",
+            "surface": "direction",
+            "note": "php-local: the edge runs trait -> using class. HasReference is used BY Customer and RepairOrder; neither is used by the trait. Distinct from refs-trait-usage, which counts the same sites without asking about orientation.",
+            "from": { "file": "app/Concerns/HasReference.php", "needle": "trait HasReference" },
+            "expect": {
+                "kind": "used_by",
+                "candidate": { "file": "app/Models/Customer.php", "needle": "use HasReference;" },
+                "must_not_include": [
+                    "HasReference uses Customer"
+                ]
+            }
+        },
+        {
+            "id": "parse-negative-unclosed-class",
+            "surface": "parse-negative",
+            "note": "Intentionally invalid fixture: the class body and the string literal are both unterminated. A parser must report an error here, never a partial tree. DO NOT FIX. Same id as the typescript and python lanes.",
+            "from": { "file": "fixtures/broken-syntax/Broken.php", "needle": "return 'this class never closes" },
+            "expect": { "kind": "syntax_error", "must_include": "Broken" }
+        },
+        {
+            "id": "parse-negative-unclosed-blade",
+            "surface": "parse-negative",
+            "note": "php-local: an unterminated blade directive plus a mismatched @endforeach. Blade compiles to PHP, so a template-aware indexer must fail loudly here too. DO NOT FIX.",
+            "from": { "file": "fixtures/broken-syntax/partial.blade.php", "needle": "@if ($order->" },
+            "expect": { "kind": "syntax_error", "must_include": "partial" }
         }
     ]
 }
