@@ -18,6 +18,7 @@ export { Schedule } from "./support/schedule.js";
 export { RepairStatus } from "./support/status.js";
 export { Priority } from "./support/priority.js";
 export { TreeNode } from "./support/treeNode.js";
+export { BOARD_REF_PREFIX, summariseDay } from "./support/boardSummary.js";
 
 export { Money } from "./money.js";
 export { AtelierError, IllegalTransitionError, NotFoundError, ValidationError } from "./errors.js";

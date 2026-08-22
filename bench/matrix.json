@@ -239,6 +239,12 @@
         "typescript"
       ]
     },
+    "def-class-field-arrow": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "def-closure-field": {
       "surface": "definition",
       "lanes": [
@@ -249,6 +255,12 @@
       "surface": "definition",
       "lanes": [
         "go"
+      ]
+    },
+    "def-computed-method-name": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-conditional-type": {
@@ -330,10 +342,22 @@
         "python"
       ]
     },
+    "def-default-export": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "def-defer-recover": {
       "surface": "definition",
       "lanes": [
         "go"
+      ]
+    },
+    "def-define-property-accessor": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-deref-forwarded-method": {
@@ -536,6 +560,7 @@
         "php",
         "rust",
         "typescript",
+        "javascript",
         "python",
         "go"
       ]
@@ -803,6 +828,7 @@
         "php",
         "rust",
         "typescript",
+        "javascript",
         "python",
         "go"
       ]
@@ -1009,6 +1035,12 @@
         "python"
       ]
     },
+    "def-setter-accessor": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "def-shadow-alias-billing": {
       "surface": "definition",
       "lanes": [
@@ -1094,6 +1126,18 @@
       "surface": "definition",
       "lanes": [
         "python"
+      ]
+    },
+    "def-symbol-keyed-method": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
+      ]
+    },
+    "def-tagged-template": {
+      "surface": "definition",
+      "lanes": [
+        "javascript"
       ]
     },
     "def-template-literal-type": {
@@ -1373,6 +1417,12 @@
         "php"
       ]
     },
+    "hover-setter-clamp": {
+      "surface": "hover",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "imp-barrel-no-fanout": {
       "surface": "import-precision",
       "lanes": [
@@ -1414,6 +1464,7 @@
         "php",
         "rust",
         "typescript",
+        "javascript",
         "python",
         "go"
       ]
@@ -1430,6 +1481,7 @@
         "php",
         "rust",
         "typescript",
+        "javascript",
         "python",
         "go"
       ]
@@ -1477,6 +1529,7 @@
     "impl-exporter-contract": {
       "surface": "implementation",
       "lanes": [
+        "javascript",
         "go"
       ]
     },
@@ -1537,6 +1590,7 @@
         "php",
         "rust",
         "typescript",
+        "javascript",
         "python",
         "go"
       ]
@@ -1829,6 +1883,12 @@
         "python"
       ]
     },
+    "refs-format-reference": {
+      "surface": "references",
+      "lanes": [
+        "javascript"
+      ]
+    },
     "refs-jsx-component-usage": {
       "surface": "references",
       "lanes": [
@@ -1879,6 +1939,12 @@
         "javascript",
         "python",
         "go"
+      ]
+    },
+    "refs-report-row": {
+      "surface": "references",
+      "lanes": [
+        "javascript"
       ]
     },
     "refs-report-row-from-cents": {
@@ -1937,6 +2003,12 @@
       "surface": "references",
       "lanes": [
         "typescript"
+      ]
+    },
+    "refs-with-reference": {
+      "surface": "references",
+      "lanes": [
+        "javascript"
       ]
     },
     "rel-hasmanythrough": {
