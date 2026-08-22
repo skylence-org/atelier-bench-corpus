@@ -16,6 +16,13 @@ class ForwardingTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             technician.no_such_thing()
 
+    def test_capacity_writes_through_the_property_setter(self) -> None:
+        technician = make_technician(2, "Ada", Schedule(4))
+        self.assertTrue(technician.book_slot(0))
+        self.assertTrue(technician.book_slot(1))
+        self.assertEqual(technician.set_capacity(1), 2)
+        self.assertEqual(technician.schedule.capacity, 2)
+
     def test_reference_arrives_two_ways(self) -> None:
         customer = Customer.seed(7, "x", "x@y")
         order = RepairOrder.seed(7, 1, 1)
