@@ -14,4 +14,3 @@ fn short_reference_is_promoted_from_the_trait() {
 fn module_alias_carries_the_crate_prefix() {
     assert_eq!(DEFAULT_REFERENCE_PREFIX, "AT");
 }
-

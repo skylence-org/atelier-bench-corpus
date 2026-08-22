@@ -104,7 +104,10 @@ impl Dispatcher {
     }
 
     pub fn topic_names(&self) -> Vec<&'static str> {
-        self.topic_listeners.iter().map(|(topic, _)| *topic).collect()
+        self.topic_listeners
+            .iter()
+            .map(|(topic, _)| *topic)
+            .collect()
     }
 
     pub fn listener_names(&self) -> Vec<&'static str> {

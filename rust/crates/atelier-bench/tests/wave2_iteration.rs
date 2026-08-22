@@ -18,4 +18,3 @@ fn namespace_binding_reads_the_rule_registry() {
 
     assert!(passing_rule_count(&data) <= 48);
 }
-
