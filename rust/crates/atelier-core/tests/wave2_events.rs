@@ -37,4 +37,3 @@ fn every_variant_carries_its_own_topic() {
         "stock.depleted"
     );
 }
-
