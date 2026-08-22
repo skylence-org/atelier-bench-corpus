@@ -25,8 +25,8 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 
 | Path | Role | .php files |
 | --- | --- | --- |
-| `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 268 |
-| `app/Bench/` | Breadth subsystem: 11 contracts, 8 concerns, 7 abstract bases, 24 reports (+ `ReportRegistry` fan-in), 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules | 162 |
+| `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 278 |
+| `app/Bench/` | Breadth subsystem: 11 contracts, 8 concerns, 7 abstract bases, 24 reports (+ `ReportRegistry` fan-in), 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules | 152 |
 | `database/` | Migrations, factories, deterministic `DatabaseSeeder`, delegating `CanonicalSeeder` | 41 |
 | `routes/` | `web.php`, `api.php`, `console.php` | 3 |
 | `resources/views/` | Report view, Blade components, Livewire SFC, Filament pages | 12 |
