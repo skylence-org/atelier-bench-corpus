@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "javascript",
-    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. On the implementation surface min_implementations counts concrete classes only: JavaScript has no implements keyword, so satisfaction is structural and reached through the prototype chain, and the abstract bases (AbstractReport, AbstractPeriodicReport, AbstractCompositeReport, AbstractNotifier) are excluded from every count. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). Kind added by the implementation surface: structural (the implementor never names the contract, which is a JSDoc @typedef with no runtime declaration). IDs shared with the php, rust, typescript and python lanes ask the same question in each language. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
+    "notes": "Known-answer navigation tasks for the javascript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (javascript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally computed impls only. cfg-gated impls are excluded. On the implementation surface min_implementations counts concrete classes only: JavaScript has no implements keyword, so satisfaction is structural and reached through the prototype chain, and the abstract bases (AbstractReport, AbstractPeriodicReport, AbstractCompositeReport, AbstractNotifier) are excluded from every count. Kinds added by the fifth wave: builtin_parent (extends a node built-in), same_name (two exports with one name in different modules), jsdoc_generic (@template), dynamic_import (import() with a static specifier). Kind added by the implementation surface: structural (the implementor never names the contract, which is a JSDoc @typedef with no runtime declaration), glob (`export *`, whose exact_count is the number of names crossing the re-export), namespace_import (`import * as`, where the answer is the one member actually read off the namespace object). IDs shared with the php, rust, typescript, python and go lanes ask the same question in each language. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (classes, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
     "tasks": [
         {
             "id": "def-through-require",
@@ -1654,6 +1654,356 @@
                         "needle": "    subscribe(dispatcher) {"
                     }
                 ]
+            }
+        },
+        {
+            "id": "def-generator-function",
+            "surface": "definition",
+            "note": "Generator method: the spread drives `*ordersOf`, and the star that makes it a generator is on the declaration, never at the call site.",
+            "from": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "return [...this.ordersOf(customerId)];"
+            },
+            "expect": {
+                "file": "packages/bench/src/dataset.cjs",
+                "needle": "    *ordersOf(customerId) {"
+            }
+        },
+        {
+            "id": "def-mixin-method",
+            "surface": "definition",
+            "note": "RepairOrder declares no shortReference(): withReference copies it onto the prototype with Object.assign. Contrast def-object-assign-mixin, which asks the same question of the sibling method reference().",
+            "from": {
+                "file": "packages/core/tests/lifecycle.test.js",
+                "needle": "assert.equal(order.shortReference(), \"AT1\");"
+            },
+            "expect": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "    shortReference() {"
+            }
+        },
+        {
+            "id": "imp-glob-import",
+            "surface": "import-precision",
+            "note": "`export *` is JavaScript's glob: it forwards all four exports of helpers.js without naming one of them, so the answer is the declaring module and not the re-export that carries them.",
+            "from": {
+                "file": "packages/core/src/support/helpersGlob.js",
+                "needle": "export * from \"./helpers.js\";"
+            },
+            "expect": {
+                "kind": "glob",
+                "exact_count": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/support/helpers.js",
+                        "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+                    },
+                    {
+                        "file": "packages/core/src/support/helpers.js",
+                        "needle": "export const ATELIER_REF_WIDTH = 6;"
+                    },
+                    {
+                        "file": "packages/core/src/support/helpers.js",
+                        "needle": "export function atelierParseReference(reference) {"
+                    }
+                ],
+                "must_not_include": [
+                    "packages/core/src/support/helpersGlob.js"
+                ]
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "`import * as board` binds every export of slotBoard.js; exactly one of them, board.SlotBoard, is read anywhere in this file.",
+            "from": {
+                "file": "packages/core/src/support/boardSummary.js",
+                "needle": "import * as board from \"./slotBoard.js\";"
+            },
+            "expect": {
+                "kind": "namespace_import",
+                "candidate": {
+                    "file": "packages/core/src/support/slotBoard.js",
+                    "needle": "export class SlotBoard {"
+                },
+                "must_not_include": [
+                    "BOARD_REFRESH"
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-generic",
+            "surface": "implementation",
+            "note": "The generic contract is a JSDoc @typedef with two @template parameters and no runtime declaration; the eight repositories never name it and satisfy it structurally on find, all and count, each pinning Rec in its own @type annotation.",
+            "from": {
+                "file": "packages/core/src/contracts/repository.js",
+                "needle": " * @typedef {object} Repository"
+            },
+            "expect": {
+                "kind": "structural",
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/repositories/customerRepository.cjs",
+                        "needle": "class CustomerRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/inventoryRepository.cjs",
+                        "needle": "class InventoryRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/invoiceRepository.cjs",
+                        "needle": "class InvoiceRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/orderRepository.cjs",
+                        "needle": "class OrderRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/partRepository.cjs",
+                        "needle": "class PartRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/paymentRepository.cjs",
+                        "needle": "class PaymentRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/technicianRepository.cjs",
+                        "needle": "class TechnicianRepository {"
+                    },
+                    {
+                        "file": "packages/bench/src/repositories/warrantyRepository.cjs",
+                        "needle": "class WarrantyRepository {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-setter-accessor",
+            "surface": "definition",
+            "note": "An assignment, not a call: `schedule.capacity = 1` resolves to the setter half of the accessor pair, never to the getter declared above it.",
+            "from": {
+                "file": "packages/core/tests/forwarding.test.js",
+                "needle": "schedule.capacity = 1;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/schedule.js",
+                "needle": "    set capacity(value) {"
+            }
+        },
+        {
+            "id": "def-computed-method-name",
+            "surface": "definition",
+            "note": "The method key is the BOARD_REFRESH constant, so neither the declaration nor the call site spells a literal `refresh` token.",
+            "from": {
+                "file": "packages/core/tests/board.test.js",
+                "needle": "assert.deepEqual(board[BOARD_REFRESH]([2, 1]).booked, [1, 2]);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/slotBoard.js",
+                "needle": "    [BOARD_REFRESH](slots) {"
+            }
+        },
+        {
+            "id": "def-class-field-arrow",
+            "surface": "definition",
+            "note": "describe is a class FIELD holding an arrow, so it is an own property of every instance and never appears on SlotBoard.prototype; the test detaches it to prove the binding.",
+            "from": {
+                "file": "packages/core/tests/board.test.js",
+                "needle": "const detached = board.describe;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/slotBoard.js",
+                "needle": "    describe = () => `${this.technicianName}: ${this.booked.length}/${this.capacity}`;"
+            }
+        },
+        {
+            "id": "def-define-property-accessor",
+            "surface": "definition",
+            "note": "`day.load` has no method syntax anywhere in the lane: the getter is installed on the prototype by an Object.defineProperty call placed after the class body.",
+            "from": {
+                "file": "packages/core/src/support/boardSummary.js",
+                "needle": "        load: day.load,"
+            },
+            "expect": {
+                "file": "packages/core/src/support/slotBoard.js",
+                "needle": "Object.defineProperty(SlotBoard.prototype, \"load\", {"
+            }
+        },
+        {
+            "id": "def-default-export",
+            "surface": "definition",
+            "note": "slotWindow.js exports no name at all; DayWindow is the importing file's own binding, so the lookup has to cross the default edge to reach the declaration.",
+            "from": {
+                "file": "packages/core/src/support/boardSummary.js",
+                "needle": "const span = new DayWindow(first, day.booked.length);"
+            },
+            "expect": {
+                "file": "packages/core/src/support/slotWindow.js",
+                "needle": "export default class SlotWindow {"
+            }
+        },
+        {
+            "id": "def-symbol-keyed-method",
+            "surface": "definition",
+            "note": "Interpolating a SlotWindow calls the method keyed by the well-known Symbol.toPrimitive; no identifier at the call site names it.",
+            "from": {
+                "file": "packages/core/src/support/boardSummary.js",
+                "needle": "        window: `${span}`,"
+            },
+            "expect": {
+                "file": "packages/core/src/support/slotWindow.js",
+                "needle": "    [Symbol.toPrimitive](hint) {"
+            }
+        },
+        {
+            "id": "def-tagged-template",
+            "surface": "definition",
+            "note": "A tag call carries no parentheses and no argument list: the template literal itself is the call, and refTag receives the static strings plus the interpolated values.",
+            "from": {
+                "file": "packages/core/src/support/boardSummary.js",
+                "needle": "        caption: refTag`board ${reference} holds ${day.booked.length} of ${capacity}`,"
+            },
+            "expect": {
+                "file": "packages/core/src/support/referenceTag.js",
+                "needle": "export function refTag(strings, ...values) {"
+            }
+        },
+        {
+            "id": "refs-format-reference",
+            "surface": "references",
+            "note": "Nine lines carry the name; one of them is the string literal \"atelierFormatReference\" inside the glob test's key assertion, which is not a reference. The floor counts genuine reference sites outside the declaration.",
+            "from": {
+                "file": "packages/core/src/support/helpers.js",
+                "needle": "export function atelierFormatReference(prefix, num, year = Reference.DEFAULT_YEAR) {"
+            },
+            "expect": {
+                "min_references": 6,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/concerns/hasReference.js",
+                        "needle": "return atelierFormatReference(this.referencePrefix, this.referenceNumber);"
+                    },
+                    {
+                        "file": "packages/core/src/support/boardSummary.js",
+                        "needle": "const reference = atelierFormatReference(BOARD_REF_PREFIX, technicianNumber);"
+                    },
+                    {
+                        "file": "packages/core/tests/structure.test.js",
+                        "needle": "assert.equal(atelierFormatReference(\"AT\", 1), \"AT-2026-000001\");"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-report-row",
+            "surface": "references",
+            "note": "The value-derived row helper, used across the report package; its sibling rowFromCents is a different function with its own task.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.cjs",
+                "needle": "function reportRow(label, value) {"
+            },
+            "expect": {
+                "min_references": 12,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/reports/churn-risk.cjs",
+                        "needle": ".map((customer) => reportRow(customer.name, 1));"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/order-backlog.cjs",
+                        "needle": ".map(([label, count]) => reportRow(label, count));"
+                    },
+                    {
+                        "file": "packages/bench/src/reports/net-margin.cjs",
+                        "needle": "return [reportRow(\"net margin\", revenue === 0 ? 0 : (revenue - data.partsCostCents()) / revenue)];"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-with-reference",
+            "surface": "references",
+            "note": "The mixin installer, called once per model at module scope: the call is a side effect at the foot of the file, not part of any class body.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.js",
+                "needle": "export function withReference(Target, prefix = DEFAULT_REFERENCE_PREFIX) {"
+            },
+            "expect": {
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/models/customer.js",
+                        "needle": "withReference(Customer, \"CU\");"
+                    },
+                    {
+                        "file": "packages/core/src/models/repairOrder.js",
+                        "needle": "withReference(RepairOrder);"
+                    },
+                    {
+                        "file": "packages/core/src/index.js",
+                        "needle": "export { hasReference, withReference } from \"./concerns/hasReference.js\";"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "impl-exporter-contract",
+            "surface": "implementation",
+            "note": "No exporter names ExporterContract: it is a JSDoc @typedef with no runtime declaration, and the 8 exporters satisfy it through one extends edge to AbstractExporter, which supplies filename() while each writes its own export(). AbstractExporter is a base and is not counted.",
+            "from": {
+                "file": "packages/bench/src/contracts/exporterContract.cjs",
+                "needle": " * @typedef {object} ExporterContract"
+            },
+            "expect": {
+                "kind": "structural",
+                "exact_count": 8,
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "packages/bench/src/exporters/csvExporter.cjs",
+                        "needle": "class CsvExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/htmlExporter.cjs",
+                        "needle": "class HtmlExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/jsonExporter.cjs",
+                        "needle": "class JsonExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/markdownExporter.cjs",
+                        "needle": "class MarkdownExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/pdfExporter.cjs",
+                        "needle": "class PdfExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/xlsxExporter.cjs",
+                        "needle": "class XlsxExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/xmlExporter.cjs",
+                        "needle": "class XmlExporter extends AbstractExporter {"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/yamlExporter.cjs",
+                        "needle": "class YamlExporter extends AbstractExporter {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hover-setter-clamp",
+            "surface": "hover",
+            "from": {
+                "file": "packages/core/src/support/schedule.js",
+                "needle": "    set capacity(value) {"
+            },
+            "expect": {
+                "contains": "never drops an already booked slot"
             }
         }
     ]
