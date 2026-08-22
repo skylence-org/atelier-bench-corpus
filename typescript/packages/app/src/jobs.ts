@@ -26,3 +26,22 @@ export class RecalculateInventory {
         return announced;
     }
 }
+
+/**
+ * Node-style callback variant of the same job: the class above returns the
+ * count, this hands it to `callback(error, count)`.
+ *
+ * The console command module exports a DIFFERENT function that is also named
+ * `recalculateInventory`; the two are told apart by module path, never by name.
+ */
+export function recalculateInventory(
+    data: Dataset,
+    dispatcher: Dispatcher,
+    callback: (error: Error | null, count: number) => void,
+): void {
+    try {
+        callback(null, new RecalculateInventory().run(data, dispatcher));
+    } catch (error) {
+        callback(error instanceof Error ? error : new Error(String(error)), 0);
+    }
+}

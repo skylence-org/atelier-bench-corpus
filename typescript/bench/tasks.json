@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "typescript",
-        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: jsx_element, jsx_factory, ambient (global namespace in a .d.ts), ambient_module (declare module), paths_alias. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (types, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
+        "notes": "Known-answer navigation tasks for the typescript lane. Needle-based, not line-based: bench/verify-tasks/verify.mjs resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (typescript/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: jsx_element, jsx_factory, ambient (global namespace in a .d.ts), ambient_module (declare module), paths_alias. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (types, members, functions, constants); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves. Kinds added by wave 2: same_name (two exported symbols carry one name in two modules, so the module path decides and the name cannot), name_only (a string literal is the only link between two sites because nothing declares it as a symbol), glob (an all-names edge, `export * from`, which re-exports every name its target module exports; exact_count on this surface counts those names and is a lane-specific fact, not a cross-lane one).",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1816,6 +1816,148 @@
                         "needle": "register(listener: Listener): void {"
                     }
                 ]
+            }
+        },
+        {
+            "id": "def-callback-style",
+            "surface": "definition",
+            "note": "Node-style callback job (error, count). The console command module exports a DIFFERENT function with the same name; must_not_include keeps them apart.",
+            "from": {
+                "file": "packages/app/tests/jobs.test.ts",
+                "needle": "recalculateInventory(Dataset.seeded(), new Dispatcher(), (error, count) => {"
+            },
+            "expect": {
+                "file": "packages/app/src/jobs.ts",
+                "needle": "export function recalculateInventory(",
+                "must_not_include": [
+                    "packages/app/src/commands/recalculateInventory.ts"
+                ]
+            }
+        },
+        {
+            "id": "def-module-const",
+            "surface": "definition",
+            "note": "Module-level constant imported by name (same anchors as the javascript, python and go lanes). This lane also carries def-crate-const, which asks the same question under the id rust and typescript agreed on; both are kept because no id may be renamed.",
+            "from": {
+                "file": "packages/core/src/concerns/hasReference.ts",
+                "needle": "export const DEFAULT_REFERENCE_PREFIX = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "file": "packages/core/src/support/helpers.ts",
+                "needle": "export const ATELIER_REF_PREFIX = \"AT\";"
+            }
+        },
+        {
+            "id": "imp-glob-import",
+            "surface": "import-precision",
+            "note": "TypeScript has no unqualified glob import; `export * from` is the equivalent all-names edge, pulling in every name its target module exports. reportContract.ts exports exactly 4 names at the base SHA: ReportRow, reportRow, rowFromCents, ReportContract.",
+            "from": {
+                "file": "packages/bench/src/index.ts",
+                "needle": "export * from \"./contracts/reportContract\";"
+            },
+            "expect": {
+                "kind": "glob",
+                "exact_count": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/contracts/reportContract.ts",
+                        "needle": "export interface ReportRow {"
+                    },
+                    {
+                        "file": "packages/bench/src/contracts/reportContract.ts",
+                        "needle": "export function rowFromCents(label: string, cents: number): ReportRow {"
+                    }
+                ],
+                "must_include": ["ReportContract", "reportRow"]
+            }
+        },
+        {
+            "id": "refs-string-event-name",
+            "surface": "references",
+            "note": "Nothing declares 'repair.completed'. The subscribe site and the emit path are connected by the literal alone. Five code sites carry it; the floor counts the four outside the `from` site, matching the min_references convention of the sibling refs-* tasks.",
+            "from": {
+                "file": "packages/core/src/events.ts",
+                "needle": "bus.on(\"repair.completed\", (payload) => {"
+            },
+            "expect": {
+                "kind": "name_only",
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "packages/core/src/events.ts",
+                        "needle": "export const REPAIR_COMPLETED = \"repair.completed\";"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.ts",
+                        "needle": "bus.emit(\"repair.completed\", { orderId: 4, reference: \"AT-2026-000001\" });"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.ts",
+                        "needle": "expect(bus.seen).toEqual([\"repair.completed\", \"stock.depleted\"]);"
+                    },
+                    {
+                        "file": "packages/core/tests/events.test.ts",
+                        "needle": "expect(bus.subscribedNames()).toEqual([\"repair.completed\"]);"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "resolution-same-name-command-vs-job",
+            "surface": "resolution",
+            "note": "Two exported functions named recalculateInventory in two modules (the console command and the callback job); the import in main.ts picks the command by module path, not by name.",
+            "from": {
+                "file": "packages/app/src/main.ts",
+                "needle": "console.log(`recalculated ${recalculateInventory(state)} part(s)`);"
+            },
+            "expect": {
+                "kind": "same_name",
+                "candidate": {
+                    "file": "packages/app/src/commands/recalculateInventory.ts",
+                    "needle": "export function recalculateInventory(state: AppState): number {"
+                },
+                "must_not_include": [
+                    "packages/app/src/jobs.ts"
+                ]
+            }
+        },
+        {
+            "id": "refs-type-only-report-row",
+            "surface": "references",
+            "note": "Lane-local: ReportRow is an interface, so every one of its use sites is a type position and none survives to runtime. 74 lines name it at the base SHA, one of them the declaration; the floor of 60 leaves room for a tool that folds the import lines into their declarations.",
+            "from": {
+                "file": "packages/bench/src/contracts/reportContract.ts",
+                "needle": "export interface ReportRow {"
+            },
+            "expect": {
+                "kind": "type_only",
+                "min_references": 60,
+                "known_sites": [
+                    {
+                        "file": "packages/bench/src/contracts/exporterContract.ts",
+                        "needle": "export(rows: readonly ReportRow[]): string;"
+                    },
+                    {
+                        "file": "packages/bench/src/support/abstractReport.ts",
+                        "needle": "abstract rows(data: Dataset): ReportRow[];"
+                    },
+                    {
+                        "file": "packages/bench/src/exporters/htmlExporter.ts",
+                        "needle": "import type { ReportRow } from \"../contracts/reportContract\";"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "hover-conditional-type",
+            "surface": "hover",
+            "note": "Lane-local: a conditional type with `infer`. The doc comment is attached to the type alias, so the hover answer comes from the declaration, not from the value that uses it.",
+            "from": {
+                "file": "packages/bench/src/support/unwrap.ts",
+                "needle": "export type Unwrap<T> = T extends Promise<infer U> ? U : T;"
+            },
+            "expect": {
+                "contains": "unwrap a Promise, or pass the type through unchanged"
             }
         }
     ]
