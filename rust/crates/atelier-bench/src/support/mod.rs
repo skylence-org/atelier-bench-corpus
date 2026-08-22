@@ -11,4 +11,5 @@ pub mod grid;
 pub mod pair_map;
 pub mod plain_row_formatter;
 pub mod report_glob;
+pub mod rule_namespace_user;
 pub mod rule_summary;

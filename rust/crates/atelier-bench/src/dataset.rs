@@ -141,6 +141,53 @@ impl Dataset {
     pub fn labour_minutes(&self) -> u32 {
         self.orders.iter().map(|order| order.labor_minutes).sum()
     }
+
+    /// Lazy walk over the open orders; the eager [`Dataset::open_orders`]
+    /// collects, this one yields.
+    pub fn iter_open_orders(&self) -> OpenOrders<'_> {
+        OpenOrders {
+            orders: &self.orders,
+            index: 0,
+        }
+    }
+
+    /// Labour still queued on the bench, summed by driving the iterator.
+    pub fn open_labour_minutes(&self) -> u32 {
+        let mut total = 0;
+
+        for order in self.iter_open_orders() {
+            total += order.labor_minutes;
+        }
+
+        total
+    }
+}
+
+/// Hand-written iterator over the open orders.
+///
+/// Rust has no generator syntax: `next` is the yield point a generator in the
+/// other lanes compiles down to, and the `for` loop in
+/// [`Dataset::open_labour_minutes`] is what drives it.
+pub struct OpenOrders<'a> {
+    orders: &'a [RepairOrder],
+    index: usize,
+}
+
+impl<'a> Iterator for OpenOrders<'a> {
+    type Item = &'a RepairOrder;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.index < self.orders.len() {
+            let order = &self.orders[self.index];
+            self.index += 1;
+
+            if order.is_open() {
+                return Some(order);
+            }
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]
