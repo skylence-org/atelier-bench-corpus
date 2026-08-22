@@ -195,6 +195,7 @@
     "def-callback-style": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python",
@@ -531,6 +532,7 @@
     "def-generator-function": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "python",
         "go"
@@ -796,6 +798,7 @@
     "def-mixin-method": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "python",
         "go"
@@ -810,6 +813,7 @@
     "def-module-const": {
       "surface": "definition",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python",
@@ -1412,6 +1416,7 @@
     "imp-namespace-one-member": {
       "surface": "import-precision",
       "lanes": [
+        "rust",
         "typescript",
         "python",
         "go"
@@ -1517,6 +1522,7 @@
     "impl-repository-generic": {
       "surface": "implementation",
       "lanes": [
+        "rust",
         "typescript",
         "python",
         "go"
@@ -1882,6 +1888,7 @@
     "refs-string-event-name": {
       "surface": "references",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python",
@@ -2034,6 +2041,7 @@
     "resolution-same-name-command-vs-job": {
       "surface": "resolution",
       "lanes": [
+        "rust",
         "typescript",
         "javascript",
         "python",
