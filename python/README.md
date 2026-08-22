@@ -22,10 +22,10 @@ hints as the only static-typing surface.
 
 | Package | Role | .py files |
 | --- | --- | --- |
-| `atelier_core/` | Domain: models, Money, enums, Protocols, container, events, policy, both `Formatter` halves | 39 |
+| `atelier_core/` | Domain: models, Money, enums, Protocols, container, events, policy, both `Formatter` halves, intake channels | 40 |
 | `atelier_bench/` | Breadth subsystem: 8 contracts, 8 concerns, 8 abstract bases, 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules, dataset, registry | 140 |
 | `atelier_app/` | Application surface: Flask routes, console commands, jobs (callback / Future / async) | 12 |
-| `tests/` | 28 unittest tests incl. request-level (Flask test client) | 11 |
+| `tests/` | 35 unittest tests incl. request-level (Flask test client) | 12 |
 | `bench/` | `tasks.json` + `verify_tasks.py` (stdlib only) + `mypy-allowlist.txt` | 3 |
 | `fixtures/broken-syntax/` | Intentionally invalid Python, **DO NOT FIX** | 2 |
 
@@ -57,9 +57,10 @@ hints as the only static-typing surface.
 | Direction / import-precision / collision / multi-parent | tasks `dir-*`, `imp-*`, `lane-local-*`, `parents-*` in `bench/tasks.json` (same ids as the other lanes) |
 | Same-name functions in two modules | `atelier_app/commands/recalculate_inventory.py` vs `atelier_app/jobs.py` |
 | HTTP surface (Flask) | `atelier_app/__init__.py`: `GET /report/<reference>`, `GET /api/orders`, `POST /api/orders/<id>/notes`, `GET /api/reports/<slug>`, `GET /health` |
-| Tests (incl. request-level) | 28 unittest tests: money, lifecycle, forwarding, shadow pair, events, structure, breadth, http, console, jobs |
+| Tests (incl. request-level) | 35 unittest tests: money, lifecycle, forwarding, shadow pair, events, structure, breadth, http, console, jobs, intake |
 | Broken-syntax fixtures | `fixtures/broken-syntax`, **DO NOT FIX** (outside every package; `--lint` requires them to fail `py_compile`) |
 | Document-symbol + call-hierarchy | `atelier_core/models/repair_order.py` (18 named symbols) and `atelier_bench/__init__.py` (8) for the symbol listing; `complete` → `transition_to`, three callers of `transition_to`, and `atelier_app.commands.recalculate_inventory` → `atelier_core` `SendCompletionNotice.subscribe` for the call graph |
+| Metaclass method, virtual subclass, `_missing_`, `__post_init__`, `__call__`, `cached_property` | `atelier_core/support/intake.py`; the `Schedule.capacity` setter's only write site is `Technician.set_capacity` in `models/technician.py` |
 
 ## Consumption (runner)
 
@@ -70,7 +71,7 @@ hints as the only static-typing surface.
 Local use (from `python/`):
 
 ```bash
-python3 -m unittest discover -s tests -t . -v   # 28 tests
+python3 -m unittest discover -s tests -t . -v   # 35 tests
 python3 -m atelier_app seed                      # summary + 16 metric lines + rules line
 python3 -m atelier_app report gross-profit       # csv export
 python3 -m atelier_app serve 8080
@@ -80,9 +81,9 @@ python3 -m atelier_app serve 8080
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 87 needle-based accuracy tasks (`from` → `expect` file/needle pairs) incl. the cardinality/direction/import-precision/collision/multi-parent surfaces from day one + 5 document-symbol/call-hierarchy surfaces |
+| `bench/tasks.json` | 95 needle-based accuracy tasks (`from` → `expect` file/needle pairs) incl. the cardinality/direction/import-precision/collision/multi-parent surfaces from day one + 5 document-symbol/call-hierarchy surfaces + 8 intake/property-setter surfaces |
 | `bench/verify_tasks.py` | Self-check that every task needle still resolves to exactly one line; **standard library only** |
-| Lane-specific `kind` strings | `setattr_mixin` (method grafted by a class decorator), `dynamic_attribute` (`__getattr__` forwarding), `property`, `dataclass_generated`, `class_creation_hook` (`__init_subclass__`), `descriptor`, `name_mangling`, `singledispatch`, `context_manager`, `same_name`, `pattern_match`, `module_getattr` (PEP 562), `unresolvable_static` (importlib with a runtime-built name), `string_key`, `mro`, `relative_import` |
+| Lane-specific `kind` strings | `setattr_mixin` (method grafted by a class decorator), `dynamic_attribute` (`__getattr__` forwarding), `property`, `dataclass_generated`, `class_creation_hook` (`__init_subclass__`), `descriptor`, `name_mangling`, `singledispatch`, `context_manager`, `same_name`, `pattern_match`, `module_getattr` (PEP 562), `unresolvable_static` (importlib with a runtime-built name), `string_key`, `mro`, `relative_import`, `metaclass` (method defined on the metaclass), `virtual_subclass` (registered at runtime, no inheritance edge), `enum_missing` (`Enum._missing_`), `dataclass_hook` (`__post_init__`) |
 | `bench/mypy-allowlist.txt` | The exact `mypy` diagnostics `--lint` accepts (5 at the pinned version: the setattr-grafted `reference()`/`reference_number` the lane exists to exercise); regenerate with `--lint --write-allowlist` |
 
 ```bash

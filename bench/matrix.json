@@ -417,6 +417,12 @@
         "go"
       ]
     },
+    "def-enum-missing-hook": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-enum-variant": {
       "surface": "definition",
       "lanes": [
@@ -757,6 +763,12 @@
         "python"
       ]
     },
+    "def-metaclass-method": {
+      "surface": "definition",
+      "lanes": [
+        "python"
+      ]
+    },
     "def-method-expression": {
       "surface": "definition",
       "lanes": [
@@ -899,6 +911,12 @@
       "surface": "definition",
       "lanes": [
         "php"
+      ]
+    },
+    "def-post-init": {
+      "surface": "definition",
+      "lanes": [
+        "python"
       ]
     },
     "def-promise-style": {
@@ -1272,6 +1290,12 @@
         "go"
       ]
     },
+    "hover-cached-property": {
+      "surface": "hover",
+      "lanes": [
+        "python"
+      ]
+    },
     "hover-conditional-type": {
       "surface": "hover",
       "lanes": [
@@ -1437,6 +1461,12 @@
       "surface": "implementation",
       "lanes": [
         "go"
+      ]
+    },
+    "impl-intake-contract": {
+      "surface": "implementation",
+      "lanes": [
+        "python"
       ]
     },
     "impl-interface": {
@@ -1732,6 +1762,12 @@
         "php"
       ]
     },
+    "refs-cached-property": {
+      "surface": "references",
+      "lanes": [
+        "python"
+      ]
+    },
     "refs-consumed-quantity": {
       "surface": "references",
       "lanes": [
@@ -1758,6 +1794,12 @@
       "surface": "references",
       "lanes": [
         "typescript",
+        "python"
+      ]
+    },
+    "refs-dunder-call": {
+      "surface": "references",
+      "lanes": [
         "python"
       ]
     },
@@ -1969,6 +2011,12 @@
       "surface": "resolution",
       "lanes": [
         "go"
+      ]
+    },
+    "resolution-property-setter": {
+      "surface": "resolution",
+      "lanes": [
+        "python"
       ]
     },
     "resolution-receiver-pointer-vs-value": {
