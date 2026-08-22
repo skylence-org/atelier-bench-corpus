@@ -38,6 +38,7 @@ func TestBlankImportRegistersTheAuditSink(t *testing.T) {
 		t.Errorf("fan-out accepted %d, want 1", accepted)
 	}
 }
+
 func TestStockWatchCountsDepletedParts(t *testing.T) {
 	dispatcher := events.NewDispatcher()
 	watch := (&events.StockWatch{}).Subscribe(dispatcher)

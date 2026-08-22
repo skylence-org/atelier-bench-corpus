@@ -5,7 +5,7 @@ import "fmt"
 // StockWatch is the inventory-side listener. The recalculate command
 // subscribes one, dispatches a stock.depleted event per depleted part and
 // reports how many notices went out; that call is the one call-hierarchy edge
-// in the lane that crosses the app package into core.
+// in the lane that crosses the app package into core/events.
 type StockWatch struct {
 	Sent int
 	Last string

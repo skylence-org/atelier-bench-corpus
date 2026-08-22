@@ -64,7 +64,7 @@ import path disagrees with its declared name, and a package that shadows a stand
 | Type switch, anonymous struct | `core/support/pick.go`: `DescribeChoice` and `AnonymousSummary` |
 | String-keyed dispatch | `atelier/services/order_volume_service.go` `By(scope)`, `core/policy/policy.go` `Allows(ability)`, `core/container/container.go` `Make(key)`, `atelier/exporters` by extension |
 | Same name, command vs job | `app/commands.RecalculateInventory` (console line) vs `app.RecalculateInventory` (job) |
-| Package-boundary call edge | `app/commands/recalculate_inventory.go` subscribes `core/events.StockWatch` and dispatches one `stock.depleted` event per depleted part: the lane's one outgoing edge from `app/` into `core/` |
+| Package-boundary call edge | `app/commands/recalculate_inventory.go` subscribes `core/events.StockWatch` and dispatches one `stock.depleted` event per depleted part: the lane's one outgoing edge from `app/` into `core/events` |
 | HTTP routes | `app/http/router.go`: `GET /report/{reference}`, `GET /api/orders`, `POST /api/orders/{id}/notes`, `GET /api/reports/{slug}`, `GET /health`; `RegisterDefault` also registers `/health` on the default mux |
 | Parameter groups vs arity | `core/models/part.go` `NewPart` takes six parameters in four groups |
 | Parse negatives | `fixtures/broken-syntax/` — two invalid files behind the `brokenfixtures` build tag, **DO NOT FIX** |
@@ -94,7 +94,7 @@ which `node bench/check-matrix.mjs` proves against `bench/conformance/expected.t
 Lane-specific `kind` strings used in `expect` blocks: `structural`, `shadow_alias`, `same_name`,
 `path_name_divergence`, `receiver`, `arity`, `init_order`, `lane_local`, `syntax_error`,
 `parent_of`, `child_of`, `uses_self`, `one_of_two`, `dot_import`, `side_effect_only`,
-`visibility_boundary`, `one_member`, `no_fanout`.
+`type_only`, `visibility_boundary`, `one_member`, `no_fanout`.
 
 Counting rule for `exact_count`: concrete, non-generic, unconditionally compiled types that satisfy
 the contract directly or through embedding. Interfaces, the embeddable bases in `atelier/support/`
