@@ -28,4 +28,22 @@ class RecalculateInventory implements ShouldQueue
             ])->save();
         });
     }
+
+    /**
+     * Callback style: the continuation is a parameter and the result arrives
+     * through it, never as a return value. The console command of the same name
+     * under app/Console/Commands/ has no such method.
+     */
+    public static function withCallback(int $restockLevel, callable $done): void
+    {
+        try {
+            (new self($restockLevel))->handle();
+        } catch (\Throwable $error) {
+            $done($error, 0);
+
+            return;
+        }
+
+        $done(null, Part::query()->count());
+    }
 }
