@@ -26,11 +26,11 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Path | Role | .php files |
 | --- | --- | --- |
 | `app/` | Domain models, enums, concerns, services, events, policies, jobs, HTTP + Livewire + Filament surfaces | 268 |
-| `app/Bench/` | Breadth subsystem: 8 contracts, 8 concerns, 7 abstract bases, 24 reports (+ `ReportRegistry` fan-in), 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules | 151 |
+| `app/Bench/` | Breadth subsystem: 11 contracts, 8 concerns, 7 abstract bases, 24 reports (+ `ReportRegistry` fan-in), 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services, 48 rules | 162 |
 | `database/` | Migrations, factories, deterministic `DatabaseSeeder`, delegating `CanonicalSeeder` | 41 |
 | `routes/` | `web.php`, `api.php`, `console.php` | 3 |
 | `resources/views/` | Report view, Blade components, Livewire SFC, Filament pages | 12 |
-| `tests/` | Feature suite (44 tests / 171 assertions), Dusk scaffold | 17 |
+| `tests/` | Feature suite (53 tests), Dusk scaffold | 18 |
 | `bench/` | `tasks.json` + `verify_tasks.php` self-check; **zero composer dependencies** | 1 |
 | `fixtures/broken-syntax/` | Intentionally invalid PHP + Blade, **DO NOT FIX** | 2 |
 
@@ -77,6 +77,9 @@ Install from the **committed** `composer.lock` only (`composer install`). Do not
 | Report fan-in registry | `app/Bench/Reports/ReportRegistry::REPORTS`, the 24 `ReportContract` implementors in one constant, mirroring `RuleRegistry::RULES` |
 | Delegating seeder | `database/seeders/CanonicalSeeder` calls `DatabaseSeeder::class`, giving the frozen dataset an in-code reference instead of only an artisan string |
 | Document-symbol + call-hierarchy | `app/Bench/Reports/ReportRegistry` (4 named symbols) for the symbol listing; `complete` → `transitionTo`, three callers of `transitionTo` (model, seeder, feature test), and `ReportController::show` → both aliased `Formatter` halves for the call graph |
+| Wave-2 shared ids: language shapes | `app/Support/Canonical/Wave2/`: generator (`OrderStream::each`), brace group-use (`RepositoryGlob`), namespace-prefix import (`NamespaceOneMember`), namespace-level const (`constants.php`) |
+| Wave-2 shared ids: name collisions | `App\Console\Commands\RecalculateInventory` against `App\Jobs\RecalculateInventory` (aliased import), and `PricingPolicy` resolving two traits' `rate()` with `insteadof` |
+| Generic contract | `app/Bench/Contracts/RepositoryContract`, a `@template` docblock generic with the 8 repositories as implementors |
 | Breadth (constructs that may be dropped) | `app/Support/Edge/`: enum-implements-interface, first-class callables, readonly promoted properties + readonly class, intersection types, `#[Attribute]` + reflection, `new` in initializer + `never` type, static closure + no-default `match`, named arguments, nullsafe chain, `@template`/`@extends` generics, trait with abstract method + static property, interface constant via implementor |
 
 ## Consumption (runner)
@@ -93,7 +96,7 @@ cp .env.example .env   # if needed
 php artisan key:generate
 php artisan migrate --force
 php artisan db:seed    # DatabaseSeeder — deterministic
-php artisan test       # 44 tests, sqlite :memory:
+php artisan test       # 53 tests, sqlite :memory:
 ```
 
 Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:reference}` (see `ReportController`).
@@ -102,7 +105,7 @@ Admin UI: `/admin` (Filament). Sample report path: `GET /report/{repairOrder:ref
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 106 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges + 24 shared canonical ids carried by the other lanes + 3 document-symbol/call-hierarchy surfaces |
+| `bench/tasks.json` | 119 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 40 original + 29 for the cardinality/direction/import-precision/collision/multi-parent/breadth surfaces (issue #7) + 10 framework-magic string-keyed edges + 24 shared canonical ids carried by the other lanes + 3 document-symbol/call-hierarchy surfaces |
 | `bench/verify_tasks.php` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

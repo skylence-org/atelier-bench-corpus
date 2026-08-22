@@ -195,6 +195,7 @@
     "def-callback-style": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -532,6 +533,7 @@
     "def-generator-function": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "python",
@@ -798,6 +800,7 @@
     "def-mixin-method": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "python",
@@ -813,6 +816,7 @@
     "def-module-const": {
       "surface": "definition",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -1233,6 +1237,12 @@
         "go"
       ]
     },
+    "dir-trait-user": {
+      "surface": "direction",
+      "lanes": [
+        "php"
+      ]
+    },
     "docsym-repair-order": {
       "surface": "document_symbol",
       "lanes": [
@@ -1401,6 +1411,7 @@
     "imp-glob-import": {
       "surface": "import-precision",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "python",
@@ -1416,6 +1427,7 @@
     "imp-namespace-one-member": {
       "surface": "import-precision",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "python",
@@ -1522,6 +1534,7 @@
     "impl-repository-generic": {
       "surface": "implementation",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "python",
@@ -1731,9 +1744,16 @@
         "go"
       ]
     },
+    "parse-negative-unclosed-blade": {
+      "surface": "parse-negative",
+      "lanes": [
+        "php"
+      ]
+    },
     "parse-negative-unclosed-class": {
       "surface": "parse-negative",
       "lanes": [
+        "php",
         "typescript",
         "python"
       ]
@@ -1888,6 +1908,7 @@
     "refs-string-event-name": {
       "surface": "references",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -2041,6 +2062,7 @@
     "resolution-same-name-command-vs-job": {
       "surface": "resolution",
       "lanes": [
+        "php",
         "rust",
         "typescript",
         "javascript",
@@ -2115,6 +2137,12 @@
       "surface": "resolution",
       "lanes": [
         "javascript"
+      ]
+    },
+    "resolution-trait-conflict-insteadof": {
+      "surface": "resolution",
+      "lanes": [
+        "php"
       ]
     },
     "resolution-trait-default-body": {
