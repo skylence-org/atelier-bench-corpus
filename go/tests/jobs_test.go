@@ -64,7 +64,7 @@ func TestSameNameCommandAndJobAreDifferentFunctions(t *testing.T) {
 	if job.Name != "recalculate-inventory" || job.Handled != 2 {
 		t.Errorf("job = %+v", job)
 	}
-	if line != "recalculate-inventory: 2 part(s) below reorder level" {
+	if line != "recalculate-inventory: 2 part(s) below reorder level, 2 notice(s), last FAN-A1" {
 		t.Errorf("command = %s", line)
 	}
 }

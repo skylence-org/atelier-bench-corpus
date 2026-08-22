@@ -1227,7 +1227,8 @@
         "rust",
         "typescript",
         "javascript",
-        "python"
+        "python",
+        "go"
       ]
     },
     "hierarchy-complete-chain": {
@@ -1248,7 +1249,8 @@
         "rust",
         "typescript",
         "javascript",
-        "python"
+        "python",
+        "go"
       ]
     },
     "hierarchy-incoming-transition": {
@@ -1258,7 +1260,8 @@
         "rust",
         "typescript",
         "javascript",
-        "python"
+        "python",
+        "go"
       ]
     },
     "hierarchy-promoted-callee": {
@@ -1405,7 +1408,8 @@
         "rust",
         "typescript",
         "javascript",
-        "python"
+        "python",
+        "go"
       ]
     },
     "impl-abstract-report": {
@@ -1761,7 +1765,8 @@
         "rust",
         "typescript",
         "javascript",
-        "python"
+        "python",
+        "go"
       ]
     },
     "refs-money-newtype": {

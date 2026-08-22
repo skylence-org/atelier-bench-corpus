@@ -38,3 +38,22 @@ func TestBlankImportRegistersTheAuditSink(t *testing.T) {
 		t.Errorf("fan-out accepted %d, want 1", accepted)
 	}
 }
+func TestStockWatchCountsDepletedParts(t *testing.T) {
+	dispatcher := events.NewDispatcher()
+	watch := (&events.StockWatch{}).Subscribe(dispatcher)
+	if watch.Summary() != "no notices" {
+		t.Errorf("empty summary = %s", watch.Summary())
+	}
+	if !dispatcher.Dispatch(events.StockDepleted, events.Payload{"sku": "BAT-55"}) {
+		t.Error("the stock event should be handled once a watch is subscribed")
+	}
+	if dispatcher.Dispatch(events.RepairCompleted, events.Payload{"reference": "AT-2026-000001"}) {
+		t.Error("the watch must not answer for the completion event")
+	}
+	if watch.Sent != 1 || watch.Last != "BAT-55" {
+		t.Errorf("watch = %d / %s", watch.Sent, watch.Last)
+	}
+	if watch.Summary() != "1 notice(s), last BAT-55" {
+		t.Errorf("summary = %s", watch.Summary())
+	}
+}
