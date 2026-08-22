@@ -37,8 +37,16 @@ export { Note, NotableKind } from "./models/note";
 export { Label } from "./models/label";
 export { Signature } from "./models/signature";
 
-export { Dispatcher, SendCompletionNotice, channelFor } from "./events";
-export type { DomainEvent, Listener } from "./events";
+export {
+    Dispatcher,
+    REPAIR_COMPLETED,
+    STATUS_CHANGED,
+    STOCK_DEPLETED,
+    SendCompletionNotice,
+    StringBus,
+    channelFor,
+} from "./events";
+export type { DomainEvent, EventPayload, Listener } from "./events";
 export { AuditingDeviceObserver } from "./observers";
 export type { DeviceObserver } from "./observers";
 export { RepairOrderPolicy } from "./policy";

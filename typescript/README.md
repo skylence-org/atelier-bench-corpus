@@ -70,6 +70,8 @@ on a bench machine if you need bit-stable ground truth.
 | Multi-parent | `packages/bench/src/contracts/compositeContract.ts` (`CompositeContract extends` 3 interfaces); `packages/bench/src/reports/dailyRevenueReport.ts` (1 `extends` + 2 `implements` on an existing report, so `ReportContract` stays at 24 implementors) |
 | Breadth (language-feature fixtures) | `packages/bench/src/support/{unwrap,flags,slug,rulesConfig,logged,arrayAugmentation,uniqueKey,severity,adhoc,keyedLookup,worker}.ts`, `packages/core/src/support/orderGuards.ts`, an overloaded `Money.plus`, and `export * as Rules from "./rules"` — conditional/mapped/template-literal types, `satisfies`, a standard TC39 decorator, global augmentation, type guard + assertion function, `unique symbol`, `const enum`, class expression, `keyof typeof`, class method overload, class/interface declaration merging, `export * as` |
 | Document-symbol + call-hierarchy | `packages/core/src/models/repairOrder.ts` (24 named symbols) and `packages/bench/src/index.ts` (4) for the symbol listing; `complete` → `transitionTo`, three callers of `transitionTo`, and `@atelier/app` `recalculateInventory` → `@atelier/core` `Dispatcher.register` for the call graph |
+| String-keyed events (name-only resolution) | `packages/core/src/events.ts`: `StringBus` plus the `REPAIR_COMPLETED` / `STATUS_CHANGED` / `STOCK_DEPLETED` literals, subscribed in `SendCompletionNotice.subscribe` and exercised by `packages/core/tests/events.test.ts`; nothing declares the string as a symbol |
+| Same name in two modules | `packages/app/src/jobs.ts` (callback job) and `packages/app/src/commands/recalculateInventory.ts` (console command) both export `recalculateInventory`; `main.ts` picks the command by module path |
 
 ## Consumption (runner)
 
@@ -95,7 +97,7 @@ HTTP surface: `GET /report/:reference` (e.g. `AT-2026-000001`), `GET /api/orders
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 92 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 34 failure-mode surfaces (issue #9) + 9 TSX/ambient/paths/async edges + 5 document-symbol/call-hierarchy surfaces |
+| `bench/tasks.json` | 99 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 34 failure-mode surfaces (issue #9) + 9 TSX/ambient/paths/async edges + 5 document-symbol/call-hierarchy surfaces + 7 shared-id parity and depth-floor tasks |
 | `bench/verify-tasks/verify.mjs` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash
