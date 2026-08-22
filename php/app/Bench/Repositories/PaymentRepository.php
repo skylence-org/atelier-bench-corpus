@@ -2,10 +2,11 @@
 
 namespace App\Bench\Repositories;
 
+use App\Bench\Contracts\RepositoryContract;
 use App\Bench\Support\AbstractComponent;
 use App\Bench\Concerns\HasCache;
 
-class PaymentRepository extends AbstractComponent
+class PaymentRepository extends AbstractComponent implements RepositoryContract
 {
     use HasCache;
 
