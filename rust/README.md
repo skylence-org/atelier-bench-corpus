@@ -50,7 +50,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Parallel iteration (rayon) | `services/revenue_service.rs::metric_sweep` — also what forces `MetricContract: Send + Sync` |
 | Wide contract implementation | 24 reports, 16 metrics, 8 exporters, 8 notifiers, 8 repositories, 12 services |
 | Deterministic seed | `atelier-bench/src/dataset.rs::seeded` — revenue `58_325c`, part cost `46_300c`, gross profit `12_025c` |
-| Tests (incl. request-level) | 63 tests: domain lifecycle, shadow pair, Deref/macro forwarding, not-found conversion, breadth registry, canonical-parity constructs, axum routes, console commands, JSON parser |
+| Tests (incl. request-level) | 71 tests: domain lifecycle, shadow pair, Deref/macro forwarding, not-found conversion, breadth registry, canonical-parity constructs, open-order iterator, topic subscription, axum routes, console commands, JSON parser |
 | Build-script generated item | `crates/atelier-core/build.rs` writes `generated_units()` into `OUT_DIR`; `support/generated_units.rs` splices it in with `include!` — no textual definition under `src/` |
 | `#[path]` module | `support/mod.rs`: `#[path = "pathed/tally_sheet.rs"] pub mod ledger;` — module name and file name differ |
 | Lifetimes, HRTB, GAT | `support/borrowed.rs` (`Borrowed<'a>`, `for<'x> Fn(&'x str)`), `support/lender.rs` (`type Loan<'a> where Self: 'a`) |
@@ -66,6 +66,10 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 | Structural look-alike that is NOT an implementor | `support/plain_row_formatter.rs`: `HasFormatting`'s method set declared inherently, no `impl HasFormatting`, and the `T: ReportContract` blanket does not reach it |
 | Import-precision: barrel, type-position-only | `repositories/customer_repository.rs` (`use atelier_core::Customer;` through the crate-root `pub use`), `models/repair_order.rs` (`Container` named only in a signature) |
 | Document-symbol + call-hierarchy | `crates/atelier-core/src/models/repair_order.rs` (31 named symbols) and `crates/atelier-bench/src/lib.rs` (16) for the symbol listing; `complete` → `transition_to`, three callers of `transition_to`, and `atelier-app` `commands::recalculate_inventory::run` → `atelier-core` `Dispatcher::register` for the call graph |
+| Callback-style entry point | `atelier-app/src/jobs.rs`: `run_with_callback` takes the continuation as a parameter and forwards to `run` |
+| Hand-written iterator (rust's generator) | `atelier-bench/src/dataset.rs`: `OpenOrders::next` is the yield point; `Dataset::open_labour_minutes` drives it with a `for` loop |
+| Namespace-bound module import | `atelier-bench/src/support/rule_namespace_user.rs`: `use crate::rules;` binds the module, only `rules::RULES` is read |
+| String-keyed subscription | `atelier-core/src/events.rs`: `Dispatcher::on` matches on a topic literal; `DomainEvent::topic` writes the same literal per variant |
 
 ## Consumption (runner)
 
@@ -76,7 +80,7 @@ Build from the **committed** `Cargo.lock` only (`cargo build --locked`). Do not 
 Local use:
 
 ```bash
-cargo test --workspace          # 63 tests
+cargo test --workspace          # 71 tests
 cargo clippy --workspace --all-targets -- -D warnings
 cargo run -p atelier-app -- serve 8080
 cargo run -p atelier-app -- seed
@@ -90,7 +94,7 @@ HTTP surface: `GET /report/{reference}` (e.g. `AT-2026-000001`), `GET /api/order
 
 | Artifact | Role |
 | --- | --- |
-| `bench/tasks.json` | 96 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges + 12 shared canonical ids + 5 document-symbol/call-hierarchy surfaces |
+| `bench/tasks.json` | 104 needle-based accuracy tasks (`from` → `expect` file/needle pairs): 44 original + 30 failure-mode surfaces (issue #8) + 5 build-script/#[path]/lifetime/HRTB/GAT edges + 12 shared canonical ids + 5 document-symbol/call-hierarchy surfaces + 8 go-wave canonical ids |
 | `bench/verify-tasks` | Self-check that every task needle still resolves to exactly one line |
 
 ```bash

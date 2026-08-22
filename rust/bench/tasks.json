@@ -2,7 +2,7 @@
     "version": 1,
     "corpus": "atelier-bench-corpus",
     "lane": "rust",
-    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: build_generated (item spliced in by include! from OUT_DIR), path_attribute (#[path]-declared module), gat (generic associated type). Kinds added by the canonical-parity wave: barrel (import resolved through the crate-root pub use re-export), type_only (a use consumed only in type position, carrying no value-level edge), structural (a type that carries a trait's method set inherently without implementing it), deref_forward (a method reached through a Deref impl). For parents-class-one-plus-two, extends_count is the trait named on the impl line, implements_count its supertraits, and exact_count their total. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (types, fields, functions, modules); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves.",
+    "notes": "Known-answer navigation tasks for the rust lane. Needle-based, not line-based: bench/verify-tasks resolves every needle to a unique line at the current SHA, so the manifest survives edits without stale line numbers. Paths are relative to the lane root (rust/), not to the repository root. 'expect' blocks carry the ground truth a harness scores against; counts are minimums where marked. exact_count is exact and counts concrete, non-generic, unconditionally compiled types that satisfy the contract directly or through inheritance; abstract bases, blanket impls and cfg-gated impls are excluded. Kinds added by the fifth wave: build_generated (item spliced in by include! from OUT_DIR), path_attribute (#[path]-declared module), gat (generic associated type). Kinds added by the canonical-parity wave: barrel (import resolved through the crate-root pub use re-export), type_only (a use consumed only in type position, carrying no value-level edge), structural (a type that carries a trait's method set inherently without implementing it), deref_forward (a method reached through a Deref impl). For parents-class-one-plus-two, extends_count is the trait named on the impl line, implements_count its supertraits, and exact_count their total. document_symbol tasks count every named symbol the anchored FILE declares at any nesting depth (types, fields, functions, modules); each task's note enumerates that count N and states min_symbols = floor(0.75 * N), the 25% margin absorbing listings that fold container nodes. call_hierarchy tasks name callees under outgoing_includes and callers under incoming_includes; both are file+needle pairs the verifier resolves. Kinds added by the wave-2 parity pass: namespace_import (a module bound as a namespace, with one member read from it), same_name (two identically named functions in different modules, separated only by the path the call site writes), name_only (a topic matched by string literal, with no type or symbol edge between the subscribe site and the dispatch that reaches it).",
     "tasks": [
         {
             "id": "def-enum-method",
@@ -1601,6 +1601,186 @@
                         "file": "crates/atelier-core/src/events.rs",
                         "needle": "pub fn register(&mut self, listener: std::sync::Arc<dyn Listener>) {"
                     }
+                ]
+            }
+        },
+        {
+            "id": "def-callback-style",
+            "surface": "definition",
+            "note": "One job, two entry points: run_with_callback takes the continuation as a parameter. The console command module exports a DIFFERENT function also called run; must_not_include keeps them apart.",
+            "from": {
+                "file": "crates/atelier-app/tests/wave2_jobs.rs",
+                "needle": "job.run_with_callback(&state.data, &dispatcher, |announced| seen.push(announced));"
+            },
+            "expect": {
+                "file": "crates/atelier-app/src/jobs.rs",
+                "needle": "pub fn run_with_callback(",
+                "must_not_include": [
+                    "crates/atelier-app/src/commands/recalculate_inventory.rs"
+                ]
+            }
+        },
+        {
+            "id": "def-generator-function",
+            "surface": "definition",
+            "note": "Rust has no generator syntax: the for loop drives OpenOrders::next, which is the yield point the other lanes write as yield. A definition request from the loop header must reach next, not stop at the method that hands back the iterator.",
+            "from": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "for order in self.iter_open_orders() {"
+            },
+            "expect": {
+                "file": "crates/atelier-bench/src/dataset.rs",
+                "needle": "fn next(&mut self) -> Option<Self::Item> {",
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-bench/src/dataset.rs",
+                        "needle": "pub fn iter_open_orders(&self) -> OpenOrders<'_> {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "def-mixin-method",
+            "surface": "definition",
+            "note": "Customer declares no short_reference; it is promoted from the HasReference default body, the rust form of a mixin.",
+            "from": {
+                "file": "crates/atelier-core/tests/wave2_parity.rs",
+                "needle": "assert_eq!(customer.short_reference(), \"CU7\");"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "fn short_reference(&self) -> String {",
+                "must_not_include": [
+                    "crates/atelier-core/src/models/customer.rs"
+                ]
+            }
+        },
+        {
+            "id": "def-module-const",
+            "surface": "definition",
+            "note": "Module-level constant aliasing the crate-wide one; the answer is the declaring module, not the alias line.",
+            "from": {
+                "file": "crates/atelier-core/src/concerns/has_reference.rs",
+                "needle": "pub const DEFAULT_REFERENCE_PREFIX: &str = ATELIER_REF_PREFIX;"
+            },
+            "expect": {
+                "file": "crates/atelier-core/src/support/helpers.rs",
+                "needle": "pub const ATELIER_REF_PREFIX: &str"
+            }
+        },
+        {
+            "id": "imp-namespace-one-member",
+            "surface": "import-precision",
+            "note": "`use crate::rules;` binds the module, not an item; only rules::RULES is read in this file, so the import must not fan out to the 24 rule submodules or to rules::generated.",
+            "from": {
+                "file": "crates/atelier-bench/src/support/rule_namespace_user.rs",
+                "needle": "use crate::rules;"
+            },
+            "expect": {
+                "kind": "namespace_import",
+                "candidate": {
+                    "file": "crates/atelier-bench/src/rules/mod.rs",
+                    "needle": "pub static RULES: Lazy<Vec<Box<dyn RuleContract>>> = Lazy::new(|| {"
+                },
+                "must_not_include": [
+                    "crates/atelier-bench/src/rules/generated.rs",
+                    "crates/atelier-bench/src/rules/minimum_stock_rule.rs"
+                ]
+            }
+        },
+        {
+            "id": "impl-repository-generic",
+            "surface": "implementation",
+            "note": "Rust parameterises this contract with associated types rather than type parameters: every implementor pins Id and Record. Eight concrete types satisfy it. The rust-local impl-repository-cross-crate asks where they live; this id counts them.",
+            "from": {
+                "file": "crates/atelier-core/src/contracts/repository.rs",
+                "needle": "pub trait Repository {"
+            },
+            "expect": {
+                "min_implementations": 8,
+                "implementations": [
+                    {
+                        "file": "crates/atelier-bench/src/repositories/customer_repository.rs",
+                        "needle": "impl Repository for CustomerRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/inventory_repository.rs",
+                        "needle": "impl Repository for InventoryRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/invoice_repository.rs",
+                        "needle": "impl Repository for InvoiceRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/order_repository.rs",
+                        "needle": "impl Repository for OrderRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/part_repository.rs",
+                        "needle": "impl Repository for PartRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/payment_repository.rs",
+                        "needle": "impl Repository for PaymentRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/technician_repository.rs",
+                        "needle": "impl Repository for TechnicianRepository {"
+                    },
+                    {
+                        "file": "crates/atelier-bench/src/repositories/warranty_repository.rs",
+                        "needle": "impl Repository for WarrantyRepository {"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "refs-string-event-name",
+            "surface": "references",
+            "note": "Nothing declares 'repair.completed' at the subscribe site: the literal is the whole link between it and the dispatch that reaches it. Five code sites carry the string; the floor counts the four outside the `from` site, matching the min_references convention of the sibling refs-* tasks.",
+            "from": {
+                "file": "crates/atelier-core/tests/wave2_events.rs",
+                "needle": "dispatcher.on(\"repair.completed\", notice.clone());"
+            },
+            "expect": {
+                "kind": "name_only",
+                "min_references": 4,
+                "known_sites": [
+                    {
+                        "file": "crates/atelier-core/src/events.rs",
+                        "needle": "pub const REPAIR_COMPLETED: &str = \"repair.completed\";"
+                    },
+                    {
+                        "file": "crates/atelier-core/src/events.rs",
+                        "needle": "DomainEvent::RepairCompleted { .. } => \"repair.completed\","
+                    },
+                    {
+                        "file": "crates/atelier-core/tests/wave2_events.rs",
+                        "needle": "assert_eq!(dispatcher.topic_names(), vec![\"repair.completed\"]);"
+                    },
+                    {
+                        "file": "crates/atelier-core/tests/wave2_events.rs",
+                        "needle": "assert_eq!(completed.topic(), \"repair.completed\");"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "resolution-same-name-command-vs-job",
+            "surface": "resolution",
+            "note": "Two functions named run: the console command in commands/recalculate_inventory.rs and the job method in jobs.rs. The console entrypoint picks the command by module path, not by name.",
+            "from": {
+                "file": "crates/atelier-app/src/main.rs",
+                "needle": "let touched = atelier_app::commands::recalculate_inventory::run(&state);"
+            },
+            "expect": {
+                "kind": "same_name",
+                "candidate": {
+                    "file": "crates/atelier-app/src/commands/recalculate_inventory.rs",
+                    "needle": "pub fn run(state: &AppState) -> usize {"
+                },
+                "must_not_include": [
+                    "crates/atelier-app/src/jobs.rs"
                 ]
             }
         }

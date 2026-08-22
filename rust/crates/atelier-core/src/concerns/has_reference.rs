@@ -2,6 +2,10 @@
 
 use crate::support::helpers::{ATELIER_REF_PREFIX, atelier_format_reference};
 
+/// Module-level alias for the crate-wide prefix, so a lookup on this name
+/// must land on the declaring module rather than on this line.
+pub const DEFAULT_REFERENCE_PREFIX: &str = ATELIER_REF_PREFIX;
+
 /// Types carrying a human-facing reference string.
 ///
 /// The default body is the shared behaviour a `references` request on this
